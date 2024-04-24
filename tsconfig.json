@@ -1,12 +1,10 @@
 {
   "compilerOptions": {
     "paths": {
-      "@affinity-lab/awqrd-comet/*": ["./src/awqrd/comet/*"],
-      "@affinity-lab/awqrd-util/*": ["./src/awqrd/util/*"],
-      "@affinity-lab/awqrd-storm/*": ["./src/awqrd/storm/*"],
-      "@affinity-lab/awqrd-sapphire/*": ["./src/awqrd/sapphire/*"]
+      "@affinity-lab/awqrd-comet/*": ["./comet/*"],
+      "@affinity-lab/awqrd-util/*": ["./util/*"],
+      "@affinity-lab/awqrd-storm/*": ["./storm/*"]
     },
-
     // Enable latest features
     "lib": ["ESNext", "DOM"],
     "target": "ESNext",
