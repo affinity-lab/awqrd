@@ -1,10 +1,12 @@
 {
   "compilerOptions": {
+    "baseUrl": "./src",
     "paths": {
-      "@affinity-lab/awqrd-comet/*": ["./comet/*"],
-      "@affinity-lab/awqrd-util/*": ["./util/*"],
-      "@affinity-lab/awqrd-storm/*": ["./storm/*"]
+      "@affinity-lab/awqrd-comet/*": ["comet/*"],
+      "@affinity-lab/awqrd-util/*": ["util/*"],
+      "@affinity-lab/awqrd-storm/*": ["storm/*"]
     },
+
     // Enable latest features
     "lib": ["ESNext", "DOM"],
     "target": "ESNext",
@@ -17,13 +19,16 @@
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
-    "noEmit": true,
-
+    "noEmit": false,
+    "declaration": true,
+    "declarationDir": "dist",
+//    "outDir": "dist",
     // Best practices
     "strict": true,
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
-
+    "emitDeclarationOnly": true,
+    "esModuleInterop": true,
     // Some stricter flags (disabled by default)
     "noUnusedLocals": false,
     "noUnusedParameters": false,
