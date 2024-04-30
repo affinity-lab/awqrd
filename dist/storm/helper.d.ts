@@ -53,4 +53,4 @@ export declare const likeString: {
      */
     contains: (search: string) => string;
 };
-export declare function getByFactory<T extends string | number, R>(repo: EntityRepository<any, any, any>, field: string): (search: T) => Promise<R | undefined>;
+export declare function getByFactory<T extends string | number, R>(repo: EntityRepository<any, any, any>, fieldName: string): (search: T) => Promise<R | undefined>;

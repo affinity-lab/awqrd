@@ -33,7 +33,7 @@ export class Storage {
 		this.collections[collection.name] = collection;
 	}
 
-	getGroupDefinition(name: string, entityRepository: IEntityRepository):{storage:Storage, group:string, entityRepository:IEntityRepository} {
+	getGroupDefinition(name: string, entityRepository: IEntityRepository): {storage:Storage, group:string, entityRepository:IEntityRepository} {
 		return {
 			storage: this,
 			group: name,

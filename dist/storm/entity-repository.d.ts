@@ -1,17 +1,17 @@
 import { MySqlTable } from "drizzle-orm/mysql-core";
 import type { MySql2Database } from "drizzle-orm/mysql2";
-import { ProcessPipeline } from "@affinity-lab/awqrd-util/process-pipeline.ts";
-import type { MaybePromise, MaybeUndefined, MaybeUnset } from "@affinity-lab/awqrd-util/types.ts";
+import { ProcessPipeline } from "../util/process-pipeline.ts";
+import type { MaybePromise, MaybeUndefined, MaybeUnset } from "../util/types.ts";
 import type { IEntityRepository } from "./entity-repository-interface.ts";
 import { Entity } from "./entity.ts";
-import type { Dto, Item, WithId } from "./types.ts";
+import type { Dto, EntityInitiator, Item, WithId } from "./types.ts";
 /**
  * A generic repository class for handling CRUD operations for storm entity in a MySQL database.
  * @template DB - The type of the database connection.
  * @template SCHEMA - The type of the database schema representing the entity's table.
  * @template ENTITY - The type of the entity class.
  */
-export declare class EntityRepository<DB extends MySql2Database<any>, SCHEMA extends MySqlTable, ENTITY extends typeof Entity> implements IEntityRepository {
+export declare class EntityRepository<DB extends MySql2Database<any>, SCHEMA extends MySqlTable, ENTITY extends EntityInitiator<ENTITY, typeof Entity>> implements IEntityRepository {
     readonly db: DB;
     readonly schema: SCHEMA;
     readonly entity: ENTITY;
@@ -48,19 +48,19 @@ export declare class EntityRepository<DB extends MySql2Database<any>, SCHEMA ext
      * @param dtoSet - An array of DTOs.
      * @returns An array of instantiated items.
      */
-    instantiateAll(dtoSet: Array<Record<string, any>>): Promise<Array<Item<ENTITY>>>;
+    protected instantiateAll(dtoSet: Array<Record<string, any>>): Promise<Array<Item<ENTITY>>>;
     /**
      * Instantiates the first item from an array of DTOs.
      * @param dtoSet - An array of DTOs.
      * @returns The instantiated item, or undefined if the array is blank.
      */
-    instantiateFirst(dtoSet: Array<Record<string, any>>): Promise<MaybeUndefined<Item<ENTITY>>>;
+    protected instantiateFirst(dtoSet: Array<Record<string, any>>): Promise<MaybeUndefined<Item<ENTITY>>>;
     /**
      * Instantiates an item from a DTO.
      * @param dto - The DTO.
      * @returns The instantiated item, or undefined if the DTO is undefined.
      */
-    instantiate(dto: Dto<SCHEMA> | undefined): Promise<MaybeUndefined<Item<ENTITY>>>;
+    protected instantiate(dto: Dto<SCHEMA> | undefined): Promise<Item<ENTITY> | undefined>;
     instantiators: {
         all: (res: any) => Promise<Item<ENTITY>[]>;
         first: (res: any) => Promise<MaybeUndefined<Item<ENTITY>>>;
@@ -149,6 +149,7 @@ export declare class EntityRepository<DB extends MySql2Database<any>, SCHEMA ext
      * @returns A promise that resolves once the delete operation is completed.
      */
     delete(item: Item<ENTITY>): Promise<Record<string, any>>;
+    delete(id: number | undefined | null): Promise<Record<string, any>>;
     /**
      * Creates a blank entity item.
      * @returns The created item.

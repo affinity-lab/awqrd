@@ -1,5 +1,8 @@
 type Constructor = (new () => Object) | Function;
 type ClassMetaDataStore = Record<string, SingleStore | ArrayStore>;
+declare class ObjectStore {
+    value: Record<string, any>;
+}
 declare class SingleStore {
     value: any;
 }
@@ -51,10 +54,12 @@ declare class MetaDataStore {
  * Class to store metadata for classes
  */
 export declare class MetaValue {
-    readonly value: any;
+    readonly store: ObjectStore | SingleStore | ArrayStore;
     readonly self: any;
     readonly inherited: Array<any>;
-    constructor(value: any, self?: boolean);
+    value: any;
+    constructor(store: ObjectStore | SingleStore | ArrayStore, self?: boolean);
+    addInherited(value: any): void;
 }
 /**
  * Class to store metadata for classes

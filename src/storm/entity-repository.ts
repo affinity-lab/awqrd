@@ -1,14 +1,15 @@
 import {sql} from "drizzle-orm";
 import {MySqlTable} from "drizzle-orm/mysql-core";
 import type {MySql2Database, MySqlRawQueryResult} from "drizzle-orm/mysql2";
-import {MaterializeIt} from "@affinity-lab/awqrd-util/materialize-it.ts";
-import {firstOrUndefined, omitFieldsIP, pickFieldsIP} from "@affinity-lab/awqrd-util/object.ts";
-import {ProcessPipeline, type State} from "@affinity-lab/awqrd-util/process-pipeline.ts";
-import type {MaybePromise, MaybeUndefined, MaybeUnset} from "@affinity-lab/awqrd-util/types.ts";
+import {MaterializeIt} from "../util/materialize-it.ts";
+import {firstOrUndefined, omitFieldsIP, pickFieldsIP} from "../util/object.ts";
+import {ProcessPipeline, type State} from "../util/process-pipeline.ts";
+import type {MaybePromise, MaybeUndefined, MaybeUnset} from "../util/types.ts";
 import type {IEntityRepository} from "./entity-repository-interface.ts";
 import {Entity} from "./entity.ts";
 import {stmt} from "./helper.ts";
-import type {Dto, Item, WithId, WithIds} from "./types.ts";
+import type {Dto, EntityInitiator, Item, WithId, WithIds} from "./types.ts";
+import {entityError} from "./error";
 
 
 /**
@@ -20,7 +21,7 @@ import type {Dto, Item, WithId, WithIds} from "./types.ts";
 export class EntityRepository<
 	DB extends MySql2Database<any>,
 	SCHEMA extends MySqlTable,
-	ENTITY extends (typeof Entity & (new (...args:any[])=>Item<ENTITY>))
+	ENTITY extends EntityInitiator<ENTITY, typeof Entity>
 > implements IEntityRepository {
 	readonly fields: string[];
 
@@ -124,10 +125,10 @@ export class EntityRepository<
 	 * @param dtoSet - An array of DTOs.
 	 * @returns An array of instantiated items.
 	 */
-	public async instantiateAll(dtoSet: Array<Record<string, any>>): Promise<Array<Item<ENTITY>>> {
-		const instances = [];
+	protected async instantiateAll(dtoSet: Array<Record<string, any>>): Promise<Array<Item<ENTITY>>> {
+		const instances: Array<Item<ENTITY>> = [];
 		for (let dto of dtoSet) {
-			let instance = await this.instantiate(dto as Dto<SCHEMA>);
+			let instance = await this.instantiate(dto as Dto<SCHEMA>) as Item<ENTITY> | undefined;
 			if (instance !== undefined) instances.push(instance)
 		}
 		return instances;
@@ -138,14 +139,14 @@ export class EntityRepository<
 	 * @param dtoSet - An array of DTOs.
 	 * @returns The instantiated item, or undefined if the array is blank.
 	 */
-	public async instantiateFirst(dtoSet: Array<Record<string, any>>): Promise<MaybeUndefined<Item<ENTITY>>> { return this.instantiate(firstOrUndefined(dtoSet));}
+	protected async instantiateFirst(dtoSet: Array<Record<string, any>>): Promise<MaybeUndefined<Item<ENTITY>>> { return await this.instantiate(firstOrUndefined(dtoSet)) as Item<ENTITY> | undefined;}
 
 	/**
 	 * Instantiates an item from a DTO.
 	 * @param dto - The DTO.
 	 * @returns The instantiated item, or undefined if the DTO is undefined.
 	 */
-	public async instantiate(dto: Dto<SCHEMA> | undefined): Promise<MaybeUndefined<Item<ENTITY>>> {
+	protected async instantiate(dto: Dto<SCHEMA> | undefined) {
 		if (dto === undefined) return undefined;
 		let item = await this.create();
 		await this.applyItemDTO(item, dto);
@@ -255,6 +256,8 @@ export class EntityRepository<
 	 * @param item - The item to update.
 	 * @returns A promise that resolves once the update operation is completed.
 	 */
+	// async update(item: Item<ENTITY>)
+	// async update(item: Item<ENTITY>)
 	async update(item: Item<ENTITY>) { return this.exec.update(item) }
 
 	/**
@@ -262,7 +265,12 @@ export class EntityRepository<
 	 * @param item - The item to insert.
 	 * @returns A promise that resolves once the insert operation is completed.
 	 */
-	async insert(item: Item<ENTITY>) { return this.exec.insert(item) }
+
+	// async insert(item: Item<ENTITY>) : Promise<number>;
+	// async insert(values: InferInsertModel<SCHEMA>): Promise<number>;
+	async insert(item: Item<ENTITY>) { // TODO
+		return this.exec.insert(item)
+	}
 
 	/**
 	 * Overwrites an item with new values.
@@ -278,7 +286,17 @@ export class EntityRepository<
 	 * @param item - The item to delete.
 	 * @returns A promise that resolves once the delete operation is completed.
 	 */
-	async delete(item: Item<ENTITY>) { return this.exec.delete(item);}
+	async delete(item: Item<ENTITY>): Promise<Record<string, any>>;
+	async delete(id: number | undefined | null): Promise<Record<string, any>>;
+	async delete(itemOrId: Item<ENTITY> | number | undefined | null) {
+		let item;
+		if (typeof itemOrId === "number" || !itemOrId) {
+			let instance = await this.instantiate(await this.getRaw(itemOrId));
+			if(instance === undefined) throw entityError.itemNotFound(this.constructor.name, itemOrId);
+			item = instance;
+		} else item = itemOrId;
+		return this.exec.delete(item);
+	}
 
 	/**
 	 * Creates a blank entity item.

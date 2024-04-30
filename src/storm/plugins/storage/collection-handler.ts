@@ -48,7 +48,7 @@ export class CollectionHandler<METADATA extends Record<string, any>> extends Arr
 		await this.load();
 	}
 
-	toJSON():{collection:string, id:number, files: Attachment<METADATA>[]|null} {
+	toJSON(): {collection:string, id:number, files: Attachment<METADATA>[]|null} {
 		return {
 			collection: this.collection.name,
 			id: this.id,

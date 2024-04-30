@@ -1,6 +1,6 @@
 import type { IEntityRepository } from "../../../entity-repository-interface.ts";
 import { Collection } from "../../storage/collection.ts";
-import { type CollectionOptions, type MetaField, type ITmpFile } from "../../storage/helper/types.ts";
+import type { CollectionOptions, MetaField, ITmpFile } from "../../storage/helper/types.ts";
 import type { Storage } from "../../storage/storage.ts";
 import { type ImgFocus, type ImgRGB } from "./types.ts";
 type ImageAttachmentMetadata = {

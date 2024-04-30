@@ -74,12 +74,15 @@ export const likeString = {
 
 export function getByFactory
 <T extends string | number, R>
-(repo: EntityRepository<any, any, any>, field: string): (search: T) => Promise<R | undefined> {
-	let stmt = repo.db.select().from(repo.schema).where(eq(repo.schema[field], sql.placeholder("search"))).prepare();
+(repo: EntityRepository<any, any, any>, fieldName: string):
+	(search: T) => Promise<R | undefined>
+{
+	let field = repo.schema[fieldName];
+	let stmt = repo.db.select().from(repo.schema).where(eq(field, sql.placeholder("search"))).prepare();
 	let fn = async (search: T) => {
 		let data = await stmt.execute({search})
 		if (data.length === 0) return undefined;
-		else return await repo.instantiate(data[0]) as R;
+		else return await repo.instantiators.first(data) as R;
 	};
 	(fn as unknown as {stmt:any}).stmt = stmt;
 	return fn;

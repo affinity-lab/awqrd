@@ -9,5 +9,7 @@ export type WithIds<TYPE = {}> = { ids: Array<number> } & TYPE
 export type Dto<SCHEMA extends MySqlTable> = WithIdOptional<InferSelectModel<SCHEMA>>
 export type Item<ENTITY extends new (...args: any) => WithIdOptional<InstanceType<ENTITY>>> = WithIdOptional<InstanceType<ENTITY>>
 
+export type EntityInitiator<ENTITY extends new (...args: any) => WithIdOptional<InstanceType<ENTITY>>, OBJECT> = OBJECT & (new (...args:any[])=>Item<ENTITY>)
+
 export type IEntity = { id: number | undefined | null } & Record<string, any>
 export type IExistingEntity = { id: number} & Record<string, any>
