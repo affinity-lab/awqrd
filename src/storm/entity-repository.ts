@@ -20,7 +20,7 @@ import type {Dto, Item, WithId, WithIds} from "./types.ts";
 export class EntityRepository<
 	DB extends MySql2Database<any>,
 	SCHEMA extends MySqlTable,
-	ENTITY extends typeof Entity
+	ENTITY extends (typeof Entity & (new (...args:any[])=>Item<ENTITY>))
 > implements IEntityRepository {
 	readonly fields: string[];
 
@@ -284,7 +284,7 @@ export class EntityRepository<
 	 * Creates a blank entity item.
 	 * @returns The created item.
 	 */
-	async create(): Promise<Item<ENTITY>> {return new this.entity() as unknown as Item<ENTITY>}
+	async create(): Promise<Item<ENTITY>> {return new this.entity()}
 
 	/**
 	 * Reloads the item by fetching the raw data for the item's ID and applying it.
