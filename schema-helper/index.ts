@@ -1,8 +1,12 @@
 // Import necessary modules and functions
 import { int, MySqlColumn } from "drizzle-orm/mysql-core";
-import * as stormTagHelperSchema from "@affinity-lab/awqrd-storm/plugins/tag/helper/schema";
-import * as stormStorageSchemaFactory from "@affinity-lab/awqrd-storm/plugins/storage/helper/storm-storage-schema-factory";
-
+import {
+	groupTagCols,
+	groupTagTableFactory,
+	tagCols,
+	tagTableFactory
+} from "@affinity-lab/awqrd-storm/plugins/tag/helper/schema";
+import {stormStorageSchemaFactory} from "@affinity-lab/awqrd-storm/plugins/storage/helper/storm-storage-schema-factory";
 /**
  * Generates a definition for an auto-incrementing primary key column named 'id' in a MySQL database.
  * @returns A MySQL integer builder object with additional constraints for the 'id' column.
@@ -25,4 +29,4 @@ export function reference(name: string, field: () => MySqlColumn, nullable: bool
 }
 
 // Export additional functions from other modules if needed
-export { stormTagHelperSchema, stormStorageSchemaFactory};
+export { groupTagCols, groupTagTableFactory, tagCols, tagTableFactory, stormStorageSchemaFactory};
