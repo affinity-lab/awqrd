@@ -4,10 +4,10 @@ import {MySqlTable} from "drizzle-orm/mysql-core";
 import {type MySql2Database} from "drizzle-orm/mysql2";
 import {MaterializeIt} from "@affinity-lab/awqrd-util/materialize-it";
 import {stmt} from "../../helper";
-import {and, not, sql, Table} from "drizzle-orm";
+import {and, not, sql} from "drizzle-orm";
 import {tagError} from "./helper/error";
 import type {MaybeArray} from "@affinity-lab/awqrd-util/types";
-import type {Dto, EntityInitiator, Item} from "../../types";
+import type {Dto, EntityInitiator} from "../../types";
 import {type State} from "@affinity-lab/awqrd-util/process-pipeline";
 import {Export} from "@affinity-lab/awqrd-storm/export";
 import type {MaybeNull} from "@affinity-lab/awqrd-util/types";
@@ -18,7 +18,7 @@ export class TagEntity extends Entity {
 	@Export name: MaybeNull<string> = null
 }
 
-// TODO test this, and add groupTags
+
 export class TagRepository<DB extends MySql2Database<any>, SCHEMA extends MySqlTable, ENTITY extends EntityInitiator<ENTITY, typeof TagEntity>> extends EntityRepository<DB, SCHEMA, ENTITY> {
 	protected usages: Array<Usage> = []
 
@@ -95,7 +95,7 @@ export class TagRepository<DB extends MySql2Database<any>, SCHEMA extends MySqlT
 		await this.deleteItems(items);
 	}
 
-	protected async deleteItems(items: Array<Dto<SCHEMA>>) { // TODO typehint
+	protected async deleteItems(items: Array<Dto<SCHEMA>>) {
 		for (let item of items) {
 			let doDelete = true;
 			for (let usage of this.usages) {
@@ -133,7 +133,7 @@ export class TagRepository<DB extends MySql2Database<any>, SCHEMA extends MySqlT
 		}
 	}
 
-	async selfRename<T extends Table<any> = any>(state: State) {
+	async selfRename(state: State) {
 		let values = state.dto;
 		let originalItem = state.prevDto;
 		if (values.name && values.name !== originalItem.name) {
