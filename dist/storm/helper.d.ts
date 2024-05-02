@@ -2,19 +2,6 @@ import { MySqlColumn } from "drizzle-orm/mysql-core";
 import type { MySqlSelectWithout } from "drizzle-orm/mysql-core/query-builders/select.types";
 import { EntityRepository } from "./entity-repository.ts";
 /**
- * Generates a definition for an auto-incrementing primary key column named 'id' in a MySQL database.
- * @returns A MySQL integer builder object with additional constraints for the 'id' column.
- */
-export declare function id(): import("drizzle-orm").NotNull<import("drizzle-orm").HasDefault<import("drizzle-orm/mysql-core").MySqlIntBuilderInitial<"id">>>;
-/**
- * Creates a reference column definition.
- * @param name - The name of the column.
- * @param field - A function that returns the reference field.
- * @param [nullable=false] - Indicates whether the column is nullable (default: false).
- * @returns  A reference column definition.
- */
-export declare function reference(name: string, field: () => MySqlColumn, nullable?: boolean): import("drizzle-orm/mysql-core").MySqlIntBuilderInitial<string>;
-/**
  * Creates an SQL expression for checking if a column's value is in a list of IDs.
  * @param col - The column to check.
  * @param ids - The list of IDs.
