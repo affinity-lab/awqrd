@@ -8,8 +8,12 @@ const chalk_1 = __importDefault(require("chalk"));
 const process_1 = __importDefault(require("process"));
 const sql_highlight_1 = require("sql-highlight");
 class DBG {
-    constructor(config) { }
+    constructor(config) {
+        this.config = config;
+    }
     req(p) {
+        if (!this.config.console.req)
+            return;
         p = p.trim();
         if (p.startsWith("<-- ")) {
             let a = p.substring(4).split(" ");
@@ -35,6 +39,8 @@ class DBG {
         console.log();
     }
     logQuery(query, args) {
+        if (!this.config.console.sql)
+            return;
         console.log(chalk_1.default.bold.bgBlack.yellow(`[SQL]`), (0, sql_highlight_1.highlight)(query));
         if (args.length > 0) {
             console.log(chalk_1.default.bgBlack.bold.yellow(`:`), args);
@@ -42,6 +48,8 @@ class DBG {
         console.log();
     }
     log(...messages) {
+        if (!this.config.console.dbg)
+            return;
         let from = (new Error()).stack.substring(6).split("    at ")[2].replace(process_1.default.cwd(), "");
         let parts = /(.*?) \((.*?):(.*?):.*?\)/.exec(from);
         console.log(chalk_1.default.bold.bgBlack.blue(`[DBG] `) +

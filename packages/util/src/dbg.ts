@@ -3,7 +3,7 @@ import process from "process";
 import {highlight} from "sql-highlight";
 
 export class DBG {
-	constructor(config:
+	constructor(private config:
 		{
 			console: {
 				dbg: boolean,
@@ -18,6 +18,7 @@ export class DBG {
 		}) {}
 
 	req(p: string) {
+		if(!this.config.console.req) return;
 		p = p.trim()
 		if (p.startsWith("<-- ")) {
 			let a = p.substring(4).split(" ");
@@ -48,6 +49,7 @@ export class DBG {
 	}
 
 	logQuery(query: string, args: any[]) {
+		if(!this.config.console.sql) return;
 		console.log(chalk.bold.bgBlack.yellow(`[SQL]`), highlight(query))
 		if (args.length > 0) {
 			console.log(chalk.bgBlack.bold.yellow(`:`), args)
@@ -56,6 +58,7 @@ export class DBG {
 	}
 
 	log(...messages: any[]) {
+		if(!this.config.console.dbg) return;
 		let from = (new Error()).stack!.substring(6).split("    at ")[2].replace(process.cwd(), "");
 		let parts = /(.*?) \((.*?):(.*?):.*?\)/.exec(from)
 
@@ -72,8 +75,6 @@ export class DBG {
 	}
 
 	hello() {
-		let width = process.stdout.columns;
-
 		let lines = [
 			"  ████   █       █   █████   █████   █████   ",
 			" █    █  █       █  █     █  █    █  █    █  ",
