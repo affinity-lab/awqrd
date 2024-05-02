@@ -4,7 +4,6 @@ import {TagRepository} from "./tag-repository";
 
 // TODO add group
 export function tagPlugin(repository: EntityRepository<any, any, any>, tagRepository: TagRepository<any, any, any>, field: string) {
-	console.log("********* TAG PLUGIN START *********")
 	tagRepository.addUsage({repo: repository, field});
 
 	repository.pipelines.update.blocks
@@ -34,5 +33,4 @@ export function tagPlugin(repository: EntityRepository<any, any, any>, tagReposi
 		await tagRepository.selfRename(state);
 		await tagRepository.updateTag(repository, state);
 	})
-	console.log("********* TAG PLUGIN END *********")
 }
