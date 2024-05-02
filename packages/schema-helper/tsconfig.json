@@ -1,0 +1,37 @@
+{
+	"compilerOptions": {
+		// Enable latest features
+		"lib": ["ESNext", "DOM"],
+		"target": "ES5",
+		"module": "CommonJS",
+		"moduleDetection": "force",
+		"jsx": "react-jsx",
+		"allowJs": true,
+		"experimentalDecorators": true,
+		// Bundler mode
+		"moduleResolution": "node",
+		"allowImportingTsExtensions": false,
+		"verbatimModuleSyntax": false,
+		"noEmit": false,
+		"declaration": true,
+//		"declarationDir": "dist",
+//		"rootDir": "src",
+		"outDir": "dist",
+		"outFile": "dist/index.js",
+		// Best practices
+		"strict": true,
+		"skipLibCheck": true,
+		"noFallthroughCasesInSwitch": true,
+		"emitDeclarationOnly": false,
+		"esModuleInterop": true,
+		// Some stricter flags (disabled by default)
+		"noUnusedLocals": false,
+		"noUnusedParameters": false,
+		"noPropertyAccessFromIndexSignature": false
+	},
+	"include": [
+		"../storm/src/plugins/tag/helper/schema.ts",
+		"../storm/src/plugins/storage/helper/storm-storage-schema-factory.ts",
+		"src/index.ts"
+	]
+}

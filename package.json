@@ -1,15 +1,14 @@
 {
   "name": "@affinity-lab/awqrd",
   "description": "AWQRD package (contains: Storm and Comet)",
-  "module": "src/index.ts",
   "type": "module",
-  "scripts": {
-    "build": "bunx rimraf ./dist && bunx tsc"
-  },
-  "main": "dist/index",
   "devDependencies": {
-    "@types/bun": "latest",
-    "drizzle-kit": "^0.20.14"
+    "@types/bun": "^1.1.1",
+    "drizzle-kit": "^0.20.14",
+    "@affinity-lab/awqrd-util": "workspace:packages/util",
+    "@affinity-lab/awqrd-storm": "workspace:packages/storm",
+    "@affinity-lab/awqrd-comet": "workspace:packages/comet",
+    "@affinity-lab/awqrd-schema-helper": "workspace:packages/schema-helper"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -32,6 +31,9 @@
     "sql-highlight": "^4.4.2"
   },
   "workspaces": [
-    "schema-helper"
+    "packages/schema-helper",
+    "packages/comet",
+    "packages/util",
+    "packages/storm"
   ]
 }

@@ -1,0 +1,19 @@
+{
+	"name": "@affinity-lab/awqrd-util",
+	"version": "1.0.0",
+	"description": "Schema Helper for AWQRD package",
+	"type": "module",
+	"main": "dist/index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "Your Name",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/bun": "latest",
+		"@types/node": "^20.12.8"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	}
+}
