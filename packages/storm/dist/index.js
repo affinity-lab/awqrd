@@ -43,5 +43,3 @@ __exportStar(require("./plugins/tag/tag-repository"), exports);
 __exportStar(require("./plugins/tag/group-tag-repository"), exports);
 __exportStar(require("./plugins/tag/tag-plugin"), exports);
 __exportStar(require("./plugins/tag/helper/error"), exports);
-__exportStar(require("./plugins/storage/helper/storm-storage-schema-factory"), exports);
-__exportStar(require("./plugins/tag/helper/schema"), exports);

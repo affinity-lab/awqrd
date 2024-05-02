@@ -10,6 +10,13 @@
 	"author": "Your Name",
 	"license": "MIT",
 	"dependencies": {
+		"drizzle-orm": "^0.30.6",
+		"fast-glob": "^3.3.2",
+		"hono": "^4.1.7",
+		"minimatch": "^9.0.4",
+		"mysql2": "^3.9.3",
+		"sharp": "^0.33.3",
+		"zod": "^3.22.4"
 	},
 	"devDependencies": {
 		"@types/bun": "latest",

@@ -27,6 +27,3 @@ export * from "./plugins/tag/tag-repository"
 export * from "./plugins/tag/group-tag-repository"
 export * from "./plugins/tag/tag-plugin"
 export * from "./plugins/tag/helper/error"
-
-export * from "./plugins/storage/helper/storm-storage-schema-factory"
-export * from "./plugins/tag/helper/schema"

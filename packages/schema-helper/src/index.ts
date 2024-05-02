@@ -1,6 +1,6 @@
 import { int, MySqlColumn } from "drizzle-orm/mysql-core";
-import {tagCols, tagTableFactory, groupTagTableFactory, groupTagCols} from "@affinity-lab/awqrd-storm";
-import {stormStorageSchemaFactory} from "@affinity-lab/awqrd-storm";
+import {tagCols, tagTableFactory, groupTagTableFactory, groupTagCols} from "@affinity-lab/awqrd-storm/dist/plugins/tag/helper/schema";
+import {stormStorageSchemaFactory} from "@affinity-lab/awqrd-storm/dist/plugins/storage/helper/storm-storage-schema-factory";
 
 /**
  * Generates a definition for an auto-incrementing primary key column named 'id' in a MySQL database.
