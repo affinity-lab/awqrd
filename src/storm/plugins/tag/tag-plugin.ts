@@ -12,7 +12,6 @@ export function tagPlugin<DB extends MySql2Database<any>, SCHEMA extends MySqlTa
 export function tagPlugin<DB extends MySql2Database<any>, SCHEMA extends MySqlTable, ENTITY extends EntityInitiator<ENTITY, typeof Entity>>(repository: EntityRepository<DB, SCHEMA, ENTITY>, tagRepository: TagRepository<any, any, any>, field: string): void
 export function tagPlugin<DB extends MySql2Database<any>, SCHEMA extends MySqlTable, ENTITY extends EntityInitiator<ENTITY, typeof Entity>>(repository: EntityRepository<DB, SCHEMA, ENTITY>, tagRepository: TagRepository<any, any, any> | GroupTagRepository<any, any, any>, field: string, groupField?: string) {
 
-	console.log("********* TAG PLUGIN START *********")
 	let usage: Usage = {repo: repository, field}
 	if(groupField) usage[(tagRepository as GroupTagRepository<any, any, any>).fieldName] = (repository as Record<string, any>)[groupField] // TODO CHECK IF THIS WORKS AND IF YES TRY TO TYPEHINT IT
 	tagRepository.addUsage(usage);
@@ -43,5 +42,4 @@ export function tagPlugin<DB extends MySql2Database<any>, SCHEMA extends MySqlTa
 		await tagRepository.selfRename(state, groupField);
 		await tagRepository.updateTag(repository, state, groupField);
 	})
-	console.log("********* TAG PLUGIN END *********")
 }
