@@ -1,5 +1,6 @@
 export * from "./bytes"
 export * from "./class-meta-data"
+export * from "./dbg"
 export * from "./extended-error"
 export * from "./load-module-default-exports"
 export * from "./materialize-it"

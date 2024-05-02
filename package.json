@@ -4,7 +4,7 @@
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
-    "build": "bunx rimraf ./dist && tsc"
+    "build": "bunx rimraf ./dist && bunx tsc"
   },
   "main": "dist/index",
   "devDependencies": {
@@ -27,6 +27,8 @@
     "reformdata": "^0.2.2",
     "sharp": "^0.33.3",
     "uni-flatten": "^1.6.2",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "chalk": "^5.3.0",
+    "sql-highlight": "^4.4.2"
   }
 }
