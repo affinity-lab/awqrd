@@ -2,6 +2,8 @@ import { TagEntity, TagRepository } from "@affinity-lab/awqrd-storm/plugins/tag/
 import { type MySql2Database } from "drizzle-orm/mysql2";
 import { type MySqlTable } from "drizzle-orm/mysql-core";
 import type { Dto, EntityInitiator } from "@affinity-lab/awqrd-storm/types";
+import { type State } from "@affinity-lab/awqrd-util/process-pipeline";
+import { EntityRepository } from "@affinity-lab/awqrd-storm/entity-repository";
 export declare class GroupTagEntity extends TagEntity {
     groupId: number | string | null;
 }
@@ -17,5 +19,12 @@ export declare class GroupTagRepository<DB extends MySql2Database<any>, SCHEMA e
     }) => Promise<Dto<SCHEMA>[]>;
     getByName(names: Array<string>, groupId?: number | string): Promise<Array<Dto<SCHEMA>>>;
     getByName(names: string, groupId?: number | string): Promise<Dto<SCHEMA> | undefined>;
-    protected doRename(oldName: string, newName: string): Promise<void>;
+    updateTag(repository: EntityRepository<any, any, any>, state: State, fieldName?: string): Promise<void>;
+    protected doRename(oldName: string, newName: string, groupId?: number | string): Promise<void>;
+    selfRename(state: State, fieldName?: string): Promise<void>;
+    protected addTag(names: Array<string>, groupId?: number | string): Promise<void>;
+    protected deleteTag(names: Array<string>, groupId?: number | string): Promise<void>;
+    protected deleteItems(items: Array<Dto<SCHEMA>>, groupId?: number | string): Promise<void>;
+    deleteInUsages(name: string, groupId?: number | string): Promise<void>;
+    rename(oldName: string, newName: string, groupId?: number | string): Promise<void>;
 }

@@ -11,4 +11,10 @@ export declare const tagError: {
         httpResponseCode: number;
         silent: boolean;
     };
+    selfRename: () => {
+        message?: string | undefined;
+        details?: Record<string, any> | undefined;
+        httpResponseCode: number;
+        silent: boolean;
+    };
 };

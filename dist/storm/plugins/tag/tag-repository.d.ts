@@ -2,7 +2,6 @@ import { EntityRepository } from "../../entity-repository";
 import { Entity } from "../../entity";
 import { MySqlTable } from "drizzle-orm/mysql-core";
 import { type MySql2Database } from "drizzle-orm/mysql2";
-import { Table } from "drizzle-orm";
 import type { MaybeArray } from "@affinity-lab/awqrd-util/types";
 import type { Dto, EntityInitiator } from "../../types";
 import { type State } from "@affinity-lab/awqrd-util/process-pipeline";
@@ -33,6 +32,6 @@ export declare class TagRepository<DB extends MySql2Database<any>, SCHEMA extend
     protected deleteItems(items: Array<Dto<SCHEMA>>): Promise<void>;
     deleteInUsages(name: string): Promise<void>;
     protected doRename(oldName: string, newName: string): void;
-    selfRename<T extends Table<any> = any>(state: State): Promise<void>;
+    selfRename(state: State): Promise<void>;
     rename(oldName: string, newName: string): Promise<void>;
 }
