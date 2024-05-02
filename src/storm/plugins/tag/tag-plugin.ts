@@ -7,12 +7,10 @@ import {MySqlTable} from "drizzle-orm/mysql-core";
 import {type EntityInitiator} from "@affinity-lab/awqrd-storm/types";
 import {Entity} from "@affinity-lab/awqrd-storm/entity";
 
-// type Helper<OBJECT extends typeof Entity, ENTITY extends EntityInitiator<ENTITY, OBJECT>, DB extends MySql2Database<any> = MySql2Database<any>, SCHEMA extends MySqlTable =  MySqlTable>;
-// type Helper<DB extends MySql2Database<any>, SCHEMA extends MySqlTable, ENTITY extends EntityInitiator<ENTITY, typeof Entity>>;
 // TODO add group
-export function tagPlugin(repository: EntityRepository<any, any, any>, tagRepository: GroupTagRepository<any, any, any>, field: string, groupField: string): void
-export function tagPlugin(repository: EntityRepository<any, any, any>, tagRepository: TagRepository<any, any, any>, field: string): void
-export function tagPlugin<DB extends MySql2Database<any>, SCHEMA extends MySqlTable, ENTITY extends EntityInitiator<ENTITY, typeof Entity>>(repository: EntityRepository<any, any, any>, tagRepository: TagRepository<any, any, any> | GroupTagRepository<any, any, any>, field: string, groupField?: string) {
+export function tagPlugin<DB extends MySql2Database<any>, SCHEMA extends MySqlTable, ENTITY extends EntityInitiator<ENTITY, typeof Entity>>(repository: EntityRepository<DB, SCHEMA, ENTITY>, tagRepository: GroupTagRepository<any, any, any>, field: string, groupField: string): void
+export function tagPlugin<DB extends MySql2Database<any>, SCHEMA extends MySqlTable, ENTITY extends EntityInitiator<ENTITY, typeof Entity>>(repository: EntityRepository<DB, SCHEMA, ENTITY>, tagRepository: TagRepository<any, any, any>, field: string): void
+export function tagPlugin<DB extends MySql2Database<any>, SCHEMA extends MySqlTable, ENTITY extends EntityInitiator<ENTITY, typeof Entity>>(repository: EntityRepository<DB, SCHEMA, ENTITY>, tagRepository: TagRepository<any, any, any> | GroupTagRepository<any, any, any>, field: string, groupField?: string) {
 
 	console.log("********* TAG PLUGIN START *********")
 	let usage: Usage = {repo: repository, field}
