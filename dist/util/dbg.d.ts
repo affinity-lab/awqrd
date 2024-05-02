@@ -1,4 +1,5 @@
 export declare class DBG {
+    private config;
     constructor(config: {
         console: {
             dbg: boolean;
