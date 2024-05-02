@@ -5,10 +5,17 @@
 	"type": "module",
 	"main": "dist/index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "echo \"Error: no XASDX specified\" && exit 1"
 	},
-	"author": "Your Name",
-	"license": "MIT",
+	"devDependencies": {
+		"rollup": "^4.17.2",
+		"rollup-plugin-commonjs": "^10.1.0",
+		"rollup-plugin-node-resolve": "^5.2.0",
+		"@rollup/plugin-node-resolve": "^15.2.3",
+		"@rollup/plugin-typescript": "^11.1.6",
+		"rollup-plugin-dts": "^6.1.0"
+	},
 	"dependencies": {
+		"drizzle-orm": "^0.30.6"
 	}
 }

@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		// Enable latest features
 		"lib": ["ESNext", "DOM"],
-		"target": "ES5",
+		"target": "ESNext",
 		"module": "CommonJS",
 		"moduleDetection": "force",
 		"jsx": "react-jsx",
@@ -14,10 +14,10 @@
 		"verbatimModuleSyntax": false,
 		"noEmit": false,
 		"declaration": true,
-//		"declarationDir": "dist",
+		"declarationDir": "build",
 //		"rootDir": "src",
-		"outDir": "dist",
-		"outFile": "dist/index.js",
+		"outDir": "build",
+//		"outFile": "dist/index.js",
 		// Best practices
 		"strict": true,
 		"skipLibCheck": true,
@@ -29,9 +29,6 @@
 		"noUnusedParameters": false,
 		"noPropertyAccessFromIndexSignature": false
 	},
-	"include": [
-		"../storm/src/plugins/tag/helper/schema.ts",
-		"../storm/src/plugins/storage/helper/storm-storage-schema-factory.ts",
-		"src/index.ts"
-	]
+	"exclude": ["rollup.config.js"],
+	"files": ["src/index.ts"]
 }
