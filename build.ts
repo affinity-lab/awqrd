@@ -69,13 +69,13 @@ function buildPackage(name: keyof typeof packages) {
 		updateDependency(name, version)
 	}
 
-	console.log("Publishing package to npm")
-	try {
-		child_process.execSync("npm publish --access public").toString();
-	} catch (e) {
-		console.log("⏵ Error occurred...")
-		process.exit(-1)
-	}
+	// console.log("Publishing package to npm")
+	//try {
+	//	child_process.execSync("npm publish --access public").toString();
+	//} catch (e) {
+	//	console.log("⏵ Error occurred...")
+	//	process.exit(-1)
+	//}
 	console.log("⏵ Done.")
 }
 
