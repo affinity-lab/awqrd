@@ -4,7 +4,7 @@ import {serveStatic} from "hono/bun";
 import Path from "path";
 import {filePathFromUrl} from "../../storage/helper/storm-storage-server";
 import {createThumbnail, parseImgParams} from "./helpers";
-import {fileExists} from "@affinity-lab/awqrd-util";
+import {fileExists} from "@affinity-lab/util";
 import {createHash} from "crypto";
 
 /**

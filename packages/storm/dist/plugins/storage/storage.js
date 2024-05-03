@@ -23,11 +23,11 @@ const drizzle_orm_1 = require("drizzle-orm");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const helper_1 = require("../../helper");
-const awqrd_util_1 = require("@affinity-lab/awqrd-util");
-const awqrd_util_2 = require("@affinity-lab/awqrd-util");
-const awqrd_util_3 = require("@affinity-lab/awqrd-util");
-const awqrd_util_4 = require("@affinity-lab/awqrd-util");
-const awqrd_util_5 = require("@affinity-lab/awqrd-util");
+const util_1 = require("@affinity-lab/util");
+const util_2 = require("@affinity-lab/util");
+const util_3 = require("@affinity-lab/util");
+const util_4 = require("@affinity-lab/util");
+const util_5 = require("@affinity-lab/util");
 const error_1 = require("./helper/error");
 class Storage {
     constructor(path, db, schema, cache, cleanup) {
@@ -51,7 +51,7 @@ class Storage {
         };
     }
     get stmt_get() {
-        return (0, helper_1.stmt)(this.db.select().from(this.schema).where((0, drizzle_orm_1.and)((0, drizzle_orm_1.sql) `name = ${drizzle_orm_1.sql.placeholder("name")}`, (0, drizzle_orm_1.sql) `itemId = ${drizzle_orm_1.sql.placeholder("id")}`)).limit(1), awqrd_util_5.firstOrUndefined);
+        return (0, helper_1.stmt)(this.db.select().from(this.schema).where((0, drizzle_orm_1.and)((0, drizzle_orm_1.sql) `name = ${drizzle_orm_1.sql.placeholder("name")}`, (0, drizzle_orm_1.sql) `itemId = ${drizzle_orm_1.sql.placeholder("id")}`)).limit(1), util_5.firstOrUndefined);
     }
     get stmt_all() {
         return (0, helper_1.stmt)(this.db.select().from(this.schema).where((0, drizzle_orm_1.and)((0, drizzle_orm_1.sql) `itemId IN (${drizzle_orm_1.sql.placeholder("ids")})`, (0, drizzle_orm_1.sql) `name = ${drizzle_orm_1.sql.placeholder("name")}`)));
@@ -61,9 +61,9 @@ class Storage {
     }
     getPath(name, id) { return path_1.default.resolve(this.path, name, id.toString(36).padStart(6, "0").match(/.{1,2}/g).join("/")); }
     getCacheKey(name, id) { return `${name}-${id}`; }
-    get(name, id, res = {}) {
-        var _a, _b;
-        return __awaiter(this, void 0, void 0, function* () {
+    get(name_1, id_1) {
+        return __awaiter(this, arguments, void 0, function* (name, id, res = {}) {
+            var _a, _b;
             let record = yield ((_a = this.cache) === null || _a === void 0 ? void 0 : _a.get(this.getCacheKey(name, id)));
             if (record) {
                 res.found = "cache";
@@ -78,8 +78,8 @@ class Storage {
             return [];
         });
     }
-    getIndexOfAttachments(name, id, filename, fail = false) {
-        return __awaiter(this, void 0, void 0, function* () {
+    getIndexOfAttachments(name_1, id_1, filename_1) {
+        return __awaiter(this, arguments, void 0, function* (name, id, filename, fail = false) {
             const attachments = yield this.get(name, id);
             const idx = attachments.findIndex(a => a.name === filename);
             if (idx === -1 && fail)
@@ -95,25 +95,25 @@ class Storage {
         });
     }
     destroyFiles(name, id) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a;
             (_a = this.cache) === null || _a === void 0 ? void 0 : _a.del(this.getCacheKey(name, id));
             yield this.stmt_del({ name, id });
             const path = this.getPath(name, id);
-            if (yield (0, awqrd_util_1.fileExists)(path)) {
+            if (yield (0, util_1.fileExists)(path)) {
                 const files = yield fs_1.default.promises.readdir(path);
                 files.map((file) => __awaiter(this, void 0, void 0, function* () {
                     yield fs_1.default.promises.unlink(path_1.default.join(path, file));
                     if (this.cleanup !== undefined)
                         yield this.cleanup(name, id, file);
                 }));
-                yield (0, awqrd_util_3.removeEmptyParentDirectories)(path);
+                yield (0, util_3.removeEmptyParentDirectories)(path);
             }
         });
     }
     updateRecord(name, id, attachments) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a;
             (_a = this.cache) === null || _a === void 0 ? void 0 : _a.del(this.getCacheKey(name, id));
             yield this.db.update(this.schema)
                 .set({ data: JSON.stringify(attachments) })
@@ -122,12 +122,12 @@ class Storage {
         });
     }
     add(name, id, file, metadata) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a;
             let path = this.getPath(name, id);
             let filename = path_1.default.basename(file.filename);
-            filename = (0, awqrd_util_4.sanitizeFilename)(filename);
-            filename = yield (0, awqrd_util_1.getUniqueFilename)(path, filename);
+            filename = (0, util_4.sanitizeFilename)(filename);
+            filename = yield (0, util_1.getUniqueFilename)(path, filename);
             yield fs_1.default.promises.mkdir(path, { recursive: true });
             yield fs_1.default.promises.copyFile(file.file, path_1.default.join(path, filename));
             let res = { found: false };
@@ -155,7 +155,7 @@ class Storage {
             yield this.updateRecord(name, id, attachments);
             const path = this.getPath(name, id);
             yield fs_1.default.promises.unlink(path_1.default.resolve(path, filename));
-            yield (0, awqrd_util_3.removeEmptyParentDirectories)(path);
+            yield (0, util_3.removeEmptyParentDirectories)(path);
         });
     }
     setPosition(name, id, filename, position) {
@@ -187,8 +187,8 @@ class Storage {
             if (idx === -1)
                 throw error_1.storageError.attachedFileNotFound(name, id, filename);
             let path = this.getPath(name, id);
-            newName = (0, awqrd_util_4.sanitizeFilename)(newName);
-            newName = yield (0, awqrd_util_1.getUniqueFilename)(path, newName);
+            newName = (0, util_4.sanitizeFilename)(newName);
+            newName = yield (0, util_1.getUniqueFilename)(path, newName);
             attachments[idx].name = newName;
             yield fs_1.default.promises.rename(path_1.default.join(path, filename), path_1.default.join(path, newName));
             yield this.updateRecord(name, id, attachments);
@@ -197,11 +197,11 @@ class Storage {
 }
 exports.Storage = Storage;
 __decorate([
-    awqrd_util_2.MaterializeIt
+    util_2.MaterializeIt
 ], Storage.prototype, "stmt_get", null);
 __decorate([
-    awqrd_util_2.MaterializeIt
+    util_2.MaterializeIt
 ], Storage.prototype, "stmt_all", null);
 __decorate([
-    awqrd_util_2.MaterializeIt
+    util_2.MaterializeIt
 ], Storage.prototype, "stmt_del", null);

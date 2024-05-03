@@ -1,7 +1,7 @@
 import { MySqlTable } from "drizzle-orm/mysql-core";
 import type { MySql2Database } from "drizzle-orm/mysql2";
-import { ProcessPipeline } from "@affinity-lab/awqrd-util";
-import type { MaybePromise, MaybeUndefined, MaybeUnset } from "@affinity-lab/awqrd-util";
+import { ProcessPipeline } from "@affinity-lab/util";
+import type { MaybePromise, MaybeUndefined, MaybeUnset } from "@affinity-lab/util";
 import type { IEntityRepository } from "./entity-repository-interface";
 import { Entity } from "./entity";
 import type { Dto, EntityInitiator, Item, WithId } from "./types";

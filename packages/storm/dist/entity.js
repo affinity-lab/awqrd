@@ -7,8 +7,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Entity = void 0;
-const awqrd_util_1 = require("@affinity-lab/awqrd-util");
-const awqrd_util_2 = require("@affinity-lab/awqrd-util");
+const util_1 = require("@affinity-lab/util");
+const util_2 = require("@affinity-lab/util");
 const export_1 = require("./export");
 /**
  * Class representing a storm entity.
@@ -28,12 +28,12 @@ class Entity {
     }
     $pick(...fields) {
         let res = this.$export();
-        (0, awqrd_util_2.pickFieldsIP)(res, ...fields);
+        (0, util_2.pickFieldsIP)(res, ...fields);
         return res;
     }
     $omit(...fields) {
         let res = this.$export();
-        (0, awqrd_util_2.omitFieldsIP)(res, ...fields);
+        (0, util_2.omitFieldsIP)(res, ...fields);
         return res;
     }
 }
@@ -42,5 +42,5 @@ __decorate([
     export_1.Export
 ], Entity.prototype, "id", void 0);
 __decorate([
-    awqrd_util_1.MaterializeIt
+    util_1.MaterializeIt
 ], Entity, "exportFields", null);

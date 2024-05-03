@@ -1,6 +1,6 @@
 import { MySqlTable } from "drizzle-orm/mysql-core";
 import type { MySql2Database } from "drizzle-orm/mysql2";
-import type { Cache } from "@affinity-lab/awqrd-util";
+import type { Cache } from "@affinity-lab/util";
 import type { IEntityRepository } from "../../entity-repository-interface";
 import { Collection } from "./collection";
 import type { AttachmentObjects, ITmpFile } from "./helper/types";

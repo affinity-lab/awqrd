@@ -1,6 +1,6 @@
 import type {InferSelectModel} from "drizzle-orm";
 import type {MySqlTable} from "drizzle-orm/mysql-core";
-import type {MaybeUnset} from "@affinity-lab/awqrd-util";
+import type {MaybeUnset} from "@affinity-lab/util";
 
 export type WithIdOptional<TYPE = {}> = Omit<TYPE, "id"> & { id: MaybeUnset<number> }
 export type WithId<TYPE = {}> = { id: number } & TYPE

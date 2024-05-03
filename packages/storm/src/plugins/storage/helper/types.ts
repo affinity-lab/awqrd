@@ -1,4 +1,4 @@
-import type {NumericString} from "@affinity-lab/awqrd-util";
+import type {NumericString} from "@affinity-lab/util";
 
 export type FileSizeWithUnit =
 	`${number}KB` | `${number}kb` | `${number}kB` |

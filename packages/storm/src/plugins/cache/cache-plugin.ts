@@ -1,6 +1,6 @@
 import {EntityRepository} from "../../entity-repository";
-import type {Cache} from "@affinity-lab/awqrd-util/";
-import type {State} from "@affinity-lab/awqrd-util/";
+import type {Cache} from "@affinity-lab/util/";
+import type {State} from "@affinity-lab/util/";
 import {resultCacheFactory, type ResultCacheFn} from "./result-cache-factory";
 
 export function cachePlugin(repository: EntityRepository<any, any, any>, cache: Cache, resultCache?: ResultCacheFn) {

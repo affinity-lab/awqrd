@@ -2,15 +2,15 @@ import {EntityRepository} from "../../entity-repository";
 import {Entity} from "../../entity";
 import {MySqlTable} from "drizzle-orm/mysql-core";
 import {type MySql2Database} from "drizzle-orm/mysql2";
-import {MaterializeIt} from "@affinity-lab/awqrd-util";
+import {MaterializeIt} from "@affinity-lab/util";
 import {stmt} from "../../helper";
 import {and, not, sql} from "drizzle-orm";
 import {tagError} from "./helper/error";
-import type {MaybeArray} from "@affinity-lab/awqrd-util";
+import type {MaybeArray} from "@affinity-lab/util";
 import type {Dto, EntityInitiator} from "../../types";
-import {type State} from "@affinity-lab/awqrd-util";
+import {type State} from "@affinity-lab/util";
 import {Export} from "../../export";
-import type {MaybeNull} from "@affinity-lab/awqrd-util";
+import type {MaybeNull} from "@affinity-lab/util";
 
 export type Usage = { "repo": EntityRepository<any, any, any>, "field": string } & Record<string, any>
 

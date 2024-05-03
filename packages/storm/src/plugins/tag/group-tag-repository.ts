@@ -2,12 +2,12 @@ import {TagEntity, TagRepository} from "./tag-repository";
 import {type MySql2Database} from "drizzle-orm/mysql2";
 import {type MySqlTable} from "drizzle-orm/mysql-core";
 import {and, eq, not, sql} from "drizzle-orm";
-import {MaterializeIt} from "@affinity-lab/awqrd-util";
+import {MaterializeIt} from "@affinity-lab/util";
 import {stmt} from "../../helper";
 import type {Dto, EntityInitiator} from "../../types";
 import {tagError} from "./helper/error";
 import {Export} from "../../export";
-import {type State} from "@affinity-lab/awqrd-util";
+import {type State} from "@affinity-lab/util";
 import {EntityRepository} from "../../entity-repository";
 
 export class GroupTagEntity extends TagEntity {

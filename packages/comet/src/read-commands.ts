@@ -1,5 +1,5 @@
-import {loadModuleDefaultExports, type MetaDataStore} from "@affinity-lab/awqrd-util";
-import {omitFields} from "@affinity-lab/awqrd-util";
+import {loadModuleDefaultExports, type MetaDataStore} from "@affinity-lab/util";
+import {omitFields} from "@affinity-lab/util";
 import type {ClientGroup} from "./client/client-group";
 import type {Client} from "./client/client";
 import {Comet} from "./comet";

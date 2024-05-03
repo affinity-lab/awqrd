@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ImageCollection = void 0;
-const awqrd_util_1 = require("@affinity-lab/awqrd-util/");
+const util_1 = require("@affinity-lab/util/");
 const collection_1 = require("../../storage/collection");
 const types_1 = require("./types");
 class ImageCollection extends collection_1.Collection {
@@ -24,7 +24,7 @@ class ImageCollection extends collection_1.Collection {
     }
     prepareFile(file) {
         return __awaiter(this, void 0, void 0, function* () {
-            const descriptor = new awqrd_util_1.FileDescriptor(file.file);
+            const descriptor = new util_1.FileDescriptor(file.file);
             let img = yield descriptor.image;
             return {
                 file, metadata: {

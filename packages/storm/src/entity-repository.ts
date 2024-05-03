@@ -1,10 +1,10 @@
 import {sql} from "drizzle-orm";
 import {MySqlTable} from "drizzle-orm/mysql-core";
 import type {MySql2Database, MySqlRawQueryResult} from "drizzle-orm/mysql2";
-import {MaterializeIt} from "@affinity-lab/awqrd-util";
-import {firstOrUndefined, omitFieldsIP, pickFieldsIP} from "@affinity-lab/awqrd-util";
-import {ProcessPipeline, type State} from "@affinity-lab/awqrd-util";
-import type {MaybePromise, MaybeUndefined, MaybeUnset} from "@affinity-lab/awqrd-util";
+import {MaterializeIt} from "@affinity-lab/util";
+import {firstOrUndefined, omitFieldsIP, pickFieldsIP} from "@affinity-lab/util";
+import {ProcessPipeline, type State} from "@affinity-lab/util";
+import type {MaybePromise, MaybeUndefined, MaybeUnset} from "@affinity-lab/util";
 import type {IEntityRepository} from "./entity-repository-interface";
 import {Entity} from "./entity";
 import {stmt} from "./helper";

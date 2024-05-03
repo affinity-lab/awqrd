@@ -1,4 +1,4 @@
-import {FileDescriptor} from "@affinity-lab/awqrd-util/";
+import {FileDescriptor} from "@affinity-lab/util/";
 import type {IEntityRepository} from "../../../entity-repository-interface";
 import {Collection} from "../../storage/collection";
 import type {CollectionOptions, MetaField, ITmpFile} from "../../storage/helper/types";

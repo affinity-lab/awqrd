@@ -1,4 +1,4 @@
-import type { NumericString } from "@affinity-lab/awqrd-util";
+import type { NumericString } from "@affinity-lab/util";
 export type FileSizeWithUnit = `${number}KB` | `${number}kb` | `${number}kB` | `${number}MB` | `${number}mb` | `${number}GB` | `${number}gb` | `${number}TB` | `${number}tb` | `${number}B` | `${number}b`;
 export type AttachmentObject = {
     name: string;

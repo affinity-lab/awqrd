@@ -39,8 +39,8 @@ class TmpFileFactory {
         let targetDir = path_1.default.join(this.path, crypto_1.default.randomUUID());
         return fs_1.default.promises.mkdir(targetDir).then(() => targetDir);
     }
-    createFromFile(file, removeOriginal = true) {
-        return __awaiter(this, void 0, void 0, function* () {
+    createFromFile(file_1) {
+        return __awaiter(this, arguments, void 0, function* (file, removeOriginal = true) {
             return this.createFromBuffer(file.name, buffer_1.Buffer.from(yield file.arrayBuffer()));
         });
     }
@@ -51,8 +51,8 @@ class TmpFileFactory {
             return new TmpFile(target);
         });
     }
-    createFromFilePath(file, removeOriginal = true) {
-        return __awaiter(this, void 0, void 0, function* () {
+    createFromFilePath(file_1) {
+        return __awaiter(this, arguments, void 0, function* (file, removeOriginal = true) {
             let target = path_1.default.join(yield this.targetDir, path_1.default.basename(file));
             if (removeOriginal)
                 yield fs_1.default.promises.rename(file, target);

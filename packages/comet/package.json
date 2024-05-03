@@ -1,24 +1,25 @@
 {
-	"name": "@affinity-lab/awqrd-comet",
-	"version": "1.0.0",
-	"description": "Schema Helper for AWQRD package",
-	"type": "module",
-	"main": "dist/index.js",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
-	},
-	"author": "Your Name",
-	"license": "MIT",
-	"dependencies": {
-		"hono": "^4.1.7",
-		"reformdata": "^0.2.2",
-		"zod": "^3.22.4"
-	},
-	"devDependencies": {
-		"@types/bun": "latest",
-		"@types/node": "^20.12.8"
-	},
-	"peerDependencies": {
-		"typescript": "^5.0.0"
-	}
+  "name": "@affinity-lab/comet",
+  "version": "1.0.20",
+  "description": "Comet Command API for bun / hono",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "hono": "^4.1.7",
+    "reformdata": "^0.2.2",
+    "zod": "^3.22.4",
+    "@affinity-lab/util": "2.0.3"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^20.12.8"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
 }

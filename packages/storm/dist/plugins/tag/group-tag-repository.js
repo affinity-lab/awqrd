@@ -18,7 +18,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GroupTagRepository = exports.GroupTagEntity = void 0;
 const tag_repository_1 = require("./tag-repository");
 const drizzle_orm_1 = require("drizzle-orm");
-const awqrd_util_1 = require("@affinity-lab/awqrd-util");
+const util_1 = require("@affinity-lab/util");
 const helper_1 = require("../../helper");
 const error_1 = require("./helper/error");
 const export_1 = require("../../export");
@@ -188,5 +188,5 @@ class GroupTagRepository extends tag_repository_1.TagRepository {
 }
 exports.GroupTagRepository = GroupTagRepository;
 __decorate([
-    awqrd_util_1.MaterializeIt
+    util_1.MaterializeIt
 ], GroupTagRepository.prototype, "stmt_groupGetByName", null);

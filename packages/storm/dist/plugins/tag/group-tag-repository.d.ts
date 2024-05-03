@@ -2,7 +2,7 @@ import { TagEntity, TagRepository } from "./tag-repository";
 import { type MySql2Database } from "drizzle-orm/mysql2";
 import { type MySqlTable } from "drizzle-orm/mysql-core";
 import type { Dto, EntityInitiator } from "../../types";
-import { type State } from "@affinity-lab/awqrd-util";
+import { type State } from "@affinity-lab/util";
 import { EntityRepository } from "../../entity-repository";
 export declare class GroupTagEntity extends TagEntity {
     groupId: number | string | null;

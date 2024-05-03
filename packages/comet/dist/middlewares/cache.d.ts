@@ -1,5 +1,5 @@
-import type { Cache } from "@affinity-lab/awqrd-util";
-import type { Middleware } from "@affinity-lab/awqrd-util";
+import type { Cache } from "@affinity-lab/util";
+import type { Middleware } from "@affinity-lab/util";
 import type { CometState } from "../client/client";
 export declare class CacheMiddleware implements Middleware {
     private cache;

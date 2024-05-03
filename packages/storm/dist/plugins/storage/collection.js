@@ -16,7 +16,7 @@ exports.Collection = void 0;
 const fs_1 = __importDefault(require("fs"));
 const minimatch_1 = require("minimatch");
 const path_1 = __importDefault(require("path"));
-const awqrd_util_1 = require("@affinity-lab/awqrd-util");
+const util_1 = require("@affinity-lab/util");
 const attachment_1 = require("./attachment");
 const collection_handler_1 = require("./collection-handler");
 const error_1 = require("./helper/error");
@@ -43,7 +43,7 @@ class Collection {
             rules.limit.count = 1;
         if (typeof rules.limit.size === "undefined")
             rules.limit.size = '1mb';
-        rules.limit.size = (0, awqrd_util_1.bytes)(rules.limit.size);
+        rules.limit.size = (0, util_1.bytes)(rules.limit.size);
         this.rules = rules;
         if (this.rules.mime !== undefined) {
             if (!Array.isArray(this.rules.ext))

@@ -5,10 +5,10 @@
   "devDependencies": {
     "@types/bun": "^1.1.1",
     "drizzle-kit": "^0.20.14",
-    "@affinity-lab/awqrd-util": "workspace:packages/util",
-    "@affinity-lab/awqrd-storm": "workspace:packages/storm",
-    "@affinity-lab/awqrd-comet": "workspace:packages/comet",
-    "@affinity-lab/awqrd-schema-helper": "workspace:packages/schema-helper"
+    "@affinity-lab/util": "workspace:packages/util",
+    "@affinity-lab/storm": "workspace:packages/storm",
+    "@affinity-lab/comet": "workspace:packages/comet",
+    "@affinity-lab/storm-schema-helper": "workspace:packages/schema-helper"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

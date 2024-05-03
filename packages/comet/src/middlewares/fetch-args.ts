@@ -1,5 +1,5 @@
 import {reform} from "reformdata";
-import type {Middleware} from "@affinity-lab/awqrd-util";
+import type {Middleware} from "@affinity-lab/util";
 import type {CometState} from "../client/client";
 import {cometError} from "../error";
 

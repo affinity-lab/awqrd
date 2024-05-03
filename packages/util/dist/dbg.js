@@ -62,7 +62,6 @@ class DBG {
         console.log();
     }
     hello() {
-        let width = process_1.default.stdout.columns;
         let lines = [
             "  ████   █       █   █████   █████   █████   ",
             " █    █  █       █  █     █  █    █  █    █  ",

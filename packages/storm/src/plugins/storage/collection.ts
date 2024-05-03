@@ -1,7 +1,7 @@
 import fs from "fs";
 import {minimatch} from "minimatch";
 import Path from "path";
-import {bytes} from "@affinity-lab/awqrd-util";
+import {bytes} from "@affinity-lab/util";
 import type {IEntityRepository} from "../../entity-repository-interface";
 import type {IEntity} from "../../types";
 import {Attachment} from "./attachment";

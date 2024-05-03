@@ -1,4 +1,4 @@
-import {createErrorData, preprocessErrorTree} from "@affinity-lab/awqrd-util";
+import {createErrorData, preprocessErrorTree} from "@affinity-lab/util";
 
 
 export const cometError = {

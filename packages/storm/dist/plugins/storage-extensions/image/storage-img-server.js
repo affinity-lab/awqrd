@@ -17,7 +17,7 @@ const bun_1 = require("hono/bun");
 const path_1 = __importDefault(require("path"));
 const storm_storage_server_1 = require("../../storage/helper/storm-storage-server");
 const helpers_1 = require("./helpers");
-const awqrd_util_1 = require("@affinity-lab/awqrd-util");
+const util_1 = require("@affinity-lab/util");
 const crypto_1 = require("crypto");
 /**
  * Function for serving images from a specified directory with dynamic URL paths and image processing.
@@ -39,7 +39,7 @@ function stormImgServerHono(app, imgPath, prefix, filesPath, skipHashCheck = fal
         file = path_1.default.join(path_1.default.dirname(file), path_1.default.basename(file, path_1.default.extname(file)));
         file = path_1.default.join(filesPath, (0, storm_storage_server_1.filePathFromUrl)(file));
         // check if file exits
-        if (!(yield (0, awqrd_util_1.fileExists)(file)))
+        if (!(yield (0, util_1.fileExists)(file)))
             return c.notFound();
         // check hash
         let hash = (0, crypto_1.createHash)("md5").update([c.req.param("collection-with-id"), c.req.param("img"), c.req.param("file")].join("/")).digest("hex").substring(0, 6);

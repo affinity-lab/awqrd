@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.readCommands = void 0;
-const awqrd_util_1 = require("@affinity-lab/awqrd-util");
-const awqrd_util_2 = require("@affinity-lab/awqrd-util");
+const util_1 = require("@affinity-lab/util");
+const util_2 = require("@affinity-lab/util");
 const comet_1 = require("./comet");
 function readCommands(commandsPath, clients) {
-    (0, awqrd_util_1.loadModuleDefaultExports)(commandsPath);
+    (0, util_1.loadModuleDefaultExports)(commandsPath);
     let allClients = [];
     for (const key in clients)
         allClients.push(...clients[key].all());
@@ -25,7 +25,7 @@ function readCommands(commandsPath, clients) {
                 }
             }
             clients.forEach((client) => {
-                config["command"][key] = (0, awqrd_util_2.omitFields)(config["command"][key], "name", "clients");
+                config["command"][key] = (0, util_2.omitFields)(config["command"][key], "name", "clients");
                 client.add(name, cometInstance, key, config["command"][key], params);
             });
         }

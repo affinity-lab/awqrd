@@ -2,7 +2,7 @@ import type {MySqlColumn} from "drizzle-orm/mysql-core";
 import {EntityRepository} from "../../entity-repository";
 import {getByFactory} from "../../helper";
 import type {WithId} from "../../types";
-import type {Cache} from "@affinity-lab/awqrd-util/";
+import type {Cache} from "@affinity-lab/util/";
 import {resultCacheFactory, type ResultCacheFn} from "./result-cache-factory";
 
 export function cachedGetByFactory<T extends string | number, R>(repo: EntityRepository<any, any, any>, fieldName: string, resultCache: ResultCacheFn, mapCache: Cache): (search: T) => Promise<R | undefined> {

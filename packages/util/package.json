@@ -1,30 +1,30 @@
 {
-	"name": "@affinity-lab/awqrd-util",
-	"version": "1.0.0",
-	"description": "Schema Helper for AWQRD package",
-	"type": "module",
-	"main": "dist/index.js",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
-	},
-	"author": "Your Name",
-	"license": "MIT",
-	"dependencies": {
-		"@types/mime-types": "^2.1.4",
-		"chalk": "^5.3.0",
-		"change-case-all": "^2.1.0",
-		"fast-glob": "^3.3.2",
-		"mime-types": "^2.1.35",
-		"node-cache": "^5.1.2",
-		"sharp": "^0.33.3",
-		"sql-highlight": "^4.4.2",
-		"uni-flatten": "^1.6.2"
-	},
-	"devDependencies": {
-		"@types/bun": "latest",
-		"@types/node": "^20.12.8"
-	},
-	"peerDependencies": {
-		"typescript": "^5.0.0"
-	}
+  "name": "@affinity-lab/util",
+  "version": "2.0.3",
+  "description": "Utils for Comet and Storm",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@types/mime-types": "^2.1.4",
+    "chalk": "^5.3.0",
+    "change-case-all": "^2.1.0",
+    "fast-glob": "^3.3.2",
+    "mime-types": "^2.1.35",
+    "node-cache": "^5.1.2",
+    "sharp": "^0.33.3",
+    "sql-highlight": "^4.4.2",
+    "uni-flatten": "^1.6.2"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^20.12.8"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
 }

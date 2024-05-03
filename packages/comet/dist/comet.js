@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Comet = void 0;
-const awqrd_util_1 = require("@affinity-lab/awqrd-util");
+const util_1 = require("@affinity-lab/util");
 class Comet {
     static Args(target, propertyKey, index) {
         Comet.classMetaData.get(target.constructor, true).set(["params", propertyKey, index.toString()], "args");
@@ -44,4 +44,4 @@ class Comet {
     }
 }
 exports.Comet = Comet;
-Comet.classMetaData = new awqrd_util_1.ClassMetaData();
+Comet.classMetaData = new util_1.ClassMetaData();

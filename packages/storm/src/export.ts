@@ -1,4 +1,4 @@
-import {ClassMetaData} from "@affinity-lab/awqrd-util";
+import {ClassMetaData} from "@affinity-lab/util";
 
 
 export function Export(target: any, name: PropertyKey,): void {

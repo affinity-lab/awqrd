@@ -18,7 +18,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TagRepository = exports.TagEntity = void 0;
 const entity_repository_1 = require("../../entity-repository");
 const entity_1 = require("../../entity");
-const awqrd_util_1 = require("@affinity-lab/awqrd-util");
+const util_1 = require("@affinity-lab/util");
 const helper_1 = require("../../helper");
 const drizzle_orm_1 = require("drizzle-orm");
 const error_1 = require("./helper/error");
@@ -180,5 +180,5 @@ class TagRepository extends entity_repository_1.EntityRepository {
 }
 exports.TagRepository = TagRepository;
 __decorate([
-    awqrd_util_1.MaterializeIt
+    util_1.MaterializeIt
 ], TagRepository.prototype, "stmt_getByName", null);

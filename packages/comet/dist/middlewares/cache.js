@@ -21,8 +21,8 @@ class CacheMiddleware {
         this.defaultKeyFn = defaultKeyFn;
     }
     handle(state, next) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a;
             if (!state.cmd.config.cache)
                 return yield next();
             let key = (state.cmd.config.cache.key === undefined) ? this.defaultKeyFn(state) : state.cmd.config.cache.key(state);

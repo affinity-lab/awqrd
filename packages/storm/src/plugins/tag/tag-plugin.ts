@@ -1,4 +1,4 @@
-import type {State} from "@affinity-lab/awqrd-util";
+import type {State} from "@affinity-lab/util";
 import {EntityRepository} from "../../entity-repository";
 import {TagRepository, type Usage} from "./tag-repository";
 import {GroupTagRepository} from "./group-tag-repository";

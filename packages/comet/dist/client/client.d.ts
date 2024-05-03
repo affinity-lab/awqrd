@@ -1,5 +1,5 @@
 import type { Context } from "hono";
-import { type Middleware, type MiddlewareFn } from "@affinity-lab/awqrd-util";
+import { type Middleware, type MiddlewareFn } from "@affinity-lab/util";
 type Command<Instance extends Object, MethodName extends keyof Instance> = {
     instance: Instance;
     key: MethodName;

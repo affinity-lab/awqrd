@@ -1,6 +1,6 @@
 import crypto from "crypto";
-import type {Cache} from "@affinity-lab/awqrd-util";
-import type {Middleware} from "@affinity-lab/awqrd-util";
+import type {Cache} from "@affinity-lab/util";
+import type {Middleware} from "@affinity-lab/util";
 import type {CometState} from "../client/client";
 
 export class CacheMiddleware implements Middleware {

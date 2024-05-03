@@ -17,9 +17,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EntityRepository = void 0;
 const drizzle_orm_1 = require("drizzle-orm");
-const awqrd_util_1 = require("@affinity-lab/awqrd-util");
-const awqrd_util_2 = require("@affinity-lab/awqrd-util");
-const awqrd_util_3 = require("@affinity-lab/awqrd-util");
+const util_1 = require("@affinity-lab/util");
+const util_2 = require("@affinity-lab/util");
+const util_3 = require("@affinity-lab/util");
 const helper_1 = require("./helper");
 const error_1 = require("./error");
 /**
@@ -42,7 +42,7 @@ class EntityRepository {
         this.entity = entity;
         //region Process pipelines
         this.pipelines = {
-            insert: new awqrd_util_3.ProcessPipeline("prepare", "action", "finalize").setup({
+            insert: new util_3.ProcessPipeline("prepare", "action", "finalize").setup({
                 prepare: ((state) => __awaiter(this, void 0, void 0, function* () {
                     state.dto = this.extractItemDTO(state.item);
                     yield this.transformInsertDTO(state.dto);
@@ -55,7 +55,7 @@ class EntityRepository {
                     yield this.reload(state.item);
                 }))
             }),
-            update: new awqrd_util_3.ProcessPipeline("prepare", "action", "finalize").setup({
+            update: new util_3.ProcessPipeline("prepare", "action", "finalize").setup({
                 prepare: ((state) => __awaiter(this, void 0, void 0, function* () {
                     state.dto = this.extractItemDTO(state.item);
                     yield this.transformUpdateDTO(state.dto);
@@ -67,7 +67,7 @@ class EntityRepository {
                     yield this.reload(state.item);
                 }))
             }),
-            getOne: new awqrd_util_3.ProcessPipeline("prepare", "action", "finalize").setup({
+            getOne: new util_3.ProcessPipeline("prepare", "action", "finalize").setup({
                 action: ((state) => __awaiter(this, void 0, void 0, function* () {
                     if (state.dto === undefined)
                         state.dto = yield this.stmt_get({ id: state.id });
@@ -77,7 +77,7 @@ class EntityRepository {
                         state.item = yield this.instantiate(state.dto);
                 }))
             }),
-            getAll: new awqrd_util_3.ProcessPipeline("prepare", "action", "finalize").setup({
+            getAll: new util_3.ProcessPipeline("prepare", "action", "finalize").setup({
                 action: ((state) => __awaiter(this, void 0, void 0, function* () {
                     if (state.dtos === undefined)
                         state.dtos = [];
@@ -87,7 +87,7 @@ class EntityRepository {
                     state.items = yield this.instantiateAll(state.dtos);
                 }))
             }),
-            delete: new awqrd_util_3.ProcessPipeline("prepare", "action", "finalize").setup({
+            delete: new util_3.ProcessPipeline("prepare", "action", "finalize").setup({
                 action: ((state) => __awaiter(this, void 0, void 0, function* () {
                     yield this.db.delete(this.schema).where((0, drizzle_orm_1.sql) `id = (${drizzle_orm_1.sql.placeholder("id")})`).execute({ id: state.item.id });
                 })),
@@ -95,7 +95,7 @@ class EntityRepository {
                     state.item.id = undefined;
                 })
             }),
-            overwrite: new awqrd_util_3.ProcessPipeline("prepare", "action", "finalize").setup({
+            overwrite: new util_3.ProcessPipeline("prepare", "action", "finalize").setup({
                 action: (state) => __awaiter(this, void 0, void 0, function* () {
                     yield this.db.update(this.schema).set(state.values).where((0, drizzle_orm_1.sql) `id = ${drizzle_orm_1.sql.placeholder("id")}`).execute({ id: state.item.id });
                 }),
@@ -110,7 +110,7 @@ class EntityRepository {
             update: (item) => __awaiter(this, void 0, void 0, function* () { return yield this.pipelines.update.run(this, { item }); }),
             getOne: (id) => __awaiter(this, void 0, void 0, function* () { return yield this.pipelines.getOne.run(this, { id }).then(state => state.item); }),
             getAll: (ids) => __awaiter(this, void 0, void 0, function* () { return this.pipelines.getAll.run(this, { ids }).then(state => state.items); }),
-            overwrite: (item, values, reload = true) => __awaiter(this, void 0, void 0, function* () { return yield this.pipelines.overwrite.run(this, { item, values, reload }); })
+            overwrite: (item_1, values_1, ...args_1) => __awaiter(this, [item_1, values_1, ...args_1], void 0, function* (item, values, reload = true) { return yield this.pipelines.overwrite.run(this, { item, values, reload }); })
         };
         this.instantiators = {
             all: (res) => this.instantiateAll(res),
@@ -146,7 +146,7 @@ class EntityRepository {
      * @returns The instantiated item, or undefined if the array is blank.
      */
     instantiateFirst(dtoSet) {
-        return __awaiter(this, void 0, void 0, function* () { return yield this.instantiate((0, awqrd_util_2.firstOrUndefined)(dtoSet)); });
+        return __awaiter(this, void 0, void 0, function* () { return yield this.instantiate((0, util_2.firstOrUndefined)(dtoSet)); });
     }
     /**
      * Instantiates an item from a DTO.
@@ -186,8 +186,8 @@ class EntityRepository {
      * @param dto The DTO to prepare for saving.
      */
     transformSaveDTO(dto) {
-        (0, awqrd_util_2.pickFieldsIP)(dto, ...this.fields);
-        (0, awqrd_util_2.omitFieldsIP)(dto, "id");
+        (0, util_2.pickFieldsIP)(dto, ...this.fields);
+        (0, util_2.omitFieldsIP)(dto, "id");
     }
     /**
      * Prepares the DTO for insertion by filtering and omitting specified fields.
@@ -207,7 +207,7 @@ class EntityRepository {
     //endregion
     //region Statements
     get stmt_all() { return (0, helper_1.stmt)(this.db.select().from(this.schema).where((0, drizzle_orm_1.sql) `id IN (${drizzle_orm_1.sql.placeholder("ids")})`)); }
-    get stmt_get() { return (0, helper_1.stmt)(this.db.select().from(this.schema).where((0, drizzle_orm_1.sql) `id = ${drizzle_orm_1.sql.placeholder("id")}`).limit(1), awqrd_util_2.firstOrUndefined); }
+    get stmt_get() { return (0, helper_1.stmt)(this.db.select().from(this.schema).where((0, drizzle_orm_1.sql) `id = ${drizzle_orm_1.sql.placeholder("id")}`).limit(1), util_2.firstOrUndefined); }
     //endregion
     /**
      * Retrieves raw data for an entity by its ID.
@@ -269,8 +269,8 @@ class EntityRepository {
      * @param [reload=true] - Whether to reload the item after overwriting.
      * @returns A promise that resolves once the overwrite operation is completed.
      */
-    overwrite(item, values, reload = true) {
-        return __awaiter(this, void 0, void 0, function* () { return this.exec.overwrite(item, values, reload); });
+    overwrite(item_1, values_1) {
+        return __awaiter(this, arguments, void 0, function* (item, values, reload = true) { return this.exec.overwrite(item, values, reload); });
     }
     delete(itemOrId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -305,8 +305,8 @@ class EntityRepository {
 }
 exports.EntityRepository = EntityRepository;
 __decorate([
-    awqrd_util_1.MaterializeIt
+    util_1.MaterializeIt
 ], EntityRepository.prototype, "stmt_all", null);
 __decorate([
-    awqrd_util_1.MaterializeIt
+    util_1.MaterializeIt
 ], EntityRepository.prototype, "stmt_get", null);

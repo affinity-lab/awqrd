@@ -1,6 +1,6 @@
 import {MySqlTable} from "drizzle-orm/mysql-core";
 import type {MySql2Database} from "drizzle-orm/mysql2";
-import type {MaybeUndefined, MaybeUnset} from "@affinity-lab/awqrd-util";
+import type {MaybeUndefined, MaybeUnset} from "@affinity-lab/util";
 import {Entity} from "./entity";
 import type {WithId} from "./types";
 

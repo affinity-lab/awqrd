@@ -1,5 +1,5 @@
 import {z} from "zod";
-import type {State} from "@affinity-lab/awqrd-util";
+import type {State} from "@affinity-lab/util";
 import {EntityRepository} from "../../entity-repository";
 
 /**

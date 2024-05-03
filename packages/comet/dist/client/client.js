@@ -16,13 +16,13 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 var _Client_commands;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Client = void 0;
-const awqrd_util_1 = require("@affinity-lab/awqrd-util");
+const util_1 = require("@affinity-lab/util");
 class Client {
     constructor(version, middlewares = []) {
         this.version = version;
         _Client_commands.set(this, {});
         this.id = crypto.randomUUID();
-        this.pipeline = new awqrd_util_1.Pipeline(...middlewares, this.execute.bind(this));
+        this.pipeline = new util_1.Pipeline(...middlewares, this.execute.bind(this));
     }
     authApi(apiKey) { apiKey; return true; }
     execute(state) {

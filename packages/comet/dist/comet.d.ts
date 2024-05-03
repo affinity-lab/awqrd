@@ -1,4 +1,4 @@
-import { ClassMetaData } from "@affinity-lab/awqrd-util";
+import { ClassMetaData } from "@affinity-lab/util";
 import { Client } from "./client/client";
 type CometGroupConfig = {
     name?: string;

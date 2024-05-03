@@ -1,4 +1,4 @@
-import type {State} from "@affinity-lab/awqrd-util";
+import type {State} from "@affinity-lab/util";
 import {EntityRepository} from "../../../entity-repository";
 import {Storage} from "../storage";
 

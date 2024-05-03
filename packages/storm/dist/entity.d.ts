@@ -1,4 +1,4 @@
-import { type MaybeUnset } from "@affinity-lab/awqrd-util";
+import { type MaybeUnset } from "@affinity-lab/util";
 /**
  * Class representing a storm entity.
  */
