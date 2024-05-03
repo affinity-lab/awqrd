@@ -5,7 +5,7 @@ import path from "path";
 const root = process.cwd();
 
 
-let packages = {
+export let packages = {
 	util: {
 		version: "0.0.1",
 		path: path.join(root, "packages/util"),
@@ -68,14 +68,7 @@ function buildPackage(name: keyof typeof packages) {
 		console.log(`⏵ Updating dependecy ${name} to version: ${version}`);
 		updateDependency(name, version)
 	}
-
-	// console.log("Publishing package to npm")
-	//try {
-	//	child_process.execSync("npm publish --access public").toString();
-	//} catch (e) {
-	//	console.log("⏵ Error occurred...")
-	//	process.exit(-1)
-	//}
+	
 	console.log("⏵ Done.")
 }
 

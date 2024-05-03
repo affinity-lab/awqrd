@@ -2,23 +2,27 @@
   "name": "@affinity-lab/awqrd",
   "description": "AWQRD package (contains: Storm and Comet)",
   "type": "module",
+  "scripts": {
+	"build": "bun build.ts",
+	"publish": "bun publish.ts"
+  },
   "devDependencies": {
-    "@types/bun": "^1.1.1",
-    "drizzle-kit": "^0.20.14",
-    "@affinity-lab/util": "workspace:packages/util",
-    "@affinity-lab/storm": "workspace:packages/storm",
-    "@affinity-lab/comet": "workspace:packages/comet",
-    "@affinity-lab/storm-schema-helper": "workspace:packages/schema-helper"
+	"@types/bun": "^1.1.1",
+	"drizzle-kit": "^0.20.14",
+	"@affinity-lab/util": "workspace:packages/util",
+	"@affinity-lab/storm": "workspace:packages/storm",
+	"@affinity-lab/comet": "workspace:packages/comet",
+	"@affinity-lab/storm-schema-helper": "workspace:packages/schema-helper"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+	"typescript": "^5.0.0"
   },
   "dependencies": {
   },
   "workspaces": [
-    "packages/schema-helper",
-    "packages/comet",
-    "packages/util",
-    "packages/storm"
+	"packages/schema-helper",
+	"packages/comet",
+	"packages/util",
+	"packages/storm"
   ]
 }
