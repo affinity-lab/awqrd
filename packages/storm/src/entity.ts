@@ -12,12 +12,12 @@ export class Entity {
 
 	@MaterializeIt
 	private static get exportFields(): Array<string> | undefined {
-		return Export.metadata.read(this.constructor)?.export;
+		return Export.metadata.read(this)?.export;
 	}
 
 	$export() {
 		const e: Record<string, any> = {}
-		let a = this.constructor.prototype.exportFields;
+		let a = Object.getPrototypeOf(this).constructor.exportFields;
 		if (a) for (const key of a) e[key] = this[key as keyof this];
 		return e
 	}

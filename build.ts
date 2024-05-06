@@ -62,7 +62,8 @@ function publishPackage(name: keyof typeof packages, code:string) {
 	console.log(`Publishing package ${pkg.name}`);
 	process.chdir(pkg.path)
 	try {
-		child_process.execSync(`npm publish --access public --otp=${code}`).toString();
+		if(code) child_process.execSync(`npm publish --access public --otp=${code}`).toString();
+		else child_process.execSync(`npm publish --access public`).toString();
 	} catch (e) {
 		console.log("⏵ Error occurred...")
 		process.exit(-1)
