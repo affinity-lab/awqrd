@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/util",
-  "version": "2.0.5",
+  "version": "2.0.11",
   "description": "Utils for Comet and Storm",
   "type": "module",
   "main": "dist/index.js",

@@ -3,6 +3,7 @@ import {createErrorData, preprocessErrorTree} from "@affinity-lab/util";
 
 export const cometError = {
 	client: {
+		unsupported: ()=> createErrorData("The client is no longer supported", {}, 505),
 		noInfo: () => createErrorData("Client information not provided."),
 		notFound: (name: string, version: number) => createErrorData(`Client not found ${name}(${version})`),
 		notAuthorized: (name: string, version: number) => createErrorData(`Client not authorized ${name}(${version})`),
