@@ -302,7 +302,11 @@ export class EntityRepository<
 	 * Creates a blank entity item.
 	 * @returns The created item.
 	 */
-	async create(): Promise<Item<ENTITY>> {return new this.entity()}
+	async create(importData?: Record<string, any>): Promise<Item<ENTITY>> {
+		let item = new this.entity(this);
+		if(importData) item.$import(importData);
+		return item;
+	}
 
 	/**
 	 * Reloads the item by fetching the raw data for the item's ID and applying it.
