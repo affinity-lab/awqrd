@@ -60,6 +60,10 @@ export class Entity {
 		omitFieldsIP(res, ...fields);
 		return res;
 	}
+
+	toJSON() {
+		return this.$export();
+	}
 }
 
 
