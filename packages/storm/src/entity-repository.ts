@@ -256,8 +256,6 @@ export class EntityRepository<
 	 * @param item - The item to update.
 	 * @returns A promise that resolves once the update operation is completed.
 	 */
-	// async update(item: Item<ENTITY>)
-	// async update(item: Item<ENTITY>)
 	async update(item: Item<ENTITY>) { return this.exec.update(item) }
 
 	/**
@@ -265,10 +263,7 @@ export class EntityRepository<
 	 * @param item - The item to insert.
 	 * @returns A promise that resolves once the insert operation is completed.
 	 */
-
-	// async insert(item: Item<ENTITY>) : Promise<number>;
-	// async insert(values: InferInsertModel<SCHEMA>): Promise<number>;
-	async insert(item: Item<ENTITY>) { // TODO
+	async insert(item: Item<ENTITY>) {
 		return this.exec.insert(item)
 	}
 
