@@ -6,8 +6,9 @@ import {type MySql2Database} from "drizzle-orm/mysql2";
 import {MySqlTable} from "drizzle-orm/mysql-core";
 import {type EntityInitiator} from "../../types";
 import {Entity} from "../../entity";
+import {prevDto} from "../../helper";
 
-// TODO add group
+
 export function tagPlugin<DB extends MySql2Database<any>, SCHEMA extends MySqlTable, ENTITY extends EntityInitiator<ENTITY, typeof Entity>>(repository: EntityRepository<DB, SCHEMA, ENTITY>, tagRepository: GroupTagRepository<any, any, any>, field: string, groupField: string): void
 export function tagPlugin<DB extends MySql2Database<any>, SCHEMA extends MySqlTable, ENTITY extends EntityInitiator<ENTITY, typeof Entity>>(repository: EntityRepository<DB, SCHEMA, ENTITY>, tagRepository: TagRepository<any, any, any>, field: string): void
 export function tagPlugin<DB extends MySql2Database<any>, SCHEMA extends MySqlTable, ENTITY extends EntityInitiator<ENTITY, typeof Entity>>(repository: EntityRepository<DB, SCHEMA, ENTITY>, tagRepository: TagRepository<any, any, any> | GroupTagRepository<any, any, any>, field: string, groupField?: string) {
@@ -18,7 +19,7 @@ export function tagPlugin<DB extends MySql2Database<any>, SCHEMA extends MySqlTa
 
 	repository.pipelines.update.blocks
 		.prepare.append(async (state: State) => {
-			state.prevDto = await repository.getRaw(state.item.id);
+			await prevDto(state, repository);
 			tagRepository.prepare(repository, state);
 	} )
 		.finalize.append(async (state: State) => {

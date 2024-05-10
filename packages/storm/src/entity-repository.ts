@@ -64,7 +64,7 @@ export class EntityRepository<
 		getAll: new ProcessPipeline("prepare", "action", "finalize").setup({
 			action: (async (state: State) => {
 				if (state.dtos === undefined) state.dtos = [];
-				state.dtos.push(...await this.stmt_all({ids: state.ids}));
+				state.dtos.push(...await this.stmt_get_array({ids: state.ids}));
 			}),
 			finalize: (async (state: State) => {
 				state.items = await this.instantiateAll(state.dtos)
@@ -210,11 +210,12 @@ export class EntityRepository<
 //endregion
 
 //region Statements
-
 	@MaterializeIt
-	protected get stmt_all() { return stmt<WithIds, Array<Dto<SCHEMA>>>(this.db.select().from(this.schema).where(sql`id IN (${sql.placeholder("ids")})`))}
+	protected get stmt_all() { return stmt<Array<Dto<SCHEMA>>>(this.db.select().from(this.schema), this.instantiateAll.bind(this))}
 	@MaterializeIt
-	protected get stmt_get() { return stmt<WithId, MaybeUndefined<Dto<SCHEMA>>>(this.db.select().from(this.schema).where(sql`id = ${sql.placeholder("id")}`).limit(1), firstOrUndefined)}
+	protected get stmt_get_array() { return stmt<WithIds, Array<Dto<SCHEMA>>>(this.db.select().from(this.schema).where(sql`id IN (${sql.placeholder("ids")})`), this.instantiateAll.bind(this))}
+	@MaterializeIt
+	protected get stmt_get() { return stmt<WithId, MaybeUndefined<Dto<SCHEMA>>>(this.db.select().from(this.schema).where(sql`id = ${sql.placeholder("id")}`).limit(1), firstOrUndefined, this.instantiateFirst.bind(this))}
 
 	//endregion
 
@@ -231,9 +232,11 @@ export class EntityRepository<
 	 * @returns A promise resolving to one or multiple items, or undefined if not found.
 	 * @final
 	 */
+	get(): Promise<Array<WithId<Item<ENTITY>>>>
 	get(id: Array<number>): Promise<Array<WithId<Item<ENTITY>>>>
 	get(ids: MaybeUnset<number>): Promise<WithId<Item<ENTITY>> | undefined>
-	async get(id: Array<number> | number | undefined | null) {
+	async get(id?: Array<number> | number | undefined | null) {
+		if(arguments.length === 0) return this.stmt_all()
 		if (Array.isArray(id)) {
 			if (id.length === 0) return [];
 			id = [...new Set(id)];

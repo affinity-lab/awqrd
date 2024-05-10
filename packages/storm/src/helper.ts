@@ -2,6 +2,7 @@ import {eq, sql} from "drizzle-orm";
 import {MySqlColumn} from "drizzle-orm/mysql-core";
 import type {MySqlSelectWithout} from "drizzle-orm/mysql-core/query-builders/select.types";
 import {EntityRepository} from "./entity-repository";
+import {State} from "@affinity-lab/util";
 
 /**
  * Creates an SQL expression for checking if a column's value is in a list of IDs.
@@ -19,8 +20,9 @@ export function In(col: MySqlColumn, ids: string) { return sql`${col} in (${sql.
  * @param processes - Processing functions to be applied to the result sequentially.
  * @returns A promise that resolves with a function accepting arguments of type ARGS and returning a result of type RES.
  */
-export function stmt<ARGS = Record<string, any>, RES = any>(stmt: MySqlSelectWithout<any, any, any>, ...processes: ((res: any) => any)[]
-) {
+export function stmt<RES>(stmt: MySqlSelectWithout<any, any, any>, ...processes: ((res: any) => any)[]): () => Promise<RES>;
+export function stmt<ARGS, RES>(stmt: MySqlSelectWithout<any, any, any>, ...processes: ((res: any) => any)[]): (args: ARGS) => Promise<RES>;
+export function stmt<ARGS, RES>(stmt: MySqlSelectWithout<any, any, any>, ...processes: ((res: any) => any)[]): (args: ARGS) => Promise<RES> {
 	let prepared = stmt.prepare();
 
 	return async (args: ARGS) => {
@@ -67,4 +69,9 @@ export function getByFactory
 	};
 	(fn as unknown as {stmt:any}).stmt = stmt;
 	return fn;
+}
+
+export async function prevDto(state: State, repository: EntityRepository<any, any, any>) {
+	if(state.prevDto) state.prevDto = await repository.getRaw(state.item.id);
+	return state.prevDto;
 }

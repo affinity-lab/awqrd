@@ -29,7 +29,13 @@ export let packages = {
 		path: path.join(root, "packages/schema-helper"),
 		name: "",
 		dependencies: []
-	}
+	},
+	sapphire: {
+		version: "0.0.1",
+		path: path.join(root, "packages/sapphire"),
+		name: "",
+		dependencies: ["util", "comet", "storm"]
+	},
 }
 
 readPackages();
@@ -47,6 +53,7 @@ function build() {
 	buildPackage("comet")
 	buildPackage("storm")
 	buildPackage("schemaHelper")
+	buildPackage("sapphire")
 }
 
 
@@ -55,6 +62,7 @@ function publish(code:string) {
 	publishPackage("comet", code)
 	publishPackage("storm", code)
 	publishPackage("schemaHelper", code)
+	publishPackage("sapphire", code)
 }
 
 function publishPackage(name: keyof typeof packages, code:string) {

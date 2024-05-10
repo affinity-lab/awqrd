@@ -3,7 +3,7 @@ import {Entity} from "../../entity";
 import {MySqlTable} from "drizzle-orm/mysql-core";
 import {type MySql2Database} from "drizzle-orm/mysql2";
 import {MaterializeIt} from "@affinity-lab/util";
-import {stmt} from "../../helper";
+import {prevDto, stmt} from "../../helper";
 import {and, not, sql} from "drizzle-orm";
 import {tagError} from "./helper/error";
 import type {MaybeArray} from "@affinity-lab/util";
@@ -24,6 +24,12 @@ export class TagRepository<DB extends MySql2Database<any>, SCHEMA extends MySqlT
 
 	public addUsage(usage: MaybeArray<Usage>) {
 		this.usages.push(...(Array.isArray(usage) ? usage : [usage]));
+	}
+
+	protected initialize() {
+		this.pipelines.delete.blocks.finalize.append((state: State) => this.deleteInUsages(state.item.name));
+		this.pipelines.update.blocks.prepare.append((state: State) => prevDto(state, this));
+		this.pipelines.update.blocks.action.append((state: State) => this.rename(state.prevDto.name, state.dto.name));
 	}
 
 	@MaterializeIt
@@ -107,7 +113,6 @@ export class TagRepository<DB extends MySql2Database<any>, SCHEMA extends MySqlT
 			}
 			if (doDelete) {
 				await this.delete(item.id);
-				await this.deleteInUsages(item.name as string);
 			}
 		}
 	}
@@ -142,7 +147,6 @@ export class TagRepository<DB extends MySql2Database<any>, SCHEMA extends MySqlT
 	}
 
 	async rename(oldName: string, newName: string): Promise<void> {
-		// TODO call from sapphire
 		oldName = oldName.replace(',', "").trim();
 		newName = newName.replace(',', "").trim();
 		if (oldName === newName) return

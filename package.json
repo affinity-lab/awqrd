@@ -12,7 +12,8 @@
     "@affinity-lab/util": "workspace:packages/util",
     "@affinity-lab/storm": "workspace:packages/storm",
     "@affinity-lab/comet": "workspace:packages/comet",
-    "@affinity-lab/storm-schema-helper": "workspace:packages/schema-helper"
+    "@affinity-lab/storm-schema-helper": "workspace:packages/schema-helper",
+    "@affinity-lab/sapphire-awqrd": "workspace:packages/sapphire"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -23,6 +24,8 @@
     "packages/schema-helper",
     "packages/comet",
     "packages/util",
-    "packages/storm"
+    "packages/storm",
+    "packages/sapphire"
+
   ]
 }

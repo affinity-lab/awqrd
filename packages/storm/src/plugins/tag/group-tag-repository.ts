@@ -3,7 +3,7 @@ import {type MySql2Database} from "drizzle-orm/mysql2";
 import {type MySqlTable} from "drizzle-orm/mysql-core";
 import {and, eq, not, sql} from "drizzle-orm";
 import {MaterializeIt} from "@affinity-lab/util";
-import {stmt} from "../../helper";
+import {prevDto, stmt} from "../../helper";
 import type {Dto, EntityInitiator} from "../../types";
 import {tagError} from "./helper/error";
 import {Export} from "../../export";
@@ -22,6 +22,12 @@ export class GroupTagRepository<DB extends MySql2Database<any>, SCHEMA extends M
 	// if you make a new Entity don't forget to add provide the field name in the constructor
 	constructor(readonly db: DB, readonly schema: SCHEMA, readonly entity: ENTITY, readonly fieldName: string = "groupId") {
 		super(db, schema, entity);
+	}
+
+	protected initialize() {
+		this.pipelines.delete.blocks.finalize.append((state: State) => this.deleteInUsages(state.item.name, state.item[this.fieldName]));
+		this.pipelines.update.blocks.prepare.append((state: State) => prevDto(state, this));
+		this.pipelines.update.blocks.action.append((state: State) => this.rename(state.prevDto.name, state.dto.name, state.item[this.fieldName]));
 	}
 
 	@MaterializeIt
