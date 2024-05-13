@@ -215,7 +215,7 @@ export class EntityRepository<
 	@MaterializeIt
 	protected get stmt_get_array() { return stmt<WithIds, Array<Dto<SCHEMA>>>(this.db.select().from(this.schema).where(sql`id IN (${sql.placeholder("ids")})`), this.instantiateAll.bind(this))}
 	@MaterializeIt
-	protected get stmt_get() { return stmt<WithId, MaybeUndefined<Dto<SCHEMA>>>(this.db.select().from(this.schema).where(sql`id = ${sql.placeholder("id")}`).limit(1), firstOrUndefined, this.instantiateFirst.bind(this))}
+	protected get stmt_get() { return stmt<WithId, MaybeUndefined<Dto<SCHEMA>>>(this.db.select().from(this.schema).where(sql`id = ${sql.placeholder("id")}`).limit(1), this.instantiateFirst.bind(this))}
 
 	//endregion
 
