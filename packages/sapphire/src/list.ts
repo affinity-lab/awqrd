@@ -1,4 +1,9 @@
-import {MySqlColumn, type MySqlJoin, type MySqlSelectWithout, type MySqlTableWithColumns} from "drizzle-orm/mysql-core";
+import {
+	MySqlColumn,
+	type MySqlJoin,
+	type MySqlSelectWithout,
+	type MySqlTableWithColumns
+} from "drizzle-orm/mysql-core";
 import {type MySql2Database} from "drizzle-orm/mysql2";
 import {and, asc, desc, getTableName, like, or, sql, SQL, type SQLWrapper} from "drizzle-orm";
 import type {AnyMySqlSelectQueryBuilder} from "drizzle-orm/mysql-core/query-builders/select.types";
@@ -8,10 +13,15 @@ import {EntityRepository} from "@affinity-lab/storm";
 type MaybeArray<T> = T | Array<T>;
 type Order = { by: MySqlColumn, reverse: boolean | undefined };
 export type Orders = Record<string, Array<Order>>;
-type SpecialSearch = { table: MySqlTableWithColumns<any>, field: string, connection: SQL }
 export type Search = MaybeArray<MySqlColumn | SpecialSearch> | undefined;
 export type Filter = SQLWrapper | SQL | undefined;
 export type BaseSelect<A extends AnyMySqlSelectQueryBuilder = any, B extends boolean = any, C extends keyof A & string = any> = MySqlSelectWithout<A, B, C>;
+
+// type SpecialSearch = { table: MySqlTableWithColumns<any>, field: string, connection: SQL }
+export class SpecialSearch {
+	constructor(readonly table: MySqlTableWithColumns<any>, readonly field: string, readonly connection: SQL) {
+	}
+}
 
 export class IList<T extends MySqlTableWithColumns<any> = any, S extends Record<string, any> = any, R extends EntityRepository<any, any, any> = any, I extends MySqlTableWithColumns<any> = any> {
 	constructor(
@@ -50,7 +60,7 @@ export class IList<T extends MySqlTableWithColumns<any> = any, S extends Record<
 	private join() {
 		let r: Array<{ table: MySqlTableWithColumns<any>, connection: SQL }> = [];
 		if (this.quickSearchFields) (Array.isArray(this.quickSearchFields) ? this.quickSearchFields : [this.quickSearchFields])
-			.filter(i => (!(i instanceof MySqlColumn)))
+			.filter((i: MySqlColumn | SpecialSearch) => i instanceof SpecialSearch)
 			.forEach(i => {
 				if (!r.includes({
 					table: (i as SpecialSearch).table,
