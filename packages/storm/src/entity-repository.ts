@@ -61,10 +61,19 @@ export class EntityRepository<
 				if (state.dto !== undefined) state.item = await this.instantiate(state.dto)
 			})
 		}),
-		getAll: new ProcessPipeline("prepare", "action", "finalize").setup({
+		getArray: new ProcessPipeline("prepare", "action", "finalize").setup({
 			action: (async (state: State) => {
 				if (state.dtos === undefined) state.dtos = [];
 				state.dtos.push(...await this.stmt_get_array({ids: state.ids}));
+			}),
+			finalize: (async (state: State) => {
+				state.items = await this.instantiateAll(state.dtos)
+			})
+		}),
+		getAll: new ProcessPipeline("prepare", "action", "finalize").setup({
+			action: (async (state: State) => {
+				if (state.dtos === undefined) state.dtos = [];
+				state.dtos.push(...await this.stmt_all());
 			}),
 			finalize: (async (state: State) => {
 				state.items = await this.instantiateAll(state.dtos)
@@ -93,7 +102,8 @@ export class EntityRepository<
 		insert: async (item: Item<ENTITY>) => {return await this.pipelines.insert.run(this, {item}).then(res => res.insertId as number)},
 		update: async (item: Item<ENTITY>) => {return await this.pipelines.update.run(this, {item})},
 		getOne: async (id: number) => {return await this.pipelines.getOne.run(this, {id}).then(state => state.item)},
-		getAll: async (ids: Array<number>) => { return this.pipelines.getAll.run(this, {ids}).then(state => state.items)},
+		getArray: async (ids: Array<number>) => { return this.pipelines.getArray.run(this, {ids}).then(state => state.items)},
+		getAll: async () => { return this.pipelines.getAll.run(this, {}).then(state => state.items)},
 		overwrite: async (item: Item<ENTITY>, values: Record<string, any>, reload: boolean = true) => { return await this.pipelines.overwrite.run(this, {item, values, reload})}
 	}
 
@@ -211,11 +221,11 @@ export class EntityRepository<
 
 //region Statements
 	@MaterializeIt
-	protected get stmt_all() { return stmt<Array<Dto<SCHEMA>>>(this.db.select().from(this.schema), this.instantiateAll.bind(this))}
+	protected get stmt_all() { return stmt<Array<Dto<SCHEMA>>>(this.db.select().from(this.schema))}
 	@MaterializeIt
-	protected get stmt_get_array() { return stmt<WithIds, Array<Dto<SCHEMA>>>(this.db.select().from(this.schema).where(sql`id IN (${sql.placeholder("ids")})`), this.instantiateAll.bind(this))}
+	protected get stmt_get_array() { return stmt<WithIds, Array<Dto<SCHEMA>>>(this.db.select().from(this.schema).where(sql`id IN (${sql.placeholder("ids")})`))}
 	@MaterializeIt
-	protected get stmt_get() { return stmt<WithId, MaybeUndefined<Dto<SCHEMA>>>(this.db.select().from(this.schema).where(sql`id = ${sql.placeholder("id")}`).limit(1), this.instantiateFirst.bind(this))}
+	protected get stmt_get() { return stmt<WithId, MaybeUndefined<Dto<SCHEMA>>>(this.db.select().from(this.schema).where(sql`id = ${sql.placeholder("id")}`).limit(1), firstOrUndefined)}
 
 	//endregion
 
@@ -236,11 +246,11 @@ export class EntityRepository<
 	get(id: Array<number>): Promise<Array<WithId<Item<ENTITY>>>>
 	get(ids: MaybeUnset<number>): Promise<WithId<Item<ENTITY>> | undefined>
 	async get(id?: Array<number> | number | undefined | null) {
-		if(arguments.length === 0) return this.stmt_all()
+		if(arguments.length === 0) return this.exec.getAll();
 		if (Array.isArray(id)) {
 			if (id.length === 0) return [];
 			id = [...new Set(id)];
-			return this.exec.getAll(id)
+			return this.exec.getArray(id)
 		} else {
 			if (id === undefined || id === null) return undefined;
 			return this.exec.getOne(id)

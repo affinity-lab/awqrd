@@ -19,7 +19,7 @@ export function cachePlugin(repository: EntityRepository<any, any, any>, cache: 
 		}
 	)
 
-	repository.pipelines.getAll.blocks
+	repository.pipelines.getArray.blocks
 		.prepare.append(async (state: State<{ ids: Array<number>, dtos: Array<{ id: number }> }>) => {
 			state.dtos = await cache.get(state.ids);
 			let dtoIds = state.dtos.map(dto => dto.id);

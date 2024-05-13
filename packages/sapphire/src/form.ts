@@ -3,8 +3,8 @@ import {Column, getTableName} from "drizzle-orm";
 import {type Dto, Entity, EntityRepository, type Item} from "@affinity-lab/storm";
 import {sapphireError} from "./error";
 import {type EntityInitiator} from "@affinity-lab/storm/src/types";
-import {MySql2Database} from "drizzle-orm/mysql2";
-import {MaybeUnset} from "@affinity-lab/util";
+import {type MySql2Database} from "drizzle-orm/mysql2";
+import {type MaybeUnset} from "@affinity-lab/util";
 
 export abstract class IForm<ENTITY extends EntityInitiator<ENTITY, typeof Entity>, DB extends MySql2Database<any> = any ,SCHEMA extends MySqlTableWithColumns<any> = any>{
 	protected type: string;
@@ -25,10 +25,13 @@ export abstract class IForm<ENTITY extends EntityInitiator<ENTITY, typeof Entity
 		return values;
 	}
 
-	protected async export(item: Dto<SCHEMA> | undefined, values?: Record<string, any>): Promise<Dto<SCHEMA> | undefined> {return item;}
+	protected async export(item: Item<ENTITY> | undefined, values?: Record<string, any>): Promise<{data: Dto<SCHEMA> | undefined, type: any}> {
+		return {type: item?.constructor.name, data: (item?.$export as Function)()};
+	}
 
 	public async getItem(id: number | null, values?: Record<string, any>) {
-		let item = id ? await this.export(await this.repository.get(id).then((i: any)=>i.$export()), values) : await this.newItem(values) ;
+		let u = await this.repository.get(id)
+		let item = id ? await this.export(u, values) : await this.newItem(values) ;
 		if(!item) throw sapphireError.notFound({location: "getItem", id});
 		return item;
 	}
