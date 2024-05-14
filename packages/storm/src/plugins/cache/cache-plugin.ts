@@ -14,7 +14,6 @@ export function cachePlugin(repository: EntityRepository<any, any, any>, cache: 
 		.finalize.prepend(async (state: Record<string, any>) => {
 			if (state.dto !== undefined){
 				await resultCache!(state.dto)
-				//await cache.set({key: state.id, value: state.dto})
 			}
 		}
 	)
@@ -27,7 +26,6 @@ export function cachePlugin(repository: EntityRepository<any, any, any>, cache: 
 		})
 		.finalize.prepend(async (state: State<{ dtos: Array<{ id: number }> }>) => {
 			await resultCache!(state.dtos);
-			// await cache.set(state.dtos.map(dto => {return {key: dto.id, value: dto} }))
 		}
 	)
 

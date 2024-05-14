@@ -1,50 +1,46 @@
-import {EntityRepository} from "../../entity-repository";
-import {Entity} from "../../entity";
-import {MySqlTable} from "drizzle-orm/mysql-core";
-import {type MySql2Database} from "drizzle-orm/mysql2";
-import {MaterializeIt} from "@affinity-lab/util";
-import {prevDto, stmt} from "../../helper";
-import {and, not, sql} from "drizzle-orm";
-import {tagError} from "./helper/error";
+import type {T_Class} from "@affinity-lab/storm/src/types";
 import type {MaybeArray} from "@affinity-lab/util";
-import type {Dto, EntityInitiator} from "../../types";
 import {type State} from "@affinity-lab/util";
+import {and, not, sql} from "drizzle-orm";
+import {MySqlTable} from "drizzle-orm/mysql-core";
+import {Entity} from "../../entity";
+import {EntityRepository} from "../../entity-repository";
 import {Export} from "../../export";
-import type {MaybeNull} from "@affinity-lab/util";
+import {stmt} from "../../helper";
+import type {Dto} from "../../types";
+import {tagError} from "./helper/error";
 
 export type Usage = { "repo": EntityRepository<any, any, any>, "field": string } & Record<string, any>
 
 export class TagEntity extends Entity {
-	@Export name: MaybeNull<string> = null
+	@Export declare name: string
 }
 
 
-export class TagRepository<DB extends MySql2Database<any>, SCHEMA extends MySqlTable, ENTITY extends EntityInitiator<ENTITY, typeof TagEntity>> extends EntityRepository<DB, SCHEMA, ENTITY> {
+export class TagRepository<
+	SCHEMA extends MySqlTable,
+	ITEM extends TagEntity,
+	DTO extends Dto<SCHEMA> & { name: string } = Dto<SCHEMA> & { name: string },
+	ENTITY extends T_Class<ITEM, typeof Entity> = T_Class<ITEM, typeof Entity>,
+> extends EntityRepository<SCHEMA, ITEM> {
+
 	protected usages: Array<Usage> = []
 
 	public addUsage(usage: MaybeArray<Usage>) {
 		this.usages.push(...(Array.isArray(usage) ? usage : [usage]));
 	}
 
-	protected initialize() {
-		this.pipelines.delete.blocks.finalize.append((state: State) => this.deleteInUsages(state.item.name));
-		this.pipelines.update.blocks.prepare.append((state: State) => prevDto(state, this));
-		this.pipelines.update.blocks.action.append((state: State) => this.rename(state.prevDto.name, state.dto.name));
-	}
+	protected stmt_getByName = stmt<{ names: Array<string> }, Array<ITEM>>(
+		this.db.select().from(this.schema).where(sql`name IN (${sql.placeholder("names")})`),
+		this.instantiators.all
+	)
 
-	@MaterializeIt
-	protected get stmt_getByName() {
-		return stmt<{ names: Array<string> }, Array<Dto<SCHEMA>>>(
-			this.db.select().from(this.schema).where(sql`name IN (${sql.placeholder("names")})`)
-		)
-	}
-
-	async getByName(names: Array<string>): Promise<Array<Dto<SCHEMA>>>
-	async getByName(names: string): Promise<Dto<SCHEMA> | undefined>
-	async getByName(names: Array<string> | string) {
+	async getByName(names: Array<string>): Promise<Array<ITEM>>
+	async getByName(name: string): Promise<ITEM | undefined>
+	async getByName(names: Array<string> | string): Promise<ITEM | undefined | Array<ITEM>> {
 		let isArray = Array.isArray(names);
-		if(typeof names === "string") names = [names];
-		if(names.length === 0) return isArray ? [] : undefined;
+		if (typeof names === "string") names = [names];
+		if (names.length === 0) return isArray ? [] : undefined;
 		let tags = await this.stmt_getByName({names});
 		return !isArray ? tags[0] : tags;
 	}
@@ -59,7 +55,7 @@ export class TagRepository<DB extends MySql2Database<any>, SCHEMA extends MySqlT
 		}
 	}
 
-	protected changes(repository: EntityRepository<any, any, any>, state: State): { prev: Array<string>, curr: Array<string> } {
+	protected changes(repository: EntityRepository<any, any>, state: State): { prev: Array<string>, curr: Array<string> } {
 		let values = state.dto;
 		let originalItem = state.prevDto;
 
@@ -77,18 +73,19 @@ export class TagRepository<DB extends MySql2Database<any>, SCHEMA extends MySqlT
 		return {prev, curr};
 	}
 
-	async updateTag(repository: EntityRepository<any, any, any>, state: State) {
+	async updateTag(repository: EntityRepository<any, any>, state: State) {
 		let {prev, curr} = this.changes(repository, state);
 		await this.addTag(curr.filter(x => !prev.includes(x)));
 		await this.deleteTag(prev.filter(x => !curr.includes(x)));
 	}
 
+
 	protected async addTag(names: Array<string>): Promise<void> {
-		let items = await this.getByName(names).then(r=>(r).map(i=>i.name))
-		let toAdd = names.filter(x => !items.includes(x));
+		let items: string[] = await this.getByName(names).then(r => r.map(i => i.name))
+		let toAdd: string[] = names.filter(x => !items.includes(x));
 		for (let tag of toAdd) {
 			let item = await this.create()
-			item.name = tag as InstanceType<ENTITY>["name"]
+			item.name = tag;
 			await this.insert(item);
 		}
 	}
@@ -97,11 +94,11 @@ export class TagRepository<DB extends MySql2Database<any>, SCHEMA extends MySqlT
 
 	protected async deleteTag(names: Array<string>): Promise<void> {
 		let items = await this.getByName(names)
-		if(items.length === 0) return;
+		if (items.length === 0) return;
 		await this.deleteItems(items);
 	}
 
-	protected async deleteItems(items: Array<Dto<SCHEMA>>) {
+	protected async deleteItems(items: Array<ITEM>) {
 		for (let item of items) {
 			let doDelete = true;
 			for (let usage of this.usages) {
@@ -112,7 +109,7 @@ export class TagRepository<DB extends MySql2Database<any>, SCHEMA extends MySqlT
 				}
 			}
 			if (doDelete) {
-				await this.delete(item.id);
+				await this.delete(item);
 			}
 		}
 	}
@@ -153,18 +150,16 @@ export class TagRepository<DB extends MySql2Database<any>, SCHEMA extends MySqlT
 		let o = await this.getByName(oldName);
 		if (!o) return
 		let n = await this.getByName(newName);
-		let item = Array.isArray(o) ? o[0] : o;
+
 		if (!n) {
-			item.name = newName
-			await this.update(item)
+			o.name = newName
+			await this.update(o)
+		} else {
+			await this.delete(o);
 		}
-		else await this.delete(item);
+
 		await this.doRename(oldName, newName);
 	}
 
 
 }
-
-
-
-

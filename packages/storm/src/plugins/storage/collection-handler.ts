@@ -1,5 +1,5 @@
+import type {WithIdOptional} from "@affinity-lab/storm/src/types";
 import {minimatch} from "minimatch";
-import type {IEntity} from "../../types";
 import type {Attachment} from "./attachment";
 import {Collection} from "./collection";
 import type {ITmpFile} from "./helper/types";
@@ -7,7 +7,7 @@ import type {Storage} from "./storage";
 
 export class CollectionHandler<METADATA extends Record<string, any>> extends Array<Attachment<METADATA>> {
 	readonly #collection: Collection<METADATA>
-	readonly #entity: IEntity
+	readonly #entity: WithIdOptional<Record<string, any>>
 
 	protected loaded = false;
 
@@ -16,7 +16,7 @@ export class CollectionHandler<METADATA extends Record<string, any>> extends Arr
 	get collection(): Collection<METADATA> {return this.#collection}
 	get storage(): Storage {return this.#collection.storage}
 
-	constructor(collection: Collection<METADATA>, entity: IEntity) {
+	constructor(collection: Collection<METADATA>, entity: WithIdOptional<Record<string, any>>) {
 		super();
 		this.#collection = collection;
 		this.#entity = entity;

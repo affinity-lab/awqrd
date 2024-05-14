@@ -1,14 +1,14 @@
-import {TagEntity, TagRepository} from "./tag-repository";
-import {type MySql2Database} from "drizzle-orm/mysql2";
-import {type MySqlTable} from "drizzle-orm/mysql-core";
-import {and, eq, not, sql} from "drizzle-orm";
-import {MaterializeIt} from "@affinity-lab/util";
-import {prevDto, stmt} from "../../helper";
-import type {Dto, EntityInitiator} from "../../types";
-import {tagError} from "./helper/error";
-import {Export} from "../../export";
+import {Entity} from "@affinity-lab/storm/src/entity";
 import {type State} from "@affinity-lab/util";
+import {and, eq, not, sql} from "drizzle-orm";
+import {type MySqlTable} from "drizzle-orm/mysql-core";
+import {type MySql2Database} from "drizzle-orm/mysql2";
 import {EntityRepository} from "../../entity-repository";
+import {Export} from "../../export";
+import {stmt} from "../../helper";
+import type {Dto, T_Class} from "../../types";
+import {tagError} from "./helper/error";
+import {TagEntity, TagRepository} from "./tag-repository";
 
 export class GroupTagEntity extends TagEntity {
 	@Export groupId: number | string | null = null
@@ -16,40 +16,37 @@ export class GroupTagEntity extends TagEntity {
 
 
 // TODO test this
-export class GroupTagRepository<DB extends MySql2Database<any>, SCHEMA extends MySqlTable, ENTITY extends EntityInitiator<ENTITY, typeof GroupTagEntity>> extends TagRepository<DB, SCHEMA, ENTITY> {
+export class GroupTagRepository<
+	SCHEMA extends MySqlTable,
+	ITEM extends GroupTagEntity,
+	DTO extends Dto<SCHEMA> & { name: string, groupId: number } = Dto<SCHEMA> & { name: string, groupId: number },
+	ENTITY extends T_Class<ITEM, typeof Entity> = T_Class<ITEM, typeof Entity>,
+> extends TagRepository<SCHEMA, ITEM> {
 
-	// the fieldName property must match the GroupTagEntity's (groupId) field name
-	// if you make a new Entity don't forget to add provide the field name in the constructor
-	constructor(readonly db: DB, readonly schema: SCHEMA, readonly entity: ENTITY, readonly fieldName: string = "groupId") {
+	constructor(readonly db: MySql2Database<any>, readonly schema: SCHEMA, readonly entity: ENTITY, readonly fieldName: string = "groupId") {
 		super(db, schema, entity);
 	}
 
-	protected initialize() {
-		this.pipelines.delete.blocks.finalize.append((state: State) => this.deleteInUsages(state.item.name, state.item[this.fieldName]));
-		this.pipelines.update.blocks.prepare.append((state: State) => prevDto(state, this));
-		this.pipelines.update.blocks.action.append((state: State) => this.rename(state.prevDto.name, state.dto.name, state.item[this.fieldName]));
-	}
+	protected stmt_groupGetByName = stmt<{ names: Array<string>, groupId: number | string }, Array<ITEM>>(
+		this.db.select().from(this.schema).where(sql`name IN (${sql.placeholder("names")}) AND ${this.fieldName} = ${sql.placeholder("groupId")}`),
+		this.instantiators.all
+	)
 
-	@MaterializeIt
-	protected get stmt_groupGetByName() {
-		return stmt<{ names: Array<string>, groupId: number | string}, Array<Dto<SCHEMA>>>(
-			this.db.select().from(this.schema).where(sql`name IN (${sql.placeholder("names")}) AND ${this.fieldName} = ${sql.placeholder("groupId")}`)
-		)
-	}
 
-	async getByName(names: Array<string>, groupId?: number | string): Promise<Array<Dto<SCHEMA>>>
-	async getByName(names: string, groupId?: number | string): Promise<Dto<SCHEMA> | undefined>
-	async getByName(names: Array<string> | string, groupId?: number | string) {
-		if(!groupId) throw tagError.groupId();
+	async getByName(names: Array<string>, groupId?: number | string): Promise<Array<ITEM>>;
+	async getByName(name: string, groupId?: number | string): Promise<ITEM | undefined>;
+	async getByName(names: Array<string> | string, groupId?: number | string): Promise<ITEM | undefined | Array<ITEM>> {
+		if (!groupId) throw tagError.groupId();
 		let isArray = Array.isArray(names);
-		if(typeof names === "string") names = [names];
-		if(names.length === 0) return isArray ? [] : undefined;
+		if (typeof names === "string") names = [names];
+		if (names.length === 0) return isArray ? [] : undefined;
 		let tags = await this.stmt_groupGetByName({names, groupId: groupId!});
 		return !isArray ? tags[0] : tags;
 	}
 
-	async updateTag(repository: EntityRepository<any, any, any>, state: State, fieldName?: string) {
-		if(!fieldName) throw tagError.selfRename();
+
+	async updateTag(repository: EntityRepository<any, any>, state: State, fieldName?: string) {
+		if (!fieldName) throw tagError.selfRename();
 		let groupId = state.dto[fieldName];
 		let {prev, curr} = this.changes(repository, state);
 		await this.addTag(curr.filter(x => !prev.includes(x)), groupId);
@@ -57,7 +54,7 @@ export class GroupTagRepository<DB extends MySql2Database<any>, SCHEMA extends M
 	}
 
 	protected async doRename(oldName: string, newName: string, groupId?: number | string) {
-		if(!groupId) throw tagError.groupId();
+		if (!groupId) throw tagError.groupId();
 		let nN = `$.${newName}`;
 		let oN = `$.${oldName}`;
 		let eN = `"${newName}"`;
@@ -66,7 +63,7 @@ export class GroupTagRepository<DB extends MySql2Database<any>, SCHEMA extends M
 		let newN = `,${newName},`
 		for (let usage of this.usages) {
 			let set: Record<string, any> = {};
-			if(usage.mode && usage.mode === "JSON") {
+			if (usage.mode && usage.mode === "JSON") {
 				let w = and(sql`json_extract(${usage.repo.schema[usage.field]}, ${oN}) > 0`, sql`json_extract(${usage.repo.schema[usage.field]}, ${nN}) is NULL`, eq(usage.repo.schema[this.fieldName], groupId))
 				set[usage.field] = sql`replace(${usage.repo.schema[usage.field]}, ${eO}, ${eN})`;
 				await usage.repo.db.update(usage.repo.schema).set(set).where(w);
@@ -84,18 +81,18 @@ export class GroupTagRepository<DB extends MySql2Database<any>, SCHEMA extends M
 	}
 
 	async selfRename(state: State, fieldName?: string) {
-		if(!fieldName) throw tagError.selfRename();
+		if (!fieldName) throw tagError.selfRename();
 		let values = state.dto;
 		let originalItem = state.prevDto;
 		let groupId = values[fieldName];
-		if(!groupId) throw tagError.groupId();
+		if (!groupId) throw tagError.groupId();
 		if (values.name && values.name !== originalItem.name) {
 			await this.doRename(originalItem.name, values.name, groupId);
 		}
 	}
 
 	protected async addTag(names: Array<string>, groupId?: number | string): Promise<void> {
-		let items = await this.getByName(names, groupId).then(r=>(r).map(i=>i.name))
+		let items = await this.getByName(names, groupId).then(r => (r).map(i => i.name))
 		let toAdd = names.filter(x => !items.includes(x));
 		for (let tag of toAdd) {
 			let item = await this.create()
@@ -106,12 +103,12 @@ export class GroupTagRepository<DB extends MySql2Database<any>, SCHEMA extends M
 
 	protected async deleteTag(names: Array<string>, groupId?: number | string): Promise<void> {
 		let items = await this.getByName(names, groupId)
-		if(items.length === 0) return;
+		if (items.length === 0) return;
 		await this.deleteItems(items, groupId);
 	}
 
-	protected async deleteItems(items: Array<Dto<SCHEMA>>, groupId?: number | string) {
-		if(!groupId) throw tagError.groupId();
+	protected async deleteItems(items: Array<ITEM>, groupId?: number | string) {
+		if (!groupId) throw tagError.groupId();
 		for (let item of items) {
 			let doDelete = true;
 			for (let usage of this.usages) {
@@ -129,7 +126,7 @@ export class GroupTagRepository<DB extends MySql2Database<any>, SCHEMA extends M
 	}
 
 	async deleteInUsages(name: string, groupId?: number | string): Promise<void> {
-		if(!groupId) throw tagError.groupId();
+		if (!groupId) throw tagError.groupId();
 		name = `${name}`
 		for (let usage of this.usages) {
 			let set: Record<string, any> = {}
@@ -139,7 +136,6 @@ export class GroupTagRepository<DB extends MySql2Database<any>, SCHEMA extends M
 	}
 
 	async rename(oldName: string, newName: string, groupId?: number | string): Promise<void> {
-		// TODO call from sapphire
 		oldName = oldName.replace(',', "").trim();
 		newName = newName.replace(',', "").trim();
 		if (oldName === newName) return
@@ -150,8 +146,7 @@ export class GroupTagRepository<DB extends MySql2Database<any>, SCHEMA extends M
 		if (!n) {
 			item.name = newName
 			await this.update(item)
-		}
-		else await this.delete(item);
+		} else await this.delete(item);
 		await this.doRename(oldName, newName, groupId);
 	}
 }

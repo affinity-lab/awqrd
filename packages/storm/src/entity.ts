@@ -1,6 +1,5 @@
-import {MaterializeIt} from "@affinity-lab/util";
+import {MaterializeIt, type MaybeNull} from "@affinity-lab/util";
 import {omitFieldsIP, pickFieldsIP} from "@affinity-lab/util";
-import {type MaybeUnset} from "@affinity-lab/util";
 import {Export} from "./export";
 import {EntityRepository} from "./entity-repository";
 import {Import} from "./import";
@@ -9,7 +8,11 @@ import {Import} from "./import";
  * Class representing a storm entity.
  */
 export class Entity {
-	constructor(private $repository: EntityRepository<any, any, any>) {}
+
+	@Export id: MaybeNull<number> = null;
+
+
+	constructor(private $repository: EntityRepository<any, any>) {}
 
 	$save() {
 		return this.$repository.save(this);
@@ -28,9 +31,6 @@ export class Entity {
 		if (a) for (const key of a) if(data.hasOwnProperty(key)) this[key as keyof this] = data[key];
 		return this;
 	}
-
-	/** The ID of the entity. */
-	@Export declare id: MaybeUnset<number>;
 
 	@MaterializeIt
 	private static get importFields(): Array<string> | undefined {

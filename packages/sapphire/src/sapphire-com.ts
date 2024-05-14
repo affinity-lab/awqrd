@@ -6,7 +6,7 @@ import {Comet, type CometState} from "@affinity-lab/comet";
 
 export abstract class SapphireCom {
 	protected constructor(
-		protected readonly formAdapter: IForm<any>,
+		protected readonly formAdapter: IForm<any, any>,
 		protected readonly listAdapter: IList,
 		protected readonly tmpFile: (...args: any) => TmpFile,
 	) {

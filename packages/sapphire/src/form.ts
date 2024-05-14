@@ -1,23 +1,21 @@
 import {type MySqlTableWithColumns} from "drizzle-orm/mysql-core";
 import {Column, getTableName} from "drizzle-orm";
-import {type Dto, Entity, EntityRepository, type Item} from "@affinity-lab/storm";
+import {type Dto, Entity, EntityRepository, type T_Class} from "@affinity-lab/storm";
 import {sapphireError} from "./error";
-import {type EntityInitiator} from "@affinity-lab/storm/src/types";
-import {type MySql2Database} from "drizzle-orm/mysql2";
 import {type MaybeUnset} from "@affinity-lab/util";
 
-export abstract class IForm<ENTITY extends EntityInitiator<ENTITY, typeof Entity>, DB extends MySql2Database<any> = any ,SCHEMA extends MySqlTableWithColumns<any> = any>{
+export abstract class IForm<SCHEMA extends MySqlTableWithColumns<any>, ITEM extends Entity,ENTITY extends T_Class<ITEM, typeof Entity> = T_Class<ITEM, typeof Entity>,DTO extends Dto<SCHEMA> = Dto<SCHEMA>>{
 	protected type: string;
 
 	protected constructor(public schema: SCHEMA,
-						  protected repository: EntityRepository<DB, SCHEMA, ENTITY>
+						  protected repository: EntityRepository<SCHEMA, ITEM>
 	) {
 		this.type = getTableName(this.schema);
 	}
 
 	protected async import(id : number | null, values: Record<string, any>): Promise<Record<string, any>> {
 		for (let key of Object.keys(this.schema)) {
-			let field = this.schema[key] as Column
+			let field = this.schema[key] as Column;
 			if (field.dataType === "date") {
 				values[key] = values[key] ? new Date(values[key]) : null;
 			}
@@ -25,12 +23,12 @@ export abstract class IForm<ENTITY extends EntityInitiator<ENTITY, typeof Entity
 		return values;
 	}
 
-	protected async export(item: Item<ENTITY> | undefined, values?: Record<string, any>): Promise<{data: Dto<SCHEMA> | undefined, type: any}> {
-		return {type: item?.constructor.name, data: (item?.$export as Function)()};
+	protected async export(item: ITEM | undefined, values?: Record<string, any>): Promise<{data: DTO | undefined, type: any}> {
+		return {type: item?.constructor.name, data: item ? (item.$export as Function)() : {}};
 	}
 
 	public async getItem(id: number | null, values?: Record<string, any>) {
-		let u = await this.repository.get(id)
+		let u = await this.repository.get(id);
 		let item = id ? await this.export(u, values) : await this.newItem(values) ;
 		if(!item) throw sapphireError.notFound({location: "getItem", id});
 		return item;
@@ -38,16 +36,16 @@ export abstract class IForm<ENTITY extends EntityInitiator<ENTITY, typeof Entity
 
 	public async save(id: number | null, values: Record<string, any> = {}): Promise<MaybeUnset<number>> {
 		values = await this.import(id, values);
-		let item: Item<ENTITY> | undefined;
+		let item: ITEM | undefined;
 		if(!id) item = await this.repository.create();
 		else item = await this.repository.get(id);
 		if(!item) throw sapphireError.notFound({location: "saveItem", id});
-		(item!.$import as Function)(values); // todo typehint somehow
-		await this.repository.save(item);
+		item.$import(values);
+		await item.$save();
 		return item.id;
 	}
 
-	protected abstract newItem(values?: Record<string, any>): Promise<{type: string, data: Partial<SCHEMA> & Record<string, any>}>;
+	protected abstract newItem(values?: Record<string, any>): Promise<{type: string, data: Partial<DTO> & Record<string, any>}>;
 
 	async delete(id: number) {await this.repository.delete(id);}
 

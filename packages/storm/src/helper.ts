@@ -2,7 +2,7 @@ import {eq, sql} from "drizzle-orm";
 import {MySqlColumn} from "drizzle-orm/mysql-core";
 import type {MySqlSelectWithout} from "drizzle-orm/mysql-core/query-builders/select.types";
 import {EntityRepository} from "./entity-repository";
-import {State} from "@affinity-lab/util";
+import {type State} from "@affinity-lab/util";
 
 /**
  * Creates an SQL expression for checking if a column's value is in a list of IDs.

@@ -1,9 +1,9 @@
+import type {WithIdOptional} from "@affinity-lab/storm/src/types";
 import fs from "fs";
 import {minimatch} from "minimatch";
 import Path from "path";
 import {bytes} from "@affinity-lab/util";
 import type {IEntityRepository} from "../../entity-repository-interface";
-import type {IEntity} from "../../types";
 import {Attachment} from "./attachment";
 import {CollectionHandler} from "./collection-handler";
 import {storageError} from "./helper/error";
@@ -20,7 +20,7 @@ export abstract class Collection<METADATA extends Record<string, any> = {}> {
 	private entityRepository: IEntityRepository
 	private readonly group: string
 
-	constructor(
+	protected constructor(
 		readonly name: string,
 		readonly groupDefinition: {
 			storage: Storage,
@@ -56,7 +56,7 @@ export abstract class Collection<METADATA extends Record<string, any> = {}> {
 		this._storage.addCollection(this);
 	}
 
-	handler(entity: IEntity): CollectionHandler<METADATA> | undefined {
+	handler(entity: WithIdOptional<Record<string, any>>): CollectionHandler<METADATA> | undefined {
 		return entity.id ? new CollectionHandler<METADATA>(this, entity) : undefined;
 	}
 

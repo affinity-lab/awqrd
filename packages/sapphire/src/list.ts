@@ -13,12 +13,11 @@ import {EntityRepository} from "@affinity-lab/storm";
 type MaybeArray<T> = T | Array<T>;
 type Order = { by: MySqlColumn, reverse: boolean | undefined };
 export type Orders = Record<string, Array<Order>>;
-export type Search = MaybeArray<MySqlColumn | SpecialSearch> | undefined;
+export type Search = MaybeArray<MySqlColumn | JoinedQuickSearch> | undefined;
 export type Filter = SQLWrapper | SQL | undefined;
 export type BaseSelect<A extends AnyMySqlSelectQueryBuilder = any, B extends boolean = any, C extends keyof A & string = any> = MySqlSelectWithout<A, B, C>;
 
-// type SpecialSearch = { table: MySqlTableWithColumns<any>, field: string, connection: SQL }
-export class SpecialSearch {
+export class JoinedQuickSearch {
 	constructor(readonly table: MySqlTableWithColumns<any>, readonly field: string, readonly connection: SQL) {
 	}
 }
@@ -60,16 +59,9 @@ export class IList<T extends MySqlTableWithColumns<any> = any, S extends Record<
 	private join() {
 		let r: Array<{ table: MySqlTableWithColumns<any>, connection: SQL }> = [];
 		if (this.quickSearchFields) (Array.isArray(this.quickSearchFields) ? this.quickSearchFields : [this.quickSearchFields])
-			.filter((i: MySqlColumn | SpecialSearch) => i instanceof SpecialSearch)
-			.forEach(i => {
-				if (!r.includes({
-					table: (i as SpecialSearch).table,
-					connection: (i as SpecialSearch).connection
-				})) {
-					r.push({
-						table: (i as SpecialSearch).table,
-						connection: (i as SpecialSearch).connection
-					})
+			.forEach((i: MySqlColumn | JoinedQuickSearch) => {
+				if (i instanceof JoinedQuickSearch && !r.includes({table: i.table, connection: i.connection})) {
+					r.push({table: i.table, connection: i.connection});
 				}
 			});
 		return r;

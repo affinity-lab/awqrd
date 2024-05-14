@@ -1,5 +1,5 @@
 import {sql} from "drizzle-orm";
-import {MySqlTable} from "drizzle-orm/mysql-core";
+import {MySqlTableWithColumns} from "drizzle-orm/mysql-core";
 import type {MySql2Database, MySqlRawQueryResult} from "drizzle-orm/mysql2";
 import {MaterializeIt} from "@affinity-lab/util";
 import {firstOrUndefined, omitFieldsIP, pickFieldsIP} from "@affinity-lab/util";
@@ -8,7 +8,7 @@ import type {MaybePromise, MaybeUndefined, MaybeUnset} from "@affinity-lab/util"
 import type {IEntityRepository} from "./entity-repository-interface";
 import {Entity} from "./entity";
 import {stmt} from "./helper";
-import type {Dto, EntityInitiator, Item, WithId, WithIds} from "./types";
+import type {Dto, T_Class, WithId, WithIds} from "./types";
 import {entityError} from "./error";
 
 
@@ -19,9 +19,10 @@ import {entityError} from "./error";
  * @template ENTITY - The type of the entity class.
  */
 export class EntityRepository<
-	DB extends MySql2Database<any>,
-	SCHEMA extends MySqlTable,
-	ENTITY extends EntityInitiator<ENTITY, typeof Entity>
+	SCHEMA extends MySqlTableWithColumns<any>,
+	ITEM extends Entity,
+	ENTITY extends T_Class<ITEM, typeof Entity> = T_Class<ITEM, typeof Entity>,
+	DTO extends Dto<SCHEMA> = Dto<SCHEMA>
 > implements IEntityRepository {
 	readonly fields: string[];
 
@@ -29,7 +30,7 @@ export class EntityRepository<
 
 	public readonly pipelines = {
 		insert: new ProcessPipeline("prepare", "action", "finalize").setup({
-			prepare: (async (state: State<{ item: Item<ENTITY> }>) => {
+			prepare: (async (state: State<{ item: ITEM }>) => {
 				state.dto = this.extractItemDTO(state.item)
 				await this.transformInsertDTO(state.dto)
 			}),
@@ -89,7 +90,7 @@ export class EntityRepository<
 		}),
 		overwrite: new ProcessPipeline("prepare", "action", "finalize").setup({
 			action: async (state: State) => {
-				await this.db.update(this.schema).set(state.values as Dto<SCHEMA>).where(sql`id = ${sql.placeholder("id")}`).execute({id: state.item.id})
+				await this.db.update(this.schema).set(state.values as DTO).where(sql`id = ${sql.placeholder("id")}`).execute({id: state.item.id})
 			},
 			finalize: async (state: State) => {
 				state.reload && await this.reload(state.item)
@@ -98,13 +99,13 @@ export class EntityRepository<
 	}
 
 	protected exec = {
-		delete: async (item: Item<ENTITY>) => {return await this.pipelines.delete.run(this, {item})},
-		insert: async (item: Item<ENTITY>) => {return await this.pipelines.insert.run(this, {item}).then(res => res.insertId as number)},
-		update: async (item: Item<ENTITY>) => {return await this.pipelines.update.run(this, {item})},
+		delete: async (item: ITEM) => {return await this.pipelines.delete.run(this, {item})},
+		insert: async (item: ITEM) => {return await this.pipelines.insert.run(this, {item}).then(res => res.insertId as number)},
+		update: async (item: ITEM) => {return await this.pipelines.update.run(this, {item})},
 		getOne: async (id: number) => {return await this.pipelines.getOne.run(this, {id}).then(state => state.item)},
-		getArray: async (ids: Array<number>) => { return this.pipelines.getArray.run(this, {ids}).then(state => state.items)},
+		getArray: async (ids: Array<number>) => { return this.pipelines.getAll.run(this, {ids}).then(state => state.items)},
 		getAll: async () => { return this.pipelines.getAll.run(this, {}).then(state => state.items)},
-		overwrite: async (item: Item<ENTITY>, values: Record<string, any>, reload: boolean = true) => { return await this.pipelines.overwrite.run(this, {item, values, reload})}
+		overwrite: async (item: ITEM, values: Record<string, any>, reload: boolean = true) => { return await this.pipelines.overwrite.run(this, {item, values, reload})}
 	}
 
 
@@ -116,7 +117,7 @@ export class EntityRepository<
 	 * @param schema - The database schema representing the entity's table.
 	 * @param entity - The entity class.
 	 */
-	constructor(readonly db: DB, readonly schema: SCHEMA, readonly entity: ENTITY) {
+	constructor(readonly db: MySql2Database<any>, readonly schema: SCHEMA, readonly entity: ENTITY) {
 		this.fields = Object.keys(schema);
 		this.initialize();
 	}
@@ -135,10 +136,10 @@ export class EntityRepository<
 	 * @param dtoSet - An array of DTOs.
 	 * @returns An array of instantiated items.
 	 */
-	protected async instantiateAll(dtoSet: Array<Record<string, any>>): Promise<Array<Item<ENTITY>>> {
-		const instances: Array<Item<ENTITY>> = [];
+	protected async instantiateAll(dtoSet: Array<Record<string, any>>): Promise<Array<ITEM>> {
+		const instances: Array<ITEM> = [];
 		for (let dto of dtoSet) {
-			let instance = await this.instantiate(dto as Dto<SCHEMA>) as Item<ENTITY> | undefined;
+			let instance = await this.instantiate(dto as DTO) as ITEM | undefined;
 			if (instance !== undefined) instances.push(instance)
 		}
 		return instances;
@@ -149,14 +150,14 @@ export class EntityRepository<
 	 * @param dtoSet - An array of DTOs.
 	 * @returns The instantiated item, or undefined if the array is blank.
 	 */
-	protected async instantiateFirst(dtoSet: Array<Record<string, any>>): Promise<MaybeUndefined<Item<ENTITY>>> { return await this.instantiate(firstOrUndefined(dtoSet)) as Item<ENTITY> | undefined;}
+	protected async instantiateFirst(dtoSet: Array<Record<string, any>>): Promise<MaybeUndefined<ITEM>> { return await this.instantiate(firstOrUndefined(dtoSet)) as ITEM | undefined;}
 
 	/**
 	 * Instantiates an item from a DTO.
 	 * @param dto - The DTO.
 	 * @returns The instantiated item, or undefined if the DTO is undefined.
 	 */
-	protected async instantiate(dto: Dto<SCHEMA> | undefined) {
+	protected async instantiate(dto: DTO | undefined) {
 		if (dto === undefined) return undefined;
 		let item = await this.create();
 		await this.applyItemDTO(item, dto);
@@ -176,7 +177,7 @@ export class EntityRepository<
 	 * @param item The item to apply the DTO to.
 	 * @param dto The data transfer object (DTO) containing the data to be applied to the item.
 	 */
-	protected async applyItemDTO(item: Item<ENTITY>, dto: Dto<SCHEMA>) {
+	protected async applyItemDTO(item: ITEM, dto: DTO) {
 		this.transformItemDTO(dto);
 		Object.assign(item, dto);
 	}
@@ -186,7 +187,7 @@ export class EntityRepository<
 	 * @param item The item from which to retrieve the DTO.
 	 * @returns The DTO representing the item.
 	 */
-	protected extractItemDTO(item: Item<ENTITY>): Dto<SCHEMA> {return Object.assign({}, item) as unknown as Dto<SCHEMA>;}
+	protected extractItemDTO(item: ITEM): DTO {return Object.assign({}, item) as unknown as DTO;}
 
 //region DTO transform
 
@@ -194,7 +195,7 @@ export class EntityRepository<
 	 * Prepares the DTO for saving by filtering and omitting specified fields.
 	 * @param dto The DTO to prepare for saving.
 	 */
-	protected transformSaveDTO(dto: Dto<SCHEMA>) {
+	protected transformSaveDTO(dto: DTO) {
 		pickFieldsIP(dto, ...this.fields);
 		omitFieldsIP(dto, "id");
 	}
@@ -203,29 +204,30 @@ export class EntityRepository<
 	 * Prepares the DTO for insertion by filtering and omitting specified fields.
 	 * @param dto The DTO to prepare for insertion.
 	 */
-	protected transformInsertDTO(dto: Dto<SCHEMA>): MaybePromise<void> {this.transformSaveDTO(dto);}
+	protected transformInsertDTO(dto: DTO): MaybePromise<void> {this.transformSaveDTO(dto);}
 
 	/**
 	 * Prepares the DTO for updating by filtering and omitting specified fields.
 	 * @param dto The DTO to prepare for updating.
 	 */
-	protected transformUpdateDTO(dto: Dto<SCHEMA>): MaybePromise<void> {this.transformSaveDTO(dto);}
+	protected transformUpdateDTO(dto: DTO): MaybePromise<void> {this.transformSaveDTO(dto);}
 
 	/**
 	 * Prepares the item DTO. This is a hook method intended for subclass overrides.
 	 * @param dto The DTO to prepare.
 	 */
-	protected transformItemDTO(dto: Dto<SCHEMA>): MaybePromise<void> {}
+	protected transformItemDTO(dto: DTO): MaybePromise<void> {}
 
 //endregion
 
 //region Statements
+
 	@MaterializeIt
-	protected get stmt_all() { return stmt<Array<Dto<SCHEMA>>>(this.db.select().from(this.schema))}
+	protected get stmt_all() { return stmt<Array<DTO>>(this.db.select().from(this.schema))}
 	@MaterializeIt
-	protected get stmt_get_array() { return stmt<WithIds, Array<Dto<SCHEMA>>>(this.db.select().from(this.schema).where(sql`id IN (${sql.placeholder("ids")})`))}
+	protected get stmt_get_array() { return stmt<WithIds, Array<DTO>>(this.db.select().from(this.schema).where(sql`id IN (${sql.placeholder("ids")})`))}
 	@MaterializeIt
-	protected get stmt_get() { return stmt<WithId, MaybeUndefined<Dto<SCHEMA>>>(this.db.select().from(this.schema).where(sql`id = ${sql.placeholder("id")}`).limit(1), firstOrUndefined)}
+	protected get stmt_get() { return stmt<WithId, MaybeUndefined<DTO>>(this.db.select().from(this.schema).where(sql`id = ${sql.placeholder("id")}`).limit(1), firstOrUndefined)}
 
 	//endregion
 
@@ -234,7 +236,7 @@ export class EntityRepository<
 	 * @param id - The ID of the entity.
 	 * @returns A promise resolving to the raw data of the entity, or undefined if not found.
 	 */
-	async getRaw(id: MaybeUnset<number>): Promise<MaybeUndefined<Dto<SCHEMA>>> { return id ? this.stmt_get({id: id!}) : undefined}
+	async getRaw(id: MaybeUnset<number>): Promise<MaybeUndefined<DTO>> { return id ? this.stmt_get({id: id!}) : undefined}
 
 	/**
 	 * Retrieves one or multiple items by their IDs.
@@ -242,9 +244,9 @@ export class EntityRepository<
 	 * @returns A promise resolving to one or multiple items, or undefined if not found.
 	 * @final
 	 */
-	get(): Promise<Array<WithId<Item<ENTITY>>>>
-	get(id: Array<number>): Promise<Array<WithId<Item<ENTITY>>>>
-	get(ids: MaybeUnset<number>): Promise<WithId<Item<ENTITY>> | undefined>
+	get(): Promise<Array<WithId<ITEM>>>
+	get(id: Array<number>): Promise<Array<WithId<ITEM>>>
+	get(ids: MaybeUnset<number>): Promise<WithId<ITEM> | undefined>
 	async get(id?: Array<number> | number | undefined | null) {
 		if(arguments.length === 0) return this.exec.getAll();
 		if (Array.isArray(id)) {
@@ -262,21 +264,21 @@ export class EntityRepository<
 	 * @param item - The item to save.
 	 * @returns A promise that resolves once the save operation is completed.
 	 */
-	async save(item: Item<ENTITY>) {return item.id ? this.update(item) : this.insert(item)}
+	async save(item: ITEM) {return item.id ? this.update(item) : this.insert(item)}
 
 	/**
 	 * Updates an existing item.
 	 * @param item - The item to update.
 	 * @returns A promise that resolves once the update operation is completed.
 	 */
-	async update(item: Item<ENTITY>) { return this.exec.update(item) }
+	async update(item: ITEM) { return this.exec.update(item) }
 
 	/**
 	 * Inserts a new item.
 	 * @param item - The item to insert.
 	 * @returns A promise that resolves once the insert operation is completed.
 	 */
-	async insert(item: Item<ENTITY>) {
+	async insert(item: ITEM) { // TODO
 		return this.exec.insert(item)
 	}
 
@@ -287,16 +289,16 @@ export class EntityRepository<
 	 * @param [reload=true] - Whether to reload the item after overwriting.
 	 * @returns A promise that resolves once the overwrite operation is completed.
 	 */
-	async overwrite(item: Item<ENTITY>, values: Record<string, any>, reload: boolean = true) { return this.exec.overwrite(item, values, reload)}
+	async overwrite(item: ITEM, values: Record<string, any>, reload: boolean = true) { return this.exec.overwrite(item, values, reload)}
 
 	/**
 	 * Deletes an item.
 	 * @param item - The item to delete.
 	 * @returns A promise that resolves once the delete operation is completed.
 	 */
-	async delete(item: Item<ENTITY>): Promise<Record<string, any>>;
+	async delete(item: ITEM): Promise<Record<string, any>>;
 	async delete(id: number | undefined | null): Promise<Record<string, any>>;
-	async delete(itemOrId: Item<ENTITY> | number | undefined | null) {
+	async delete(itemOrId: ITEM | number | undefined | null) {
 		let item;
 		if (typeof itemOrId === "number" || !itemOrId) {
 			let instance = await this.instantiate(await this.getRaw(itemOrId));
@@ -310,7 +312,7 @@ export class EntityRepository<
 	 * Creates a blank entity item.
 	 * @returns The created item.
 	 */
-	async create(importData?: Record<string, any>): Promise<Item<ENTITY>> {
+	async create(importData?: Record<string, any>): Promise<ITEM> {
 		let item = new this.entity(this);
 		if(importData) item.$import(importData);
 		return item;
@@ -321,7 +323,7 @@ export class EntityRepository<
 	 * @param item - The item to reload.
 	 * @returns A promise that resolves when the item is reloaded.
 	 */
-	async reload(item: Item<ENTITY>) { this.getRaw(item.id).then(dto => { dto && this.applyItemDTO(item, dto!)})};
+	async reload(item: ITEM) { this.getRaw(item.id).then(dto => { dto && this.applyItemDTO(item, dto!)})};
 
 }
 
