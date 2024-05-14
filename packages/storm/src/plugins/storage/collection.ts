@@ -20,7 +20,7 @@ export abstract class Collection<METADATA extends Record<string, any> = {}> {
 	private entityRepository: IEntityRepository
 	private readonly group: string
 
-	protected constructor(
+	constructor(
 		readonly name: string,
 		readonly groupDefinition: {
 			storage: Storage,
