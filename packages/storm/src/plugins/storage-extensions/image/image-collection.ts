@@ -1,7 +1,7 @@
 import {FileDescriptor} from "@affinity-lab/util/";
-import type {IEntityRepository} from "../../../entity-repository-interface";
+import type {EntityRepositoryInterface} from "../../../entity/entity-repository-interface";
 import {Collection} from "../../storage/collection";
-import type {CollectionOptions, MetaField, ITmpFile} from "../../storage/helper/types";
+import type {CollectionOptions, ITmpFile, MetaField} from "../../storage/helper/types";
 import type {Storage} from "../../storage/storage";
 import {type ImgFocus, imgFocusOptions, type ImgRGB} from "./types";
 
@@ -14,6 +14,9 @@ type ImageAttachmentMetadata = {
 	readonly animated: boolean
 }
 
+/**
+ * Collection for image attachments
+ */
 export class ImageCollection extends Collection<ImageAttachmentMetadata> {
 	public readonly writableMetaFields: Record<string, MetaField> = {
 		title: {type: "string"},
@@ -24,7 +27,7 @@ export class ImageCollection extends Collection<ImageAttachmentMetadata> {
 		groupDefinition: {
 			storage: Storage,
 			group: string,
-			entityRepository: IEntityRepository
+			entityRepository: EntityRepositoryInterface
 		},
 		rules: CollectionOptions) {
 		super(name, groupDefinition, rules);

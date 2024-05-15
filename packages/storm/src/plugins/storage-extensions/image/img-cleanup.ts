@@ -1,6 +1,7 @@
 import {glob} from "fast-glob";
 import fs from "fs";
 import Path from "path";
+
 /**
  * Generates a function that cleans up image files based on the provided parameters.
  *
@@ -9,10 +10,10 @@ import Path from "path";
  * @param {string} file - the file extension to be used in the image file
  * @return {Promise<void>} a Promise that resolves when the image files are successfully deleted
  */
-export function imgCleanupFactory(imgPath:string){
-	return async (name:string, id:number, file:string)=>{
-		let files = await glob(Path.join(imgPath, `${name}.${id.toString(36).padStart(6,"0")}.*.${file}.*`))
-		files.map(file=> fs.promises.unlink(file));
+export function imgCleanupFactory(imgPath: string) {
+	return async (name: string, id: number, file: string) => {
+		let files = await glob(Path.join(imgPath, `${name}.${id.toString(36).padStart(6, "0")}.*.${file}.*`))
+		files.map(file => fs.promises.unlink(file));
 	}
 }
 

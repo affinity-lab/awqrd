@@ -1,8 +1,8 @@
+import {ClassMetaData, type State} from "@affinity-lab/util";
 import {eq, sql} from "drizzle-orm";
 import {MySqlColumn} from "drizzle-orm/mysql-core";
 import type {MySqlSelectWithout} from "drizzle-orm/mysql-core/query-builders/select.types";
-import {EntityRepository} from "./entity-repository";
-import {type State} from "@affinity-lab/util";
+import {EntityRepositoryInterface} from "./entity/entity-repository-interface";
 
 /**
  * Creates an SQL expression for checking if a column's value is in a list of IDs.
@@ -24,7 +24,6 @@ export function stmt<RES>(stmt: MySqlSelectWithout<any, any, any>, ...processes:
 export function stmt<ARGS, RES>(stmt: MySqlSelectWithout<any, any, any>, ...processes: ((res: any) => any)[]): (args: ARGS) => Promise<RES>;
 export function stmt<ARGS, RES>(stmt: MySqlSelectWithout<any, any, any>, ...processes: ((res: any) => any)[]): (args: ARGS) => Promise<RES> {
 	let prepared = stmt.prepare();
-
 	return async (args: ARGS) => {
 		let result = await prepared.execute(args);
 		for (const process of processes) result = await process(result);
@@ -55,23 +54,48 @@ export const likeString = {
 	contains: (search: string) => "%" + search + "%",
 };
 
-export function getByFactory
-<T extends string | number, R>
-(repo: EntityRepository<any, any, any>, fieldName: string):
-	(search: T) => Promise<R | undefined>
-{
+/**
+ * Retrieves a single item from a repository by a specified field.
+ * @param repo
+ * @param fieldName
+ * @returns A function that retrieves the previous DTO of an item.
+ */
+export function getByFactory<T extends string | number, R>(repo: EntityRepositoryInterface, fieldName: string): (search: T) => Promise<R | undefined> {
 	let field = repo.schema[fieldName];
 	let stmt = repo.db.select().from(repo.schema).where(eq(field, sql.placeholder("search"))).prepare();
 	let fn = async (search: T) => {
 		let data = await stmt.execute({search})
 		if (data.length === 0) return undefined;
-		else return await repo.instantiators.first(data) as R;
+		else return await repo.instantiate.first(data as any) as R;
 	};
-	(fn as unknown as {stmt:any}).stmt = stmt;
+	(fn as unknown as { stmt: any }).stmt = stmt;
 	return fn;
 }
 
-export async function prevDto(state: State, repository: EntityRepository<any, any, any>) {
-	if(state.prevDto) state.prevDto = await repository.getRaw(state.item.id);
+/**
+ * Retrieves the previous data transfer object (DTO) of an item.
+ * Use it in pipeline functions to access the previous DTO of the item.
+ * @param state
+ * @param repository
+ */
+export async function prevDto(state: State, repository: EntityRepositoryInterface) {
+	if (state.prevDto) state.prevDto = await repository.getRawDTO(state.item.id);
 	return state.prevDto;
 }
+/**
+ * Export decorator. Marks an entity property as exportable.
+ */
+export function Export(target: any, name: PropertyKey,): void {
+	Export.metadata.get(target.constructor, true).push("export", name);
+}
+
+Export.metadata = new ClassMetaData()
+
+/**
+ * Import decorator. Marks an entity property as importable.
+ */
+export function Import(target: any, name: PropertyKey,): void {
+	Import.metadata.get(target.constructor, true).push("import", name);
+}
+
+Import.metadata = new ClassMetaData()

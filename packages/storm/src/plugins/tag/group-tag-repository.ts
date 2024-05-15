@@ -1,18 +1,15 @@
-import {Entity} from "@affinity-lab/storm/src/entity";
-import {type State} from "@affinity-lab/util";
+import {T_Class} from "@affinity-lab/util";
 import {and, eq, not, sql} from "drizzle-orm";
 import {type MySqlTable} from "drizzle-orm/mysql-core";
 import {type MySql2Database} from "drizzle-orm/mysql2";
-import {EntityRepository} from "../../entity-repository";
-import {Export} from "../../export";
-import {stmt} from "../../helper";
-import type {Dto, T_Class} from "../../types";
+import {EntityRepositoryInterface} from "../../entity/entity-repository-interface";
+import {Export, stmt} from "../../helper";
+import type {Dto} from "../../types";
 import {tagError} from "./helper/error";
 import {TagEntity, TagRepository} from "./tag-repository";
 
-export class GroupTagEntity extends TagEntity {
-	@Export groupId: number | string | null = null
-}
+//TODO: ez a groupId elég gyanús nekem! :D
+export class GroupTagEntity extends TagEntity {@Export groupId: number | string | null = null}
 
 
 // TODO test this
@@ -20,22 +17,21 @@ export class GroupTagRepository<
 	SCHEMA extends MySqlTable,
 	ITEM extends GroupTagEntity,
 	DTO extends Dto<SCHEMA> & { name: string, groupId: number } = Dto<SCHEMA> & { name: string, groupId: number },
-	ENTITY extends T_Class<ITEM, typeof Entity> = T_Class<ITEM, typeof Entity>,
+	ENTITY extends T_Class<ITEM, typeof GroupTagEntity> = T_Class<ITEM, typeof GroupTagEntity>,
 > extends TagRepository<SCHEMA, ITEM> {
 
-	constructor(readonly db: MySql2Database<any>, readonly schema: SCHEMA, readonly entity: ENTITY, readonly fieldName: string = "groupId") {
-		super(db, schema, entity);
-	}
+	constructor(readonly db: MySql2Database<any>, readonly schema: SCHEMA, readonly entity: ENTITY, readonly fieldName: string = "groupId") {super(db, schema, entity)}
 
-	protected stmt_groupGetByName = stmt<{ names: Array<string>, groupId: number | string }, Array<ITEM>>(
-		this.db.select().from(this.schema).where(sql`name IN (${sql.placeholder("names")}) AND ${this.fieldName} = ${sql.placeholder("groupId")}`),
-		this.instantiators.all
-	)
+	protected stmt_groupGetByName = stmt<{ names: Array<string>, groupId: number | string }, Array<ITEM>>(this.db.select().from(this.schema).where(sql`name IN (${sql.placeholder("names")}) AND ${this.fieldName} = ${sql.placeholder("groupId")}`), this.instantiate.all)
 
-
-	async getByName(names: Array<string>, groupId?: number | string): Promise<Array<ITEM>>;
-	async getByName(name: string, groupId?: number | string): Promise<ITEM | undefined>;
-	async getByName(names: Array<string> | string, groupId?: number | string): Promise<ITEM | undefined | Array<ITEM>> {
+	/**
+	 * Get tags by name and groupId
+	 * @param names
+	 * @param groupId
+	 */
+	public async getByName(names: Array<string>, groupId?: number | string): Promise<Array<ITEM>>;
+	public async getByName(name: string, groupId?: number | string): Promise<ITEM | undefined>;
+	public async getByName(names: Array<string> | string, groupId?: number | string): Promise<ITEM | undefined | Array<ITEM>> {
 		if (!groupId) throw tagError.groupId();
 		let isArray = Array.isArray(names);
 		if (typeof names === "string") names = [names];
@@ -44,52 +40,63 @@ export class GroupTagRepository<
 		return !isArray ? tags[0] : tags;
 	}
 
+	/**
+	 * Delete a tag from all usages
+	 * @param name
+	 * @param groupId
+	 */
+	public async deleteInUsages(name: string, groupId?: number | string): Promise<void> {
+		if (!groupId) throw tagError.groupId();
+		name = `${name}`
+		for (let usage of this.usages) {
+			let set: Record<string, any> = {}
+			set[usage.field] = sql`trim(both ',' from replace(concat(',', ${usage.repo.schema[usage.field]} , ','), ',${name},', ','))`;
+			usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`FIND_IN_SET("${name}", ${usage.repo.schema[usage.field]})`, eq(usage.repo.schema[this.fieldName], groupId)));
+		}
+	}
 
-	async updateTag(repository: EntityRepository<any, any>, state: State, fieldName?: string) {
+	/**
+	 * Rename a tag
+	 * @param oldName
+	 * @param newName
+	 * @param groupId
+	 */
+	public async rename(oldName: string, newName: string, groupId?: number | string): Promise<void> {
+		oldName = oldName.replace(',', "").trim();
+		newName = newName.replace(',', "").trim();
+		if (oldName === newName) return
+		let o = await this.getByName(oldName, groupId);
+		if (!o) return
+		let n = await this.getByName(newName, groupId);
+		let item = Array.isArray(o) ? o[0] : o;
+		if (!n) {
+			item.name = newName
+			await this.update(item)
+		} else await this.delete(item);
+		await this.doRename(oldName, newName, groupId);
+	}
+
+	// ------------------------------------------ PIPELINE HELPERS
+
+
+	public async updateTag(repository: EntityRepositoryInterface, dto: Record<string, any>, prevDto: Record<string, any>, fieldName?: string) {
 		if (!fieldName) throw tagError.selfRename();
-		let groupId = state.dto[fieldName];
-		let {prev, curr} = this.changes(repository, state);
+		let groupId = dto[fieldName];
+		let {prev, curr} = this.changes(repository, dto, prevDto);
 		await this.addTag(curr.filter(x => !prev.includes(x)), groupId);
 		await this.deleteTag(prev.filter(x => !curr.includes(x)), groupId);
 	}
 
-	protected async doRename(oldName: string, newName: string, groupId?: number | string) {
+
+	public async selfRename(dto: Record<string, any>, prevDto: Record<string, any>, fieldName?: string) {
+		if (!fieldName) throw tagError.selfRename();
+		let groupId: number | string | undefined | null = dto[fieldName];
 		if (!groupId) throw tagError.groupId();
-		let nN = `$.${newName}`;
-		let oN = `$.${oldName}`;
-		let eN = `"${newName}"`;
-		let eO = `"${oldName}"`;
-		let oldN = `,${oldName},`
-		let newN = `,${newName},`
-		for (let usage of this.usages) {
-			let set: Record<string, any> = {};
-			if (usage.mode && usage.mode === "JSON") {
-				let w = and(sql`json_extract(${usage.repo.schema[usage.field]}, ${oN}) > 0`, sql`json_extract(${usage.repo.schema[usage.field]}, ${nN}) is NULL`, eq(usage.repo.schema[this.fieldName], groupId))
-				set[usage.field] = sql`replace(${usage.repo.schema[usage.field]}, ${eO}, ${eN})`;
-				await usage.repo.db.update(usage.repo.schema).set(set).where(w);
-				w = and(sql`json_extract(${usage.repo.schema[usage.field]}, ${oN}) > 0`, sql`json_extract(${usage.repo.schema[usage.field]}, ${nN}) > 0`)
-				// set[usage.field] = sql`json_remove(json_replace(${usage.repo.schema[usage.field]}, ${nN}, json_value(${usage.repo.schema[usage.field]}, ${nN}) + json_value(${usage.repo.schema[usage.field]}, ${oN})), ${oN})`;
-				set[usage.field] = sql`json_remove(${usage.repo.schema[usage.field]}, ${oN})`; // replace this line with the one above, to add the values together
-				await usage.repo.db.update(usage.repo.schema).set(set).where(w);
-			} else {
-				set[usage.field] = sql`trim(both ',' from replace(concat(',', ${usage.repo.schema[usage.field]} , ','), ${oldN}, ${newN}))`;
-				await usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`FIND_IN_SET(${oldName}, ${usage.repo.schema[usage.field]})`, not(sql`FIND_IN_SET(${newName}, ${usage.repo.schema[usage.field]})`), eq(usage.repo.schema[this.fieldName], groupId)));
-				set[usage.field] = sql`trim(both ',' from replace(concat(',', ${usage.repo.schema[usage.field]} , ','), ${oldN}, ','))`;
-				await usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`FIND_IN_SET(${oldName}, ${usage.repo.schema[usage.field]})`, sql`FIND_IN_SET(${newName}, ${usage.repo.schema[usage.field]})`, eq(usage.repo.schema[this.fieldName], groupId)));
-			}
-		}
+		if (dto.name && dto.name !== prevDto.name) await this.doRename(prevDto.name, dto.name, groupId);
 	}
 
-	async selfRename(state: State, fieldName?: string) {
-		if (!fieldName) throw tagError.selfRename();
-		let values = state.dto;
-		let originalItem = state.prevDto;
-		let groupId = values[fieldName];
-		if (!groupId) throw tagError.groupId();
-		if (values.name && values.name !== originalItem.name) {
-			await this.doRename(originalItem.name, values.name, groupId);
-		}
-	}
+	// ------------------------------------------ INTERNAL HELPERS
+
 
 	protected async addTag(names: Array<string>, groupId?: number | string): Promise<void> {
 		let items = await this.getByName(names, groupId).then(r => (r).map(i => i.name))
@@ -119,34 +126,37 @@ export class GroupTagRepository<
 				}
 			}
 			if (doDelete) {
-				await this.delete(item.id);
+				await this.delete(item);
 				await this.deleteInUsages(item.name as string, groupId);
 			}
 		}
 	}
 
-	async deleteInUsages(name: string, groupId?: number | string): Promise<void> {
-		if (!groupId) throw tagError.groupId();
-		name = `${name}`
-		for (let usage of this.usages) {
-			let set: Record<string, any> = {}
-			set[usage.field] = sql`trim(both ',' from replace(concat(',', ${usage.repo.schema[usage.field]} , ','), ',${name},', ','))`;
-			usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`FIND_IN_SET("${name}", ${usage.repo.schema[usage.field]})`, eq(usage.repo.schema[this.fieldName], groupId)));
-		}
-	}
 
-	async rename(oldName: string, newName: string, groupId?: number | string): Promise<void> {
-		oldName = oldName.replace(',', "").trim();
-		newName = newName.replace(',', "").trim();
-		if (oldName === newName) return
-		let o = await this.getByName(oldName, groupId);
-		if (!o) return
-		let n = await this.getByName(newName, groupId);
-		let item = Array.isArray(o) ? o[0] : o;
-		if (!n) {
-			item.name = newName
-			await this.update(item)
-		} else await this.delete(item);
-		await this.doRename(oldName, newName, groupId);
+	protected async doRename(oldName: string, newName: string, groupId?: number | string) {
+		if (!groupId) throw tagError.groupId();
+		let nN = `$.${newName}`;
+		let oN = `$.${oldName}`;
+		let eN = `"${newName}"`;
+		let eO = `"${oldName}"`;
+		let oldN = `,${oldName},`
+		let newN = `,${newName},`
+		for (let usage of this.usages) {
+			let set: Record<string, any> = {};
+			if (usage.mode && usage.mode === "JSON") {
+				let w = and(sql`json_extract(${usage.repo.schema[usage.field]}, ${oN}) > 0`, sql`json_extract(${usage.repo.schema[usage.field]}, ${nN}) is NULL`, eq(usage.repo.schema[this.fieldName], groupId))
+				set[usage.field] = sql`replace(${usage.repo.schema[usage.field]}, ${eO}, ${eN})`;
+				await usage.repo.db.update(usage.repo.schema).set(set).where(w);
+				w = and(sql`json_extract(${usage.repo.schema[usage.field]}, ${oN}) > 0`, sql`json_extract(${usage.repo.schema[usage.field]}, ${nN}) > 0`)
+				// set[usage.field] = sql`json_remove(json_replace(${usage.repo.schema[usage.field]}, ${nN}, json_value(${usage.repo.schema[usage.field]}, ${nN}) + json_value(${usage.repo.schema[usage.field]}, ${oN})), ${oN})`;
+				set[usage.field] = sql`json_remove(${usage.repo.schema[usage.field]}, ${oN})`; // replace this line with the one above, to add the values together
+				await usage.repo.db.update(usage.repo.schema).set(set).where(w);
+			} else {
+				set[usage.field] = sql`trim(both ',' from replace(concat(',', ${usage.repo.schema[usage.field]} , ','), ${oldN}, ${newN}))`;
+				await usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`FIND_IN_SET(${oldName}, ${usage.repo.schema[usage.field]})`, not(sql`FIND_IN_SET(${newName}, ${usage.repo.schema[usage.field]})`), eq(usage.repo.schema[this.fieldName], groupId)));
+				set[usage.field] = sql`trim(both ',' from replace(concat(',', ${usage.repo.schema[usage.field]} , ','), ${oldN}, ','))`;
+				await usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`FIND_IN_SET(${oldName}, ${usage.repo.schema[usage.field]})`, sql`FIND_IN_SET(${newName}, ${usage.repo.schema[usage.field]})`, eq(usage.repo.schema[this.fieldName], groupId)));
+			}
+		}
 	}
 }

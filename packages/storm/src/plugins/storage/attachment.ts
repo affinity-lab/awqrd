@@ -9,11 +9,29 @@ export class Attachment<METADATA extends Record<string, any>> implements Attachm
 	#id: string
 	#size: number
 	#metadata: METADATA
+	/**
+	 * The metadata of the attachment
+	 */
 	public metadata: METADATA
+	/**
+	 * The file size of the attachment
+	 */
 	get size(): number {return this.#size}
+	/**
+	 * The id of the attachment
+	 */
 	get id(): string {return this.#id}
+	/**
+	 * The filename of the attachment
+	 */
 	get name(): string {return this.#name}
+	/**
+	 * The collection of the attachment
+	 */
 	get collection(): Collection<METADATA> {return this.#collection}
+	/**
+	 * The entity id of the attachment
+	 */
 	get entityId(): number {return this.#entityId}
 
 	constructor(attachmentObject: AttachmentObject, collection: Collection<METADATA>, entityId: number) {
@@ -36,8 +54,8 @@ export class Attachment<METADATA extends Record<string, any>> implements Attachm
 		})
 	}
 
-	toJSON(){
-		return{
+	toJSON() {
+		return {
 			metadata: this.#metadata,
 			name: this.name,
 			id: this.id,
@@ -45,15 +63,32 @@ export class Attachment<METADATA extends Record<string, any>> implements Attachm
 		}
 	}
 
+	/**
+	 * Save the metadata of the attachment
+	 */
 	async saveMetaData() {
 		await this.collection.storage.updateMetadata(this.collection.name, this.entityId, this.name, this.#metadata)
 	}
+
+	/**
+	 * Set the position of the attachment
+	 * @param position
+	 */
 	async setPositions(position: number) {
 		await this.collection.storage.setPosition(this.collection.name, this.entityId, this.name, position);
 	}
+
+	/**
+	 * Delete the attachment
+	 */
 	async delete() {
 		await this.collection.storage.delete(this.collection.name, this.entityId, this.name)
 	}
+
+	/**
+	 * Rename the attachment
+	 * @param name
+	 */
 	async rename(name: string) {
 		await this.collection.storage.rename(this.collection.name, this.entityId, this.name, name)
 	}

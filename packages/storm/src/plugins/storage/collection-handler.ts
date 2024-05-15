@@ -11,9 +11,21 @@ export class CollectionHandler<METADATA extends Record<string, any>> extends Arr
 
 	protected loaded = false;
 
+	/**
+	 * Get the entity owning the collection
+	 */
 	get entity() {return this.#entity}
+	/**
+	 * Get the id of the entity owning the collection
+	 */
 	get id(): number {return this.#entity.id!}
+	/**
+	 * Get the collection
+	 */
 	get collection(): Collection<METADATA> {return this.#collection}
+	/**
+	 * Get the storage of the collection
+	 */
 	get storage(): Storage {return this.#collection.storage}
 
 	constructor(collection: Collection<METADATA>, entity: WithIdOptional<Record<string, any>>) {
@@ -27,6 +39,9 @@ export class CollectionHandler<METADATA extends Record<string, any>> extends Arr
 	pop(): never { throw Error(`can not pop from collection handler ${this.collection.name}`);}
 	shift(): never { throw Error(`can not shift from collection handler ${this.collection.name}`);}
 
+	/**
+	 * Load the collection
+	 */
 	public async load(): Promise<this> {
 		// todo: make proper update instead of this
 		this.loaded = true;
@@ -35,6 +50,10 @@ export class CollectionHandler<METADATA extends Record<string, any>> extends Arr
 		return this;
 	}
 
+	/**
+	 * Add a file to the collection
+	 * @param file
+	 */
 	async add(file: ITmpFile) {
 		await this.load();
 		const prepared = await this.collection.prepare(this, file);
@@ -48,7 +67,7 @@ export class CollectionHandler<METADATA extends Record<string, any>> extends Arr
 		await this.load();
 	}
 
-	toJSON(): {collection:string, id:number, files: Attachment<METADATA>[]|null} {
+	toJSON(): { collection: string, id: number, files: Attachment<METADATA>[] | null } {
 		return {
 			collection: this.collection.name,
 			id: this.id,
@@ -56,8 +75,25 @@ export class CollectionHandler<METADATA extends Record<string, any>> extends Arr
 		}
 	}
 
+	/**
+	 * Get the first file in the collection
+	 */
 	first(): Attachment<METADATA> | undefined {return this.at(0);}
+
+	/**
+	 * Get the last file in the collection
+	 */
 	last(): Attachment<METADATA> | undefined {return this.at(-1)}
+
+	/**
+	 * Get a file by name
+	 * @param filename
+	 */
 	findFile(filename: string): Attachment<METADATA> | undefined { return this.find(obj => filename === obj.name)}
+
+	/**
+	 * Get files by a glob pattern
+	 * @param glob
+	 */
 	findFiles(glob: string): Array<Attachment<METADATA>> { return this.filter(obj => minimatch(obj.name, glob))}
 }

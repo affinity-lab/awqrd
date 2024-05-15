@@ -1,11 +1,10 @@
-import fs from "fs";
+import {fileExists} from "@affinity-lab/util";
+import {createHash} from "crypto";
 import {Hono} from "hono";
 import {serveStatic} from "hono/bun";
 import Path from "path";
 import {filePathFromUrl} from "../../storage/helper/storm-storage-server";
 import {createThumbnail, parseImgParams} from "./helpers";
-import {fileExists} from "@affinity-lab/util";
-import {createHash} from "crypto";
 
 /**
  * Function for serving images from a specified directory with dynamic URL paths and image processing.
@@ -16,13 +15,13 @@ import {createHash} from "crypto";
  * @param {string} filesPath - The path to the files directory
  * @param {boolean} skipHashCheck - Flag to skip hash check for images
  */
-export function stormImgServerHono(app: Hono, imgPath: string, prefix: string, filesPath: string, skipHashCheck:boolean = false) {
+export function stormImgServerHono(app: Hono, imgPath: string, prefix: string, filesPath: string, skipHashCheck: boolean = false) {
 	prefix = prefix.replace(/\/+/g, '/').replace(/^\/|\/$/g, '')
 	app.get(
 		`/${prefix}/:hash/:collection-with-id/:img/:file`,
 		serveStatic({
 			root: imgPath,
-			rewriteRequestPath: (path: string) =>  path.substring(1 + prefix.length + 1 + 6 + 1).replaceAll("/", "-")
+			rewriteRequestPath: (path: string) => path.substring(1 + prefix.length + 1 + 6 + 1).replaceAll("/", "-")
 		}),
 		async (c, next) => {
 			// create original file path
@@ -49,7 +48,7 @@ export function stormImgServerHono(app: Hono, imgPath: string, prefix: string, f
 		},
 		serveStatic({
 			root: imgPath,
-			rewriteRequestPath: (path: string) =>  path.substring(1 + prefix.length + 1 + 6 + 1).replaceAll("/", "-")
+			rewriteRequestPath: (path: string) => path.substring(1 + prefix.length + 1 + 6 + 1).replaceAll("/", "-")
 		})
 	)
 }

@@ -1,7 +1,16 @@
 import type {Cache} from "@affinity-lab/util/";
 
+/**
+ * Result cache function type.
+ */
 export type ResultCacheFn = (res: (Record<string, any> | Array<Record<string, any>>)) => Promise<Record<string, any> | Array<Record<string, any>>>
 
+/**
+ * Factory function for creating a result cache function.
+ * @param cache
+ * @param mapCache
+ * @param fields
+ */
 export function resultCacheFactory(cache: Cache, mapCache?: Cache, ...fields: string[]): ResultCacheFn {
 	return async (res: Record<string, any> | Array<Record<string, any>>) => {
 		if (Array.isArray(res)) {

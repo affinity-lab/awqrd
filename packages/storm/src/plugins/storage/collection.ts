@@ -1,31 +1,42 @@
 import type {WithIdOptional} from "@affinity-lab/storm/src/types";
+import {bytes} from "@affinity-lab/util";
 import fs from "fs";
 import {minimatch} from "minimatch";
 import Path from "path";
-import {bytes} from "@affinity-lab/util";
-import type {IEntityRepository} from "../../entity-repository-interface";
+import type {EntityRepositoryInterface} from "../../entity/entity-repository-interface";
 import {Attachment} from "./attachment";
 import {CollectionHandler} from "./collection-handler";
 import {storageError} from "./helper/error";
 import {mimeTypeMap} from "./helper/mimetype-map";
-import type {CollectionOptions, MetaField, Rules, ITmpFile} from "./helper/types";
+import type {CollectionOptions, ITmpFile, MetaField, Rules} from "./helper/types";
 import type {Storage} from "./storage";
 
 export abstract class Collection<METADATA extends Record<string, any> = {}> {
 
-	private readonly _storage: Storage;
-	get storage() {return this._storage}
-	public readonly writableMetaFields: Record<string, MetaField> = {}
-	readonly rules: Rules
-	private entityRepository: IEntityRepository
+
+	private entityRepository: EntityRepositoryInterface
 	private readonly group: string
+	private readonly _storage: Storage;
+
+	/**
+	 * The storage of the collection
+	 */
+	get storage() {return this._storage}
+	/**
+	 * The writable metadata fields
+	 */
+	public readonly writableMetaFields: Record<string, MetaField> = {}
+	/**
+	 * The rules for the collection
+	 */
+	readonly rules: Rules
 
 	constructor(
 		readonly name: string,
 		readonly groupDefinition: {
 			storage: Storage,
 			group: string,
-			entityRepository: IEntityRepository
+			entityRepository: EntityRepositoryInterface
 		},
 		rules: CollectionOptions
 	) {
@@ -56,15 +67,23 @@ export abstract class Collection<METADATA extends Record<string, any> = {}> {
 		this._storage.addCollection(this);
 	}
 
+	/**
+	 * Get a collection handler
+	 * @param entity
+	 */
 	handler(entity: WithIdOptional<Record<string, any>>): CollectionHandler<METADATA> | undefined {
 		return entity.id ? new CollectionHandler<METADATA>(this, entity) : undefined;
 	}
-
 
 	protected async updateMetadata(id: number, filename: string, metadata: Partial<METADATA>) {await this._storage.updateMetadata(this.name, id, filename, metadata);}
 
 	protected async prepareFile(file: ITmpFile): Promise<{ file: ITmpFile, metadata: Record<string, any> }> {return {file, metadata: {}};}
 
+	/**
+	 * Prepare the file for storage
+	 * @param collectionHandler
+	 * @param file
+	 */
 	async prepare(collectionHandler: CollectionHandler<METADATA>, file: ITmpFile) {
 		let metadata: Record<string, any>;
 		const ext = Path.extname(file.filename);
@@ -97,9 +116,20 @@ export abstract class Collection<METADATA extends Record<string, any> = {}> {
 		return {file, metadata};
 	}
 
+	/**
+	 * Hook for when an attachment is removed
+	 */
 	async onDelete() {}
+
+	/**
+	 * Hook for when an attachment is modified
+	 */
 	async onModify() {}
 
+	/**
+	 * Get attachments for an entity
+	 * @param id
+	 */
 	public async get(id: number): Promise<Array<Attachment<METADATA>>> {
 		let attachmentObjects = await this._storage.get(this.name, id);
 		return attachmentObjects.map(attachmentObject => new Attachment<METADATA>(attachmentObject, this, id))

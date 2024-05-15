@@ -5,7 +5,8 @@
  * @returns An object containing only the fields specified in the 'fields' array.
  */
 export function pickFieldsIP(values: Record<string, any>, ...fields: string[]) {
-	Object.keys(values).forEach(key => { if (!fields.includes(key)) delete values[key];})
+	Object.keys(values).forEach(key => { if (!fields.includes(key)) delete values[key];});
+	return values;
 }
 
 /**
@@ -16,6 +17,7 @@ export function pickFieldsIP(values: Record<string, any>, ...fields: string[]) {
  */
 export function omitFieldsIP(values: Record<string, any>, ...fields: string[]) {
 	fields.forEach(key => {delete values[key]});
+	return values;
 }
 
 /**

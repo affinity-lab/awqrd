@@ -1,9 +1,15 @@
-import {EntityRepository} from "../../entity-repository";
-import type {Cache} from "@affinity-lab/util/";
-import type {State} from "@affinity-lab/util/";
+import type {Cache, State} from "@affinity-lab/util/";
+import {EntityRepositoryInterface} from "../../entity/entity-repository-interface";
 import {resultCacheFactory, type ResultCacheFn} from "./result-cache-factory";
 
-export function cachePlugin(repository: EntityRepository<any, any, any>, cache: Cache, resultCache?: ResultCacheFn) {
+
+/**
+ * Extends the entity repository pipelines to include caching.
+ * @param repository
+ * @param cache
+ * @param resultCache
+ */
+export function cachePlugin(repository: EntityRepositoryInterface, cache: Cache, resultCache?: ResultCacheFn) {
 
 	if (resultCache === undefined) resultCache = resultCacheFactory(cache);
 
@@ -12,7 +18,7 @@ export function cachePlugin(repository: EntityRepository<any, any, any>, cache: 
 			state.dto = await cache.get(state.id);
 		})
 		.finalize.prepend(async (state: Record<string, any>) => {
-			if (state.dto !== undefined){
+			if (state.dto !== undefined) {
 				await resultCache!(state.dto)
 			}
 		}

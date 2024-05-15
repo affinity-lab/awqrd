@@ -1,5 +1,9 @@
-import {int, json, mysqlTable, serial, varchar,unique } from "drizzle-orm/mysql-core";
+import {int, json, mysqlTable, serial, unique, varchar} from "drizzle-orm/mysql-core";
 
+/**
+ * Create a storage schema
+ * @param name
+ */
 export function stormStorageSchemaFactory(name: string = "_storage") {
 	return mysqlTable(name, {
 			id: serial("id").primaryKey(),

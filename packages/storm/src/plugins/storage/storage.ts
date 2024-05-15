@@ -1,19 +1,17 @@
+import type {Cache} from "@affinity-lab/util";
+import {fileExists, firstOrUndefined, getUniqueFilename, MaterializeIt, removeEmptyParentDirectories, sanitizeFilename} from "@affinity-lab/util";
 import {and, eq, sql} from "drizzle-orm";
 import {MySqlTable} from "drizzle-orm/mysql-core";
 import type {MySql2Database} from "drizzle-orm/mysql2";
 import fs from "fs";
 import Path from "path";
+import type {EntityRepositoryInterface} from "../../entity/entity-repository-interface";
 import {stmt} from "../../helper";
-import type {Cache} from "@affinity-lab/util";
-import {getUniqueFilename, fileExists} from "@affinity-lab/util";
-import {MaterializeIt} from "@affinity-lab/util";
-import {removeEmptyParentDirectories} from "@affinity-lab/util";
-import {sanitizeFilename} from "@affinity-lab/util";
-import type {IEntityRepository} from "../../entity-repository-interface";
-import {firstOrUndefined} from "@affinity-lab/util";
 import {Collection} from "./collection";
 import {storageError} from "./helper/error";
 import type {AttachmentObjects, AttachmentRecord, ITmpFile} from "./helper/types";
+
+export type GroupDefinition = { storage: Storage, group: string, entityRepository: EntityRepositoryInterface };
 
 export class Storage {
 	constructor(
@@ -28,12 +26,21 @@ export class Storage {
 
 	collections: Record<string, Collection<any>> = {}
 
+	/**
+	 * Add a collection to the storage
+	 * @param collection
+	 */
 	addCollection(collection: any) {
 		if (this.collections[collection.name] !== undefined) throw new Error(`collection name must be unique! ${collection.name}`);
 		this.collections[collection.name] = collection;
 	}
 
-	getGroupDefinition(name: string, entityRepository: IEntityRepository): {storage:Storage, group:string, entityRepository:IEntityRepository} {
+	/**
+	 * Get a collection from the storage
+	 * @param name
+	 * @param entityRepository
+	 */
+	getGroupDefinition(name: string, entityRepository: EntityRepositoryInterface): GroupDefinition {
 		return {
 			storage: this,
 			group: name,
@@ -76,6 +83,12 @@ export class Storage {
 
 	protected getCacheKey(name: string, id: number): string {return `${name}-${id}`;}
 
+	/**
+	 * Get all attachments for a given name and id
+	 * @param name
+	 * @param id
+	 * @param res
+	 */
 	async get(name: string, id: number, res: { found?: "db" | "cache" | false } = {}): Promise<AttachmentObjects> {
 		let record: AttachmentRecord | undefined = await this.cache?.get(this.getCacheKey(name, id));
 		if (record) {
@@ -98,7 +111,12 @@ export class Storage {
 		return {attachments, index: idx};
 	}
 
-	async destroy(repository: IEntityRepository, id:number){
+	/**
+	 * Delete all attachments for a given id
+	 * @param repository
+	 * @param id
+	 */
+	async destroy(repository: EntityRepositoryInterface, id: number) {
 		for (const collectionsKey in this.collections) {
 			await this.destroyFiles(collectionsKey, id);
 		}
@@ -131,6 +149,13 @@ export class Storage {
 			.execute({name, id});
 	}
 
+	/**
+	 * Add an attachment to the storage
+	 * @param name
+	 * @param id
+	 * @param file
+	 * @param metadata
+	 */
 	async add(name: string, id: number, file: ITmpFile, metadata: Record<string, any>) {
 		let path = this.getPath(name, id);
 		let filename = Path.basename(file.filename);
@@ -158,6 +183,12 @@ export class Storage {
 		file.release();
 	}
 
+	/**
+	 * Delete an attachment from the storage
+	 * @param name
+	 * @param id
+	 * @param filename
+	 */
 	async delete(name: string, id: number, filename: string) {
 		let {attachments, index} = await this.getIndexOfAttachments(name, id, filename, true);
 		attachments.splice(index, 1);
@@ -167,6 +198,13 @@ export class Storage {
 		await removeEmptyParentDirectories(path);
 	}
 
+	/**
+	 * Set the position of an attachment
+	 * @param name
+	 * @param id
+	 * @param filename
+	 * @param position
+	 */
 	async setPosition(name: string, id: number, filename: string, position: number) {
 		const attachments = await this.get(name, id);
 		const idx = attachments.findIndex(a => a.name === filename);
@@ -176,6 +214,13 @@ export class Storage {
 		await this.updateRecord(name, id, attachments);
 	}
 
+	/**
+	 * Update the metadata of an attachment
+	 * @param name
+	 * @param id
+	 * @param filename
+	 * @param metadata
+	 */
 	async updateMetadata(name: string, id: number, filename: string, metadata: Record<string, any>) {
 		const attachments = await this.get(name, id);
 		const idx = attachments.findIndex(a => a.name === filename);
@@ -184,6 +229,13 @@ export class Storage {
 		await this.updateRecord(name, id, attachments);
 	}
 
+	/**
+	 * Rename an attachment
+	 * @param name
+	 * @param id
+	 * @param filename
+	 * @param newName
+	 */
 	async rename(name: string, id: number, filename: string, newName: string) {
 		const attachments = await this.get(name, id);
 		const idx = attachments.findIndex(a => a.name === filename);

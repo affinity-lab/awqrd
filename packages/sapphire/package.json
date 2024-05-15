@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/sapphire-awqrd",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Backend for sapphire",
   "type": "module",
   "main": "dist/index.js",
@@ -17,9 +17,9 @@
     "mysql2": "^3.9.3",
     "sharp": "^0.33.3",
     "zod": "^3.22.4",
-    "@affinity-lab/util": "2.0.34",
-    "@affinity-lab/storm": "1.0.49",
-    "@affinity-lab/comet": "1.0.51"
+    "@affinity-lab/util": "2.0.36",
+    "@affinity-lab/storm": "1.0.50",
+    "@affinity-lab/comet": "1.0.53"
   },
   "devDependencies": {
     "@types/bun": "latest",

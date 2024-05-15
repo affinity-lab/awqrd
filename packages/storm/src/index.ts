@@ -1,7 +1,6 @@
-export * from "./entity"
-export * from "./entity-repository"
-export * from "./entity-repository-interface"
-export * from "./export"
+export * from "./entity/entity"
+export * from "./entity/entity-repository"
+export * from "./entity/entity-repository-interface"
 export * from "./helper"
 export * from "./types"
 export * from "./error"
@@ -27,3 +26,6 @@ export * from "./plugins/tag/tag-repository"
 export * from "./plugins/tag/group-tag-repository"
 export * from "./plugins/tag/tag-plugin"
 export * from "./plugins/tag/helper/error"
+export {ViewEntityRepositoryInterface} from "./entity/view-entity-repository-interface";
+export {ViewEntityRepository} from "./entity/view-entity-repository";
+export {ViewEntity} from "./entity/view-entity";

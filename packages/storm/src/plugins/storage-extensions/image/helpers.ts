@@ -49,9 +49,9 @@ export async function createThumbnail(source: string, output: string, imgParams:
 
 	if (focus as string === "box") {
 		const aspect = width / height;
-		if (oAspect > aspect){
+		if (oAspect > aspect) {
 			height = Math.floor(width / oAspect);
-		}else{
+		} else {
 			width = Math.floor(height * oAspect);
 		}
 
