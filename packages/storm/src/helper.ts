@@ -3,6 +3,7 @@ import {eq, sql} from "drizzle-orm";
 import {MySqlColumn} from "drizzle-orm/mysql-core";
 import type {MySqlSelectWithout} from "drizzle-orm/mysql-core/query-builders/select.types";
 import {EntityRepositoryInterface} from "./entity/entity-repository-interface";
+import {Dto} from "./types";
 
 /**
  * Creates an SQL expression for checking if a column's value is in a list of IDs.
@@ -66,7 +67,7 @@ export function getByFactory<T extends string | number, R>(repo: EntityRepositor
 	let fn = async (search: T) => {
 		let data = await stmt.execute({search})
 		if (data.length === 0) return undefined;
-		else return await repo.instantiate.first(data as any) as R;
+		else return await repo.instantiate.first(data as Array<Dto<any>>) as R;
 	};
 	(fn as unknown as { stmt: any }).stmt = stmt;
 	return fn;
