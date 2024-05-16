@@ -1,4 +1,5 @@
-import type {MaybeArray, T_Class} from "@affinity-lab/util";
+import {prevDto} from "@affinity-lab/storm/src/helper";
+import type {MaybeArray, State, T_Class} from "@affinity-lab/util";
 import {and, not, sql} from "drizzle-orm";
 import {MySqlTable} from "drizzle-orm/mysql-core";
 import {Entity} from "../../entity/entity";
@@ -84,7 +85,7 @@ export class TagRepository<
 	 * Add a usage to the tag
 	 * @param usage
 	 */
-	public addUsage(usage: MaybeArray<Usage>) { this.usages.push(...(Array.isArray(usage) ? usage : [usage]));}
+	protected addUsage(usage: MaybeArray<Usage>) { this.usages.push(...(Array.isArray(usage) ? usage : [usage]));}
 
 
 	/**
@@ -92,7 +93,7 @@ export class TagRepository<
 	 * @param dto
 	 * @param prevDto
 	 */
-	public async selfRename(dto: DTO, prevDto: DTO) {
+	protected async selfRename(dto: DTO, prevDto: DTO) {
 		if (dto.name && dto.name !== prevDto.name) {
 			await this.doRename(prevDto.name, dto.name);
 		}
@@ -105,7 +106,7 @@ export class TagRepository<
 	 * @param dto
 	 * @param prevDto
 	 */
-	public async updateTag(repository: EntityRepositoryInterface, dto: Record<string, any>, prevDto: Record<string, any>) {
+	protected async updateTag(repository: EntityRepositoryInterface, dto: Record<string, any>, prevDto: Record<string, any>) {
 		let {prev, curr} = this.changes(repository, dto, prevDto);
 		await this.addTag(curr.filter(x => !prev.includes(x)));
 		await this.deleteTag(prev.filter(x => !curr.includes(x)));
@@ -117,7 +118,7 @@ export class TagRepository<
 	 * @param repository
 	 * @param dto
 	 */
-	public prepare(repository: EntityRepositoryInterface, dto: Record<string, any>) {
+	protected prepare(repository: EntityRepositoryInterface, dto: Record<string, any>) {
 		for (let usage of this.usages) {
 			if (usage.repo === repository) {
 				if (!dto[usage.field]) dto[usage.field] = "";
@@ -182,6 +183,44 @@ export class TagRepository<
 			await usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`FIND_IN_SET("${oldName}", ${usage.field})`, not(sql`FIND_IN_SET("${newName}", ${usage.field})`)));
 			set[usage.field] = sql`trim(both ',' from replace(concat(',', ${usage.field} , ','), ',${oldName},', ','))`;
 			await usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`FIND_IN_SET("${oldName}", ${usage.field})`, sql`FIND_IN_SET("${newName}", ${usage.field})`));
+		}
+	}
+
+	// ------------------------------------------ PIPELINE PLUGIN
+
+	plugin(field: string) {
+		return (repository: EntityRepositoryInterface) => {
+
+			let usage: Usage = {repo: repository, field}
+			this.addUsage(usage);
+
+			repository.pipelines.update.blocks
+				.prepare.append(async (state: State) =>{
+					await prevDto(state, repository);
+					this.prepare(repository, state.dto);
+				})
+				.finalize.append(async (state: State) => {
+					await this.selfRename(state.dto, state.prevDto);
+					await this.updateTag(repository, state.dto, state.prevDto);
+				}
+			)
+
+			repository.pipelines.delete.blocks
+				.prepare.append(async (state: State) => await prevDto(state, repository))
+				.finalize.append(async (state: State) => await this.updateTag(repository, state.dto, state.prevDto)
+			)
+
+			repository.pipelines.insert.blocks
+				.prepare.append(async (state: State) => this.prepare(repository, state.dto))
+
+			repository.pipelines.overwrite.blocks
+				.prepare.append(async (state: State) => await prevDto(state, repository))
+				.finalize.append(async (state: State) => {
+		
+					await this.selfRename(state.dto, await prevDto(state, repository));
+					await this.updateTag(repository, state.dto, await prevDto(state, repository));
+				}
+			)
 		}
 	}
 }

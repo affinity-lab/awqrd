@@ -3,14 +3,22 @@ import {MaterializeIt, MaybeNull, omitFieldsIP, pickFieldsIP} from "@affinity-la
 import {Export} from "../helper";
 import {ViewEntityRepositoryInterface} from "./view-entity-repository-interface";
 
+
+
+
+
+
 /**
  * Class representing a storm view entity.
  */
-export class ViewEntity {
+export abstract class ViewEntity{
 
+	static repository: ViewEntityRepositoryInterface;
+	get $repository() { return (this.constructor as typeof ViewEntity).repository; }
+	
 	@Export id: MaybeNull<number> = null;
 
-	constructor(protected $repository: ViewEntityRepositoryInterface) {}
+	constructor() {}
 
 	@MaterializeIt
 	private static get exportFields(): Array<string> | undefined { return Export.metadata.read(this)?.export;}
@@ -21,7 +29,7 @@ export class ViewEntity {
 	 */
 	$export() {
 		const e: Record<string, any> = {}
-		let a = Object.getPrototypeOf(this).constructor.exportFields;
+		let a = (this.constructor as typeof ViewEntity).exportFields;
 		if (a) for (const key of a) e[key] = this[key as keyof this];
 		return e
 	}

@@ -7,10 +7,10 @@ import {ViewEntityRepositoryInterface} from "./view-entity-repository-interface"
 
 
 export interface EntityRepositoryInterface<
-	SCHEMA extends MySqlTableWithColumns<any> = MySqlTableWithColumns<any>,
-	ITEM extends Entity = Entity,
-	ENTITY extends T_Class<ITEM, typeof Entity> = T_Class<ITEM, typeof Entity>,
-	DTO extends Dto<SCHEMA> = Dto<SCHEMA> & Record<string, any>
+	SCHEMA extends MySqlTableWithColumns<any> = any,
+	ITEM extends Entity = any,
+	ENTITY extends T_Class<ITEM, typeof Entity> = any,
+	DTO extends Dto<SCHEMA> = any
 > extends ViewEntityRepositoryInterface <SCHEMA, ITEM, ENTITY, DTO> {
 	pipelines: {
 		getAll: ProcessPipeline<"prepare" | "action" | "finalize">;
@@ -21,6 +21,7 @@ export interface EntityRepositoryInterface<
 		delete: ProcessPipeline<"prepare" | "action" | "finalize">;
 		overwrite: ProcessPipeline<"prepare" | "action" | "finalize">;
 	};
+	addPlugin(plugin: (repository: EntityRepositoryInterface) => any): this;
 	save(item: ITEM): Promise<any>;
 	update(item: ITEM): Promise<any>;
 	insert(item: ITEM): Promise<any>;

@@ -3,6 +3,7 @@ import {omitFieldsIP, pickFieldsIP, ProcessPipeline, type State} from "@affinity
 import {sql} from "drizzle-orm";
 import {MySqlTableWithColumns} from "drizzle-orm/mysql-core";
 import type {MySqlRawQueryResult} from "drizzle-orm/mysql2";
+import type {MySql2Database} from "drizzle-orm/mysql2/index";
 import type {Dto} from "../types";
 import {Entity} from "./entity";
 import type {EntityRepositoryInterface} from "./entity-repository-interface";
@@ -22,6 +23,7 @@ export class EntityRepository<
 >
 	extends ViewEntityRepository<SCHEMA, ITEM, ENTITY, DTO>
 	implements EntityRepositoryInterface<SCHEMA, ITEM, ENTITY, DTO> {
+
 
 	protected pipelineFactory() {
 		return {
@@ -80,6 +82,14 @@ export class EntityRepository<
 	public readonly pipelines = this.pipelineFactory();
 	protected readonly exec = this.pipelineExecFactory();
 
+	constructor(db: MySql2Database<any>, schema: SCHEMA, entity: ENTITY) { super(db, schema, entity);}
+
+	addPlugin(plugin: (repository: EntityRepositoryInterface) => any) {
+		plugin(this);
+		return this;
+	}
+
+
 	/**
 	 * Retrieves the data transfer object (DTO) from the item.
 	 * @param item The item from which to retrieve the DTO.
@@ -121,7 +131,8 @@ export class EntityRepository<
 	 * @returns A promise that resolves to the new item.
 	 */
 	public async create(importData?: Record<string, any>): Promise<ITEM> {
-		let item = new this.entity(this as EntityRepositoryInterface);
+		// @ts-ignore
+		let item = new this.entity(this);
 		if (importData) item.$import(importData);
 		return item;
 	}
@@ -161,6 +172,6 @@ export class EntityRepository<
 	 * @param item - The item to delete.
 	 * @returns A promise that resolves once the delete operation is completed.
 	 */
-	public async delete(item: ITEM) { return this.exec.delete(item);}
+	public async delete(item: ITEM | undefined) { if (item) return this.exec.delete(item);}
 }
 

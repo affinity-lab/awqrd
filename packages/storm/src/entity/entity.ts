@@ -1,3 +1,4 @@
+import {ViewEntityRepositoryInterface} from "@affinity-lab/storm/src/entity/view-entity-repository-interface";
 import {MaterializeIt} from "@affinity-lab/util";
 import {Import} from "../helper";
 import {EntityRepositoryInterface} from "./entity-repository-interface";
@@ -7,9 +8,10 @@ import {ViewEntity} from "./view-entity";
 /**
  * Class representing a storm entity.
  */
-export class Entity extends ViewEntity {
-	constructor(protected $repository: EntityRepositoryInterface) { super($repository);}
+export abstract class Entity extends ViewEntity {
 
+	static repository: EntityRepositoryInterface;
+	get $repository() { return (this.constructor as typeof Entity).repository; }
 
 	@MaterializeIt
 	private static get importFields(): Array<string> | undefined { return Import.metadata.read(this)?.import;}
@@ -19,10 +21,11 @@ export class Entity extends ViewEntity {
 	 * @param importData
 	 */
 	$import(importData: Record<string, any>) {
-		let importFields = Object.getPrototypeOf(this).constructor.importFields;
+		let importFields = (this.constructor as typeof Entity).importFields;
 		if (importFields) for (const key of importFields) if (importData.hasOwnProperty(key)) this[key as keyof this] = importData[key];
 		return this;
 	}
+
 	/**
 	 * Saves the entity to the database.
 	 */

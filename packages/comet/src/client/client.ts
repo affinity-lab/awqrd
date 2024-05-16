@@ -1,5 +1,5 @@
-import type {Context} from "hono";
 import {type Middleware, type MiddlewareFn, Pipeline} from "@affinity-lab/util";
+import type {Context} from "hono";
 import {cometError} from "../error";
 
 type Command<Instance extends Object, MethodName extends keyof Instance> = {
@@ -33,19 +33,18 @@ export abstract class Client {
 		this.pipeline = new Pipeline(...middlewares, this.execute.bind(this));
 	}
 
-	authApi(apiKey: string | undefined) { apiKey; return true; }
+	authApi(apiKey: string | undefined) {
+		apiKey;
+		return true;
+	}
 
 	protected async execute(state: CometState) {
 
-		if(this.unsupported) throw cometError.client.unsupported();
+		if (this.unsupported) throw cometError.client.unsupported();
 
 		let args = [];
-		if (state.cmd.params.length === 0) {
-			args.push(state);
-		} else for (let param of state.cmd.params) {
-			args.push(state[param as keyof CometState])
-		}
-
+		if (state.cmd.params.length === 0) args.push(state);
+		else for (let param of state.cmd.params) args.push(state[param as keyof CometState])
 
 		return state.cmd.instance[state.cmd.key](...args);
 	}

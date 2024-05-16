@@ -1,4 +1,4 @@
-import type {Cache} from "@affinity-lab/util";
+import type {Cache, State} from "@affinity-lab/util";
 import {fileExists, firstOrUndefined, getUniqueFilename, MaterializeIt, removeEmptyParentDirectories, sanitizeFilename} from "@affinity-lab/util";
 import {and, eq, sql} from "drizzle-orm";
 import {MySqlTable} from "drizzle-orm/mysql-core";
@@ -246,5 +246,13 @@ export class Storage {
 		attachments[idx].name = newName;
 		await fs.promises.rename(Path.join(path, filename), Path.join(path, newName));
 		await this.updateRecord(name, id, attachments);
+	}
+
+	plugin() {
+		return (repository: EntityRepositoryInterface) => {
+			repository.pipelines.delete.blocks
+				.finalize.append(async (state: State<{ item: { id: number } }>) => this.destroy(repository, state.item.id)
+			)
+		}
 	}
 }

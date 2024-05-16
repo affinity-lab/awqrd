@@ -1,6 +1,6 @@
 import {firstOrUndefined, MaterializeIt, type MaybePromise, type MaybeUndefined, type MaybeUnset, ProcessPipeline, type State, T_Class} from "@affinity-lab/util";
 import {sql} from "drizzle-orm";
-import {MySqlTableWithColumns} from "drizzle-orm/mysql-core";
+import {MySqlTableWithColumns} from "drizzle-orm/mysql-core/index";
 import type {MySql2Database} from "drizzle-orm/mysql2";
 import {stmt} from "../helper";
 import type {Dto, WithId, WithIds} from "../types";
@@ -24,17 +24,24 @@ export class ViewEntityRepository<
 	readonly fields: string[];
 	readonly pipelines = this.pipelineFactory();
 	readonly instantiate = this.instantiateFactory();
-
 	protected readonly exec = this.pipelineExecFactory();
 
 	constructor(readonly db: MySql2Database<any>, readonly schema: SCHEMA, readonly entity: ENTITY) {
 		this.fields = Object.keys(schema);
+		entity.repository = this
 		this.initialize();
 	}
+
+	addPlugin(plugin: (repository: ViewEntityRepositoryInterface) => any) {
+		plugin(this);
+		return this;
+	}
+
+
 	protected initialize() {}
 
 	@MaterializeIt
-	protected get stmt_all() { return stmt<Array<DTO>>(this.db.select().from(this.schema))}
+	protected get stmt_all() { return stmt<undefined,Array<DTO>>(this.db.select().from(this.schema))}
 	@MaterializeIt
 	protected get stmt_get_array() { return stmt<WithIds, Array<DTO>>(this.db.select().from(this.schema).where(sql`id IN (${sql.placeholder("ids")})`))}
 	@MaterializeIt
@@ -62,7 +69,7 @@ export class ViewEntityRepository<
 			getAll: new ProcessPipeline("prepare", "action", "finalize").setup({
 				action: (async (state: State) => {
 					if (state.dtos === undefined) state.dtos = [];
-					state.dtos.push(...await this.stmt_all());
+					state.dtos.push(...await this.stmt_all(undefined));
 				}),
 				finalize: (async (state: State) => {
 					state.items = await this.instantiate.all(state.dtos)
@@ -140,19 +147,19 @@ export class ViewEntityRepository<
 	 * Retrieves all items
 	 * @returns A promise resolving to all items.
 	 */
-	get(): Promise<Array<WithId<ITEM>>>
+	get(): Promise<Array<ITEM>>
 	/**
 	 * Retrieves one or multiple items by their IDs.
 	 * @param ids
 	 * @returns A promise resolving to one or multiple items, or undefined if not found.
 	 */
-	get(ids: Array<number>): Promise<Array<WithId<ITEM>>>
+	get(ids: Array<number>): Promise<Array<ITEM>>
 	/**
 	 * Retrieves one item by the provided ID.
 	 * @param id
 	 * @returns A promise resolving to the item, or undefined if not found.
 	 */
-	get(id: MaybeUnset<number>): Promise<WithId<ITEM> | undefined>
+	get(id: MaybeUnset<number>): Promise<ITEM | undefined>
 	async get(id?: Array<number> | number | undefined | null) {
 		if (arguments.length === 0) return this.exec.getAll();
 		if (Array.isArray(id)) {
@@ -171,7 +178,8 @@ export class ViewEntityRepository<
 	 * @returns A promise that resolves to the new item.
 	 */
 	async create(): Promise<ITEM> {
-		return new this.entity(this as ViewEntityRepositoryInterface);
+		// @ts-ignore
+		return new this.entity(this);
 	}
 
 	/**

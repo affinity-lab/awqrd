@@ -1,19 +1,19 @@
-import {type MySqlTableWithColumns} from "drizzle-orm/mysql-core";
+import {type Dto, Entity, EntityRepository} from "@affinity-lab/storm";
+import {type MaybeUnset, T_Class} from "@affinity-lab/util";
 import {Column, getTableName} from "drizzle-orm";
-import {type Dto, Entity, EntityRepository, type T_Class} from "@affinity-lab/storm";
+import {type MySqlTableWithColumns} from "drizzle-orm/mysql-core";
 import {sapphireError} from "./error";
-import {type MaybeUnset} from "@affinity-lab/util";
 
-export abstract class IForm<SCHEMA extends MySqlTableWithColumns<any>, ITEM extends Entity,ENTITY extends T_Class<ITEM, typeof Entity> = T_Class<ITEM, typeof Entity>,DTO extends Dto<SCHEMA> = Dto<SCHEMA>>{
+export abstract class IForm<SCHEMA extends MySqlTableWithColumns<any>, ITEM extends Entity, ENTITY extends T_Class<ITEM, typeof Entity> = T_Class<ITEM, typeof Entity>, DTO extends Dto<SCHEMA> = Dto<SCHEMA>> {
 	protected type: string;
 
 	protected constructor(public schema: SCHEMA,
-						  protected repository: EntityRepository<SCHEMA, ITEM>
+		protected repository: EntityRepository<SCHEMA, ITEM>
 	) {
 		this.type = getTableName(this.schema);
 	}
 
-	protected async import(id : number | null, values: Record<string, any>): Promise<Record<string, any>> {
+	protected async import(id: number | null, values: Record<string, any>): Promise<Record<string, any>> {
 		for (let key of Object.keys(this.schema)) {
 			let field = this.schema[key] as Column;
 			if (field.dataType === "date") {
@@ -23,31 +23,31 @@ export abstract class IForm<SCHEMA extends MySqlTableWithColumns<any>, ITEM exte
 		return values;
 	}
 
-	protected async export(item: ITEM | undefined, values?: Record<string, any>): Promise<{data: DTO | undefined, type: any}> {
+	protected async export(item: ITEM | undefined, values?: Record<string, any>): Promise<{ data: DTO | undefined, type: any }> {
 		return {type: item?.constructor.name, data: item ? (item.$export as Function)() : {}};
 	}
 
 	public async getItem(id: number | null, values?: Record<string, any>) {
 		let u = await this.repository.get(id);
-		let item = id ? await this.export(u, values) : await this.newItem(values) ;
-		if(!item) throw sapphireError.notFound({location: "getItem", id});
+		let item = id ? await this.export(u, values) : await this.newItem(values);
+		if (!item) throw sapphireError.notFound({location: "getItem", id});
 		return item;
 	}
 
 	public async save(id: number | null, values: Record<string, any> = {}): Promise<MaybeUnset<number>> {
 		values = await this.import(id, values);
 		let item: ITEM | undefined;
-		if(!id) item = await this.repository.create();
+		if (!id) item = await this.repository.create();
 		else item = await this.repository.get(id);
-		if(!item) throw sapphireError.notFound({location: "saveItem", id});
+		if (!item) throw sapphireError.notFound({location: "saveItem", id});
 		item.$import(values);
 		await item.$save();
 		return item.id;
 	}
 
-	protected abstract newItem(values?: Record<string, any>): Promise<{type: string, data: Partial<DTO> & Record<string, any>}>;
+	protected abstract newItem(values?: Record<string, any>): Promise<{ type: string, data: Partial<DTO> & Record<string, any> }>;
 
-	async delete(id: number) {await this.repository.delete(id);}
+	async delete(id: number) {await this.repository.delete(await this.repository.get(id));}
 
 	// async file(id: number, collectionName: string, files: Array<TmpFile>) {
 	// 	let collection: Collection<any> | undefined = undefined;

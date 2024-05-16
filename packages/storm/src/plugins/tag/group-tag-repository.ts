@@ -1,22 +1,24 @@
-import {T_Class} from "@affinity-lab/util";
+import {prevDto} from "@affinity-lab/storm/src/helper";
+import {Usage} from "@affinity-lab/storm/src/plugins/tag/tag-repository";
+import {type State, T_Class} from "@affinity-lab/util";
 import {and, eq, not, sql} from "drizzle-orm";
 import {type MySqlTable} from "drizzle-orm/mysql-core";
 import {type MySql2Database} from "drizzle-orm/mysql2";
 import {EntityRepositoryInterface} from "../../entity/entity-repository-interface";
-import {Export, stmt} from "../../helper";
+import {stmt} from "../../helper";
 import type {Dto} from "../../types";
 import {tagError} from "./helper/error";
 import {TagEntity, TagRepository} from "./tag-repository";
 
 //TODO: ez a groupId elég gyanús nekem! :D
-export class GroupTagEntity extends TagEntity {@Export groupId: number | string | null = null}
+export class GroupTagEntity extends TagEntity {}
 
 
 // TODO test this
 export class GroupTagRepository<
 	SCHEMA extends MySqlTable,
 	ITEM extends GroupTagEntity,
-	DTO extends Dto<SCHEMA> & { name: string, groupId: number } = Dto<SCHEMA> & { name: string, groupId: number },
+	DTO extends Dto<SCHEMA> & { name: string } = Dto<SCHEMA> & { name: string },
 	ENTITY extends T_Class<ITEM, typeof GroupTagEntity> = T_Class<ITEM, typeof GroupTagEntity>,
 > extends TagRepository<SCHEMA, ITEM> {
 
@@ -157,6 +159,46 @@ export class GroupTagRepository<
 				set[usage.field] = sql`trim(both ',' from replace(concat(',', ${usage.repo.schema[usage.field]} , ','), ${oldN}, ','))`;
 				await usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`FIND_IN_SET(${oldName}, ${usage.repo.schema[usage.field]})`, sql`FIND_IN_SET(${newName}, ${usage.repo.schema[usage.field]})`, eq(usage.repo.schema[this.fieldName], groupId)));
 			}
+		}
+	}
+
+
+	// ------------------------------------------ PIPELINE PLUGIN
+
+	plugin(field: string, groupField: string = "groupId") {
+		return (repository: EntityRepositoryInterface) => {
+
+			let usage: Usage = {repo: repository, field}
+			usage[this.fieldName] = (repository as Record<string, any>)[groupField] 
+			//TODO: CHECK IF THIS WORKS AND IF YES TRY TO TYPEHINT IT
+
+			repository.pipelines.update.blocks
+				.prepare.append(async (state: State) => await prevDto(state, repository))
+				.prepare.append(async (state: State) => this.prepare(repository, state.dto))
+				.finalize.append(async (state: State) => {
+					await this.selfRename(state.dto, state.prevDto, groupField);
+					await this.updateTag(repository, state.dto, state.prevDto, groupField);
+				}
+			)
+
+			repository.pipelines.delete.blocks
+				.prepare.append(async (state: State) => await prevDto(state, repository))
+				.finalize.append(async (state: State) => {
+					await this.updateTag(repository, state.dto, state.prevDto, groupField);
+
+				}
+			)
+
+			repository.pipelines.insert.blocks
+				.prepare.append(async (state: State) => this.prepare(repository, state.dto))
+
+			repository.pipelines.overwrite.blocks
+				.prepare.append(async (state: State) => await prevDto(state, repository))
+				.finalize.append(async (state: State) => {
+					await this.selfRename(state.dto, await prevDto(state, repository), groupField);
+					await this.updateTag(repository, state.dto, await prevDto(state, repository), groupField);
+				}
+			)
 		}
 	}
 }

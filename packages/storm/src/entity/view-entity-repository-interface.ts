@@ -1,16 +1,16 @@
 import {MaybeUndefined, MaybeUnset, ProcessPipeline, T_Class} from "@affinity-lab/util";
 import {MySqlTableWithColumns} from "drizzle-orm/mysql-core";
 import type {MySql2Database} from "drizzle-orm/mysql2";
-import type {Dto, WithId} from "../types";
+import type {Dto} from "../types";
 
 import {ViewEntity} from "./view-entity";
 
 
 export interface ViewEntityRepositoryInterface<
-	SCHEMA extends MySqlTableWithColumns<any> = MySqlTableWithColumns<any>,
-	ITEM extends ViewEntity = ViewEntity,
-	ENTITY extends T_Class<ITEM, typeof ViewEntity> = T_Class<ITEM, typeof ViewEntity>,
-	DTO extends Dto<SCHEMA> = Dto<SCHEMA> & Record<string, any>
+	SCHEMA extends MySqlTableWithColumns<any> = any,
+	ITEM extends ViewEntity = any,
+	ENTITY extends T_Class<ITEM, typeof ViewEntity> = any,
+	DTO extends Dto<SCHEMA> = any
 > {
 	readonly db: MySql2Database<any>
 	readonly schema: SCHEMA,
@@ -27,12 +27,12 @@ export interface ViewEntityRepositoryInterface<
 		one: (dto: (DTO | undefined)) => Promise<undefined | ITEM>;
 		first: (dtoSet: Array<DTO>) => Promise<MaybeUndefined<ITEM>>
 	};
-
+	addPlugin(plugin: (repository: ViewEntityRepositoryInterface) => any): this;
 	getRawDTO(id: MaybeUnset<number>): Promise<MaybeUndefined<DTO>>;
 
-	get(): Promise<Array<WithId<ITEM>>>;
-	get(ids: Array<number>): Promise<Array<WithId<ITEM>>>;
-	get(id: MaybeUnset<number>): Promise<WithId<ITEM> | undefined>;
+	get(): Promise<Array<ITEM>>;
+	get(ids: Array<number>): Promise<Array<ITEM>>;
+	get(id: MaybeUnset<number>): Promise<ITEM | undefined>;
 
 	create(): Promise<ITEM>;
 	reload(item: any): Promise<void>;

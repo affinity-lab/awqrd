@@ -1,19 +1,21 @@
+import {cometError} from "@affinity-lab/comet/src/error";
 import type {Middleware} from "@affinity-lab/util";
-import type {CometState} from "../client/client";
 import {ExtendedError} from "@affinity-lab/util";
 import {StatusCode} from "hono/dist/types/utils/http-status";
+import type {CometState} from "../client/client";
 
 export class RenderMiddleware implements Middleware {
 
-	constructor(private errorHandler?: (error: any) => void) {}
+	constructor(private errorHandler?: (error: any) => any) {}
 
 	async handle(state: CometState, next: Function) {
 		try {
+			if (state.client.unsupported) throw cometError.client.unsupported();
 			return state.ctx.json(await next())
-		} catch (e) {
-			if (this.errorHandler !== undefined) {this.errorHandler(e)}
-			if(e instanceof ExtendedError) return state.ctx.json({error: e}, e.httpResponseCode as StatusCode)
-			else return state.ctx.json({error: e}, 500)
+		} catch (error) {
+			if (this.errorHandler !== undefined) error = this.errorHandler(error) ?? error
+			if (error instanceof ExtendedError) return state.ctx.json({error: error}, error.httpResponseCode as StatusCode)
+			else return state.ctx.json({error: error}, 500)
 		}
 	}
 }

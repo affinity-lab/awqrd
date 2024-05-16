@@ -6,7 +6,7 @@
 	  "DOM"
 	],
 	"target": "ESNext",
-	"module": "esnext",
+	"module": "ESNext",
 	"moduleDetection": "force",
 	// "jsx": "react-jsx",
 	"allowJs": true,

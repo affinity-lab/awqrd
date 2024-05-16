@@ -22,7 +22,6 @@ export class ImageCollection extends Collection<ImageAttachmentMetadata> {
 		title: {type: "string"},
 		focus: {type: "enum", options: imgFocusOptions}
 	}
-
 	constructor(name: string,
 		groupDefinition: {
 			storage: Storage,
