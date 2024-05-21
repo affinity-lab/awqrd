@@ -63,6 +63,7 @@ export class Attachment<METADATA extends Record<string, any>> implements Attachm
 		}
 	}
 
+
 	/**
 	 * Save the metadata of the attachment
 	 */

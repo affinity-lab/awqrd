@@ -11,14 +11,14 @@ export class DBG {
 				req: boolean,
 			},
 			file: {
-				dbg: string|undefined,
-				sql: string|undefined,
-				req: string|undefined,
+				dbg: string | undefined,
+				sql: string | undefined,
+				req: string | undefined,
 			}
 		}) {}
 
 	req(p: string) {
-		if(!this.config.console.req) return;
+		if (!this.config.console.req) return;
 		p = p.trim()
 		if (p.startsWith("<-- ")) {
 			let a = p.substring(4).split(" ");
@@ -49,7 +49,7 @@ export class DBG {
 	}
 
 	logQuery(query: string, args: any[]) {
-		if(!this.config.console.sql) return;
+		if (!this.config.console.sql) return;
 		console.log(chalk.bold.bgBlack.yellow(`[SQL]`), highlight(query))
 		if (args.length > 0) {
 			console.log(chalk.bgBlack.bold.yellow(`:`), args)
@@ -57,8 +57,30 @@ export class DBG {
 		console.log()
 	}
 
+	msg(message: string | any) {
+		let formatted: any;
+		let raw: string;
+		if (typeof message === "string") {
+			formatted = chalk.bgBlack.greenBright.bold(message);
+			raw = message;
+		} else {
+			formatted = message;
+			raw = message.toString();
+		}
+
+		let lines = raw.split("\n");
+		let width = Math.max(...lines.map((l) => l.length));
+		let top = "╭" + ("─".repeat(width + 2)) + "╮";
+		let bottom = "╰" + ("─".repeat(width + 2)) + "╯";
+
+		console.log(chalk.bgBlack.white(top))
+		let flines = formatted.split("\n");
+		for (let i = 0; i < lines.length; i++) console.log((i === 0 ? "╮ " : "│ ") + flines[i] + " ".repeat(width - lines[i].length) + " │")
+		console.log(chalk.bgBlack.white(bottom))
+	}
+
 	log(...messages: any[]) {
-		if(!this.config.console.dbg) return;
+		if (!this.config.console.dbg) return;
 		let from = (new Error()).stack!.substring(6).split("    at ")[2].replace(process.cwd(), "");
 		let parts = /(.*?) \((.*?):(.*?):.*?\)/.exec(from)
 
