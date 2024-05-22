@@ -1,4 +1,4 @@
-import {type Dto, Entity, EntityRepository, EntityRepositoryInterface} from "@affinity-lab/storm";
+import {type Dto, Entity, EntityRepositoryInterface} from "@affinity-lab/storm";
 import {type MaybeUnset, T_Class} from "@affinity-lab/util";
 import {Column, getTableName} from "drizzle-orm";
 import {type MySqlTableWithColumns} from "drizzle-orm/mysql-core";
@@ -14,7 +14,7 @@ export abstract class IForm<
 	protected type: string;
 
 	protected constructor(public schema: SCHEMA,
-		protected repository: EntityRepositoryInterface<SCHEMA, ITEM, ENTITY, DTO>
+		protected repository: EntityRepositoryInterface
 	) {
 		this.type = getTableName(this.schema);
 	}
