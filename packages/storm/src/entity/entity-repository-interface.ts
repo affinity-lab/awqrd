@@ -1,6 +1,6 @@
 import {ProcessPipeline, T_Class} from "@affinity-lab/util";
 import {MySqlTableWithColumns} from "drizzle-orm/mysql-core";
-import {MySqlTable} from "drizzle-orm/mysql-core/index";
+import {MySqlTable} from "drizzle-orm/mysql-core";
 import type {Dto} from "../types";
 import {Entity} from "./entity";
 import {ViewEntityRepositoryInterface} from "./view-entity-repository-interface";
@@ -22,10 +22,10 @@ export interface EntityRepositoryInterface<
 		overwrite: ProcessPipeline<"prepare" | "action" | "finalize">;
 	};
 	addPlugin(plugin: (repository: EntityRepositoryInterface) => any): this;
-	save(item: ITEM): Promise<any>;
-	update(item: ITEM): Promise<any>;
-	insert(item: ITEM): Promise<any>;
-	overwrite(item: ITEM, values: Record<string, any>, reload?: boolean): Promise<any>;
-	delete(item: ITEM): Promise<any>;
+	save(item: ITEM | undefined): Promise<any>;
+	update(item: ITEM | undefined): Promise<any>;
+	insert(item: ITEM | undefined): Promise<any>;
+	overwrite(item: ITEM | undefined, values: Record<string, any>, reload?: boolean): Promise<any>;
+	delete(item: ITEM | undefined): Promise<any>;
 	create(importData?: Dto<MySqlTable>): Promise<ITEM>;
 }

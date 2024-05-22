@@ -8,8 +8,6 @@ import {type MySql2Database} from "drizzle-orm/mysql2";
 import {and, asc, desc, getTableName, like, or, sql, SQL, type SQLWrapper} from "drizzle-orm";
 import type {AnyMySqlSelectQueryBuilder} from "drizzle-orm/mysql-core/query-builders/select.types";
 import type {GetSelectTableSelection, SelectResultField} from "drizzle-orm/query-builders/select.types";
-import {EntityRepository} from "@affinity-lab/storm";
-
 type MaybeArray<T> = T | Array<T>;
 type Order = { by: MySqlColumn, reverse: boolean | undefined };
 export type Orders = Record<string, Array<Order>>;
@@ -22,15 +20,15 @@ export class JoinedQuickSearch {
 	}
 }
 
-export class IList<T extends MySqlTableWithColumns<any> = any, S extends Record<string, any> = any, R extends EntityRepository<any, any, any> = any, I extends MySqlTableWithColumns<any> = any> {
+export class IList<SCHEMA extends MySqlTableWithColumns<any> = any> {
 	constructor(
-		protected schema: T,
-		protected db: MySql2Database<S>,
+		protected schema: SCHEMA,
+		protected db: MySql2Database<any>,
 		protected quickSearchFields: Search
 	) {
 	}
 
-	protected export(item: { [K in keyof { [Key in keyof GetSelectTableSelection<T> & string]: SelectResultField<GetSelectTableSelection<T>[Key], true> }]: { [Key in keyof GetSelectTableSelection<T> & string]: SelectResultField<GetSelectTableSelection<T>[Key], true> }[K] }) {
+	protected export(item: { [K in keyof { [Key in keyof GetSelectTableSelection<SCHEMA> & string]: SelectResultField<GetSelectTableSelection<SCHEMA>[Key], true> }]: { [Key in keyof GetSelectTableSelection<SCHEMA> & string]: SelectResultField<GetSelectTableSelection<SCHEMA>[Key], true> }[K] }) {
 		return item;
 	}
 

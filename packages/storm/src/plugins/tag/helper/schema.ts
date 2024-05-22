@@ -5,9 +5,9 @@ import {type MySqlIntBuilderInitial} from "drizzle-orm/mysql-core/columns/int";
  * generate columns for tags
  * @param id
  */
-export const tagCols = (id: () => MySqlIntBuilderInitial<any>) => {
+export function tagCols (id: () => MySqlIntBuilderInitial<any>) {
 	return {id: id(), name: varchar("name", {length: 255}).notNull().unique()};
-};
+}
 
 /**
  * generate columns for group tags
@@ -15,11 +15,10 @@ export const tagCols = (id: () => MySqlIntBuilderInitial<any>) => {
  * @param groupCol
  * @param fieldName
  */
-export const groupTagCols = (id: () => MySqlIntBuilderInitial<any>, groupCol: MySqlColumnBuilder, fieldName: string = "groupId") => {
-	let columns: Record<string, MySqlColumnBuilder> = {id: id(), name: varchar("name", {length: 255}).notNull().unique()};
-	columns[fieldName] = groupCol;
-	return columns;
-};
+
+export function groupTagCols(id: () => MySqlIntBuilderInitial<any>, groupCol: MySqlColumnBuilder) {
+	return {id: id(), name: varchar("name", {length: 255}).notNull().unique(), groupId: groupCol};
+}
 
 
 /**
@@ -39,7 +38,7 @@ export function tagTableFactory(name: string, id: () => MySqlIntBuilderInitial<a
  * @param groupCol
  * @param fieldName
  */
-export function groupTagTableFactory(name: string, id: () => MySqlIntBuilderInitial<any>, groupCol: MySqlColumnBuilder, fieldName: string = "groupId") {
-	let columns = groupTagCols(id, groupCol, fieldName);
+export function groupTagTableFactory(name: string, id: () => MySqlIntBuilderInitial<any>, groupCol: MySqlColumnBuilder) {
+	let columns = groupTagCols(id, groupCol);
 	return mysqlTable(name, columns);
 }

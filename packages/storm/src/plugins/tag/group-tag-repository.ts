@@ -10,8 +10,16 @@ import type {Dto} from "../../types";
 import {tagError} from "./helper/error";
 import {TagEntity, TagRepository} from "./tag-repository";
 
-//TODO: ez a groupId elég gyanús nekem! :D
-export class GroupTagEntity extends TagEntity {}
+export type GroupUsage = {
+	repo: EntityRepositoryInterface,
+	field: string,
+	groupField: string,
+	mode?: "JSON" | "LIST"
+}
+
+export class GroupTagEntity extends TagEntity {
+	declare groupId: number | string
+}
 
 
 // TODO test this
@@ -22,9 +30,11 @@ export class GroupTagRepository<
 	ENTITY extends T_Class<ITEM, typeof GroupTagEntity> = T_Class<ITEM, typeof GroupTagEntity>,
 > extends TagRepository<SCHEMA, ITEM> {
 
-	constructor(readonly db: MySql2Database<any>, readonly schema: SCHEMA, readonly entity: ENTITY, readonly fieldName: string = "groupId") {super(db, schema, entity)}
+	protected usages: Array<GroupUsage> = []
 
-	protected stmt_groupGetByName = stmt<{ names: Array<string>, groupId: number | string }, Array<ITEM>>(this.db.select().from(this.schema).where(sql`name IN (${sql.placeholder("names")}) AND ${this.fieldName} = ${sql.placeholder("groupId")}`), this.instantiate.all)
+	constructor(readonly db: MySql2Database<any>, readonly schema: SCHEMA, readonly entity: ENTITY) {super(db, schema, entity)}
+
+	protected stmt_groupGetByName = stmt<{ names: Array<string>, groupId: number | string }, Array<ITEM>>(this.db.select().from(this.schema).where(sql`name IN (${sql.placeholder("names")}) AND groupId = ${sql.placeholder("groupId")}`), this.instantiate.all)
 
 	/**
 	 * Get tags by name and groupId
@@ -53,7 +63,7 @@ export class GroupTagRepository<
 		for (let usage of this.usages) {
 			let set: Record<string, any> = {}
 			set[usage.field] = sql`trim(both ',' from replace(concat(',', ${usage.repo.schema[usage.field]} , ','), ',${name},', ','))`;
-			usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`FIND_IN_SET("${name}", ${usage.repo.schema[usage.field]})`, eq(usage.repo.schema[this.fieldName], groupId)));
+			usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`FIND_IN_SET("${name}", ${usage.repo.schema[usage.field]})`, eq(usage.repo.schema[usage.groupField], groupId)));
 		}
 	}
 
@@ -121,7 +131,7 @@ export class GroupTagRepository<
 		for (let item of items) {
 			let doDelete = true;
 			for (let usage of this.usages) {
-				let res = await usage.repo.db.select().from(usage.repo.schema).where(and(sql`FIND_IN_SET(${item.name}, ${usage.repo.schema[usage.field]})`, eq(usage.repo.schema[this.fieldName], groupId))).limit(1).execute();
+				let res = await usage.repo.db.select().from(usage.repo.schema).where(and(sql`FIND_IN_SET(${item.name}, ${usage.repo.schema[usage.field]})`, eq(usage.repo.schema[usage.groupField], groupId))).limit(1).execute();
 				if (res.length !== 0) {
 					doDelete = false;
 					break;
@@ -146,7 +156,7 @@ export class GroupTagRepository<
 		for (let usage of this.usages) {
 			let set: Record<string, any> = {};
 			if (usage.mode && usage.mode === "JSON") {
-				let w = and(sql`json_extract(${usage.repo.schema[usage.field]}, ${oN}) > 0`, sql`json_extract(${usage.repo.schema[usage.field]}, ${nN}) is NULL`, eq(usage.repo.schema[this.fieldName], groupId))
+				let w = and(sql`json_extract(${usage.repo.schema[usage.field]}, ${oN}) > 0`, sql`json_extract(${usage.repo.schema[usage.field]}, ${nN}) is NULL`, eq(usage.repo.schema[usage.groupField], groupId))
 				set[usage.field] = sql`replace(${usage.repo.schema[usage.field]}, ${eO}, ${eN})`;
 				await usage.repo.db.update(usage.repo.schema).set(set).where(w);
 				w = and(sql`json_extract(${usage.repo.schema[usage.field]}, ${oN}) > 0`, sql`json_extract(${usage.repo.schema[usage.field]}, ${nN}) > 0`)
@@ -155,9 +165,9 @@ export class GroupTagRepository<
 				await usage.repo.db.update(usage.repo.schema).set(set).where(w);
 			} else {
 				set[usage.field] = sql`trim(both ',' from replace(concat(',', ${usage.repo.schema[usage.field]} , ','), ${oldN}, ${newN}))`;
-				await usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`FIND_IN_SET(${oldName}, ${usage.repo.schema[usage.field]})`, not(sql`FIND_IN_SET(${newName}, ${usage.repo.schema[usage.field]})`), eq(usage.repo.schema[this.fieldName], groupId)));
+				await usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`FIND_IN_SET(${oldName}, ${usage.repo.schema[usage.field]})`, not(sql`FIND_IN_SET(${newName}, ${usage.repo.schema[usage.field]})`), eq(usage.repo.schema[usage.groupField], groupId)));
 				set[usage.field] = sql`trim(both ',' from replace(concat(',', ${usage.repo.schema[usage.field]} , ','), ${oldN}, ','))`;
-				await usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`FIND_IN_SET(${oldName}, ${usage.repo.schema[usage.field]})`, sql`FIND_IN_SET(${newName}, ${usage.repo.schema[usage.field]})`, eq(usage.repo.schema[this.fieldName], groupId)));
+				await usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`FIND_IN_SET(${oldName}, ${usage.repo.schema[usage.field]})`, sql`FIND_IN_SET(${newName}, ${usage.repo.schema[usage.field]})`, eq(usage.repo.schema[usage.groupField], groupId)));
 			}
 		}
 	}
@@ -165,12 +175,13 @@ export class GroupTagRepository<
 
 	// ------------------------------------------ PIPELINE PLUGIN
 
-	plugin(field: string, groupField: string = "groupId") {
+	plugin(field: string, groupField?: string, mode: "JSON" | "LIST" = "LIST") {
+		if(!groupField) throw new Error("GROUPID MUST BE DEFINED !!!!!!!");
 		return (repository: EntityRepositoryInterface) => {
 
-			let usage: Usage = {repo: repository, field}
-			usage[this.fieldName] = (repository as Record<string, any>)[groupField] 
+			let usage: GroupUsage = {repo: repository, field, groupField, mode}
 			//TODO: CHECK IF THIS WORKS AND IF YES TRY TO TYPEHINT IT
+			this.addUsage(usage)
 
 			repository.pipelines.update.blocks
 				.prepare.append(async (state: State) => await prevDto(state, repository))
@@ -184,8 +195,7 @@ export class GroupTagRepository<
 			repository.pipelines.delete.blocks
 				.prepare.append(async (state: State) => await prevDto(state, repository))
 				.finalize.append(async (state: State) => {
-					await this.updateTag(repository, state.dto, state.prevDto, groupField);
-
+					await this.deleteTag(state.prevDto[usage.field].split(','), groupField)
 				}
 			)
 

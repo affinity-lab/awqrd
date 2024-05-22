@@ -12,7 +12,7 @@ import {tagError} from "./helper/error";
 export type Usage = {
 	repo: EntityRepositoryInterface,
 	field: string
-} & Record<string, any>
+}
 
 export class TagEntity extends Entity {@Export declare name: string}
 
@@ -106,7 +106,7 @@ export class TagRepository<
 	 * @param dto
 	 * @param prevDto
 	 */
-	protected async updateTag(repository: EntityRepositoryInterface, dto: Record<string, any>, prevDto: Record<string, any>) {
+	protected async updateTag(repository: EntityRepositoryInterface, dto: DTO | {}, prevDto: DTO) {
 		let {prev, curr} = this.changes(repository, dto, prevDto);
 		await this.addTag(curr.filter(x => !prev.includes(x)));
 		await this.deleteTag(prev.filter(x => !curr.includes(x)));
@@ -207,7 +207,7 @@ export class TagRepository<
 
 			repository.pipelines.delete.blocks
 				.prepare.append(async (state: State) => await prevDto(state, repository))
-				.finalize.append(async (state: State) => await this.updateTag(repository, state.dto, state.prevDto)
+				.finalize.append(async (state: State) => await this.deleteTag(state.prevDto[usage.field].split(','))
 			)
 
 			repository.pipelines.insert.blocks

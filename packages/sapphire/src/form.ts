@@ -1,14 +1,20 @@
-import {type Dto, Entity, EntityRepository} from "@affinity-lab/storm";
+import {type Dto, Entity, EntityRepository, EntityRepositoryInterface} from "@affinity-lab/storm";
 import {type MaybeUnset, T_Class} from "@affinity-lab/util";
 import {Column, getTableName} from "drizzle-orm";
 import {type MySqlTableWithColumns} from "drizzle-orm/mysql-core";
 import {sapphireError} from "./error";
 
-export abstract class IForm<SCHEMA extends MySqlTableWithColumns<any>, ITEM extends Entity, ENTITY extends T_Class<ITEM, typeof Entity> = T_Class<ITEM, typeof Entity>, DTO extends Dto<SCHEMA> = Dto<SCHEMA>> {
+
+export abstract class IForm<
+	SCHEMA extends MySqlTableWithColumns<any>,
+	ITEM extends Entity,
+	ENTITY extends T_Class<ITEM, typeof Entity> = T_Class<ITEM, typeof Entity>,
+	DTO extends Dto<SCHEMA> = Dto<SCHEMA>
+> {
 	protected type: string;
 
 	protected constructor(public schema: SCHEMA,
-		protected repository: EntityRepository<SCHEMA, ITEM>
+		protected repository: EntityRepositoryInterface<SCHEMA, ITEM, ENTITY, DTO>
 	) {
 		this.type = getTableName(this.schema);
 	}

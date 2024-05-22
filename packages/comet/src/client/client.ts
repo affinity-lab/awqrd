@@ -50,6 +50,7 @@ export abstract class Client {
 	}
 
 	async resolve(command: string, ctx: Context) {
+		command = command.toLowerCase();
 		let cmd = this.#commands[command];
 		return await this.pipeline.run({ctx, args: {}, cmd, client: this, env: {}, id: this.id + "." + command, files: {}});
 	}

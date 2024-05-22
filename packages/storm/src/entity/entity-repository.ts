@@ -3,7 +3,7 @@ import {omitFieldsIP, pickFieldsIP, ProcessPipeline, type State} from "@affinity
 import {sql} from "drizzle-orm";
 import {MySqlTableWithColumns} from "drizzle-orm/mysql-core";
 import type {MySqlRawQueryResult} from "drizzle-orm/mysql2";
-import type {MySql2Database} from "drizzle-orm/mysql2/index";
+import type {MySql2Database} from "drizzle-orm/mysql2";
 import type {Dto} from "../types";
 import {Entity} from "./entity";
 import type {EntityRepositoryInterface} from "./entity-repository-interface";
@@ -99,12 +99,12 @@ export class EntityRepository<
 	protected async getInsertDTO(item: ITEM): Promise<DTO> {
 		let dto = this.extractItemDTO(item);
 		await this.transformInsertDTO(dto);
-		return dto
+		return dto;
 	}
 	protected async getUpdateDTO(item: ITEM): Promise<DTO> {
 		let dto = this.extractItemDTO(item);
 		await this.transformUpdateDTO(dto);
-		return dto
+		return dto;
 	}
 	/**
 	 * Prepares the DTO for saving by filtering and omitting specified fields.
@@ -135,6 +135,7 @@ export class EntityRepository<
 		let item = new this.entity(this);
 		if (importData) item.$import(importData);
 		return item;
+
 	}
 
 	/**
@@ -142,21 +143,21 @@ export class EntityRepository<
 	 * @param item - The item to save.
 	 * @returns A promise that resolves once the save operation is completed.
 	 */
-	public async save(item: ITEM) {return item.id ? this.update(item) : this.insert(item)}
+	public async save(item: ITEM | undefined) {if (item) return item.id ? this.update(item) : this.insert(item)}
 
 	/**
 	 * Updates an existing item.
 	 * @param item - The item to update.
 	 * @returns A promise that resolves once the update operation is completed.
 	 */
-	public async update(item: ITEM) { return this.exec.update(item) }
+	public async update(item: ITEM | undefined) { if (item) return this.exec.update(item) }
 
 	/**
 	 * Inserts a new item.
 	 * @param item - The item to insert.
 	 * @returns A promise that resolves once the insert operation is completed.
 	 */
-	public async insert(item: ITEM) { return this.exec.insert(item)}
+	public async insert(item: ITEM | undefined) { if (item) return this.exec.insert(item)}
 
 	/**
 	 * Overwrites an item with new values.
@@ -165,7 +166,7 @@ export class EntityRepository<
 	 * @param [reload=true] - Whether to reload the item after overwriting.
 	 * @returns A promise that resolves once the overwrite operation is completed.
 	 */
-	public async overwrite(item: ITEM, values: Record<string, any>, reload: boolean = true) { return this.exec.overwrite(item, values, reload)}
+	public async overwrite(item: ITEM | undefined, values: Record<string, any>, reload: boolean = true) { if (item) return this.exec.overwrite(item, values, reload)}
 
 	/**
 	 * Deletes an item.
