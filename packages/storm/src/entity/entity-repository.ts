@@ -30,7 +30,7 @@ export class EntityRepository<
 			...super.pipelineFactory(),
 			insert: new ProcessPipeline("prepare", "action", "finalize").setup({
 				prepare: (async (state: State<{ item: ITEM }>) => {
-					state.dto = await this.getInsertDTO(state.dto)
+					state.dto = await this.getInsertDTO(state.item)
 				}),
 				action: (async (state: State) => {
 					await this.db.insert(this.schema).values(state.dto).execute().then((res: MySqlRawQueryResult) => state.insertId = res[0].insertId)
@@ -42,7 +42,7 @@ export class EntityRepository<
 			}),
 			update: new ProcessPipeline("prepare", "action", "finalize").setup({
 				prepare: (async (state: State) => {
-					state.dto = await this.getUpdateDTO(state.dto)
+					state.dto = await this.getUpdateDTO(state.item)
 				}),
 				action: (async (state: State) => {
 					await this.db.update(this.schema).set(state.dto).where(sql`id = ${sql.placeholder("id")}`).execute({id: state.item.id})
