@@ -12,6 +12,7 @@ import {storageError} from "./helper/error";
 import type {AttachmentObjects, AttachmentRecord, ITmpFile} from "./helper/types";
 
 export type GroupDefinition = { storage: Storage, group: string, entityRepository: EntityRepositoryInterface };
+type Collections = Record<string, Collection>
 
 export class Storage {
 	constructor(
@@ -24,7 +25,8 @@ export class Storage {
 
 	}
 
-	collections: Record<string, Collection<any>> = {}
+	collections: Collections = {};
+	groups: Record<string, {collections: Collections, repository: EntityRepositoryInterface}> = {};
 
 	/**
 	 * Add a collection to the storage
@@ -33,6 +35,8 @@ export class Storage {
 	addCollection(collection: any) {
 		if (this.collections[collection.name] !== undefined) throw new Error(`collection name must be unique! ${collection.name}`);
 		this.collections[collection.name] = collection;
+		if(this.groups[collection.group] === undefined) this.groups[collection.group] = {repository: collection.entityRepository, collections: {}};
+		this.groups[collection.group].collections[collection.name] = collection;
 	}
 
 	/**

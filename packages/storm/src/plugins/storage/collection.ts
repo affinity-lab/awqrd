@@ -14,14 +14,17 @@ import type {Storage} from "./storage";
 export abstract class Collection<METADATA extends Record<string, any> = {}> {
 
 
-	private entityRepository: EntityRepositoryInterface
-	private readonly group: string
+	readonly entityRepository: EntityRepositoryInterface
+	readonly group: string
 	private readonly _storage: Storage;
 
 	/**
 	 * The storage of the collection
 	 */
-	get storage() {return this._storage}
+	get storage() {
+		return this._storage
+	}
+
 	/**
 	 * The writable metadata fields
 	 */
@@ -75,9 +78,13 @@ export abstract class Collection<METADATA extends Record<string, any> = {}> {
 		return entity.id ? new CollectionHandler<METADATA>(this, entity) : undefined;
 	}
 
-	protected async updateMetadata(id: number, filename: string, metadata: Partial<METADATA>) {await this._storage.updateMetadata(this.name, id, filename, metadata);}
+	protected async updateMetadata(id: number, filename: string, metadata: Partial<METADATA>) {
+		await this._storage.updateMetadata(this.name, id, filename, metadata);
+	}
 
-	protected async prepareFile(file: ITmpFile): Promise<{ file: ITmpFile, metadata: Record<string, any> }> {return {file, metadata: {}};}
+	protected async prepareFile(file: ITmpFile): Promise<{ file: ITmpFile, metadata: Record<string, any> }> {
+		return {file, metadata: {}};
+	}
 
 	/**
 	 * Prepare the file for storage
@@ -92,22 +99,23 @@ export abstract class Collection<METADATA extends Record<string, any> = {}> {
 		let id = collectionHandler.id;
 
 		// check if entity exists
-		if (await this.entityRepository.get(id) === undefined) throw storageError.ownerNotExists(this.name, id);
 
+		if (await this.entityRepository.get(id) === undefined) throw storageError.ownerNotExists(this.name, id);
 		// check limit
+
 		if (collectionHandler.length >= this.rules.limit.count) {
 			throw storageError.tooManyFiles(this.name, id, filename, this.rules.limit.count);
 		}
-
 		// check extension
+
 		if (this.rules.ext !== undefined && !this.rules.ext.includes(ext)) {
 			throw storageError.extensionNotAllowed(this.name, id, filename, this.rules.ext);
 		}
+		// check size
+
 
 		// prepare (modify, replace, whatever) the file
 		({file, metadata} = await this.prepareFile(file));
-
-		// check size
 		let size = stat.size;
 		if (size > this.rules.limit!.size!) {
 			throw storageError.fileTooLarge(this.name, id, filename, this.rules.limit!.size!);
@@ -119,12 +127,14 @@ export abstract class Collection<METADATA extends Record<string, any> = {}> {
 	/**
 	 * Hook for when an attachment is removed
 	 */
-	async onDelete() {}
+	async onDelete() {
+	}
 
 	/**
 	 * Hook for when an attachment is modified
 	 */
-	async onModify() {}
+	async onModify() {
+	}
 
 	/**
 	 * Get attachments for an entity

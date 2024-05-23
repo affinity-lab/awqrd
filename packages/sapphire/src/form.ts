@@ -1,5 +1,5 @@
-import {type Dto, Entity, EntityRepositoryInterface} from "@affinity-lab/storm";
-import {type MaybeUnset, T_Class} from "@affinity-lab/util";
+import {Attachment, Collection, type Dto, Entity, EntityRepositoryInterface, Storage} from "@affinity-lab/storm";
+import {type MaybeUnset, T_Class, TmpFile} from "@affinity-lab/util";
 import {Column, getTableName} from "drizzle-orm";
 import {type MySqlTableWithColumns} from "drizzle-orm/mysql-core";
 import {sapphireError} from "./error";
@@ -14,7 +14,8 @@ export abstract class IForm<
 	protected type: string;
 
 	protected constructor(public schema: SCHEMA,
-		protected repository: EntityRepositoryInterface
+						  protected repository: EntityRepositoryInterface,
+						  protected storage: Storage
 	) {
 		this.type = getTableName(this.schema);
 	}
@@ -53,65 +54,68 @@ export abstract class IForm<
 
 	protected abstract newItem(values?: Record<string, any>): Promise<{ type: string, data: Partial<DTO> & Record<string, any> }>;
 
-	async delete(id: number) {await this.repository.delete(await this.repository.get(id));}
+	async delete(id: number) {
+		await this.repository.delete(await this.repository.get(id));
+	}
 
-	// async file(id: number, collectionName: string, files: Array<TmpFile>) {
-	// 	let collection: Collection<any> | undefined = undefined;
-	// 	for (let c of this.repository.files) if (c.name === collectionName) collection = c;
-	// 	if (!collection) return "collection doesn't exist!";
-	// 	if (files) for (let file of files) await collection.add(id, file);
-	// 	else return "No files were given!";
-	// 	return "done";
-	// }
-	//
-	// async collection(id: number) {
-	// 	let collections = [];
-	// 	for (let collection of this.repository.files) {
-	// 		let files = await collection.get(id);
-	// 		collections.push({
-	// 			name: collection.name,
-	// 			items: files,
-	// 			publicMetaFields: collection.publicMetaFields,
-	// 			rules: collection.rules
-	// 		});
-	// 	}
-	// 	return collections;
-	// }
-	//
-	// async changeFileData(id: number, collectionName: string, fileName: string, newMetaData?: Record<string, any>, newName?: string) {
-	// 	let collection: Collection<any> | undefined = undefined;
-	// 	for (let c of this.repository.files) if (c.name === collectionName) collection = c;
-	// 	if (!collection) return "collection doesn't exist!";
-	// 	if (newMetaData) await collection.setMetadata(id, fileName, newMetaData);
-	// 	if (newName) {
-	// 		let ext = Path.extname(fileName);
-	// 		newName = newName.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-	// 		if ((fileName.split('.')[0] !== newName.split('.')[0]) || (Path.extname(newName) !== ext && Path.extname(newName) !== '')) {
-	// 			if (Path.extname(newName) !== ext) {
-	// 				console.log(fileName, ext, newName)
-	// 				newName += ext;
-	// 			}
-	// 			await collection.rename(id, fileName, newName);
-	// 		}
-	// 	}
-	// 	return "done";
-	// }
-	//
-	// async deleteFile(id: number, collectionName: string, fileName: string) {
-	// 	let collection: Collection<any> | undefined = undefined;
-	// 	for (let c of this.repository.files) if (c.name === collectionName) collection = c;
-	// 	if (!collection) return "collection doesn't exist!";
-	// 	await collection.delete(id, fileName);
-	// 	return "done";
-	// }
-	//
-	// async changeFileOrder(id: number, collectionName: string, fileName: string,  position: number) {
-	// 	let collection: Collection<any> | undefined = undefined;
-	// 	for (let c of this.repository.files) if (c.name === collectionName) collection = c;
-	// 	if (!collection) return "collection doesn't exist!";
-	// 	await collection.setPosition(id, fileName, position);
-	// 	return "done";
-	// }
+	async file(id: number, collectionName: string, files: Array<TmpFile>) {
+		let item = await this.repository.get(id);
+		let collection: Collection<any> | undefined = this.storage.collections[collectionName];
+		if (!collection) throw sapphireError.collectionNotExist(collectionName);
+		if (files) for (let file of files) await collection.handler(item)?.add(file);
+		else throw sapphireError.fileNotProvided();
+	}
+
+	async collection(id: number) {
+		let collections = [];
+		for (let key in this.storage.groups) {
+			let group = this.storage.groups[key];
+			if(group.repository === this.repository) {
+				for (let key in group.collections) {
+					let collection = group.collections[key];
+					let files = await collection.get(id);
+					collections.push({
+						name: collection.name,
+						items: files,
+						publicMetaFields: collection.writableMetaFields,
+						rules: {...collection.rules, limit: collection.rules.limit.count}
+					});
+				}
+			}
+		}
+		return collections;
+	}
+
+	async changeFileData(id: number, collectionName: string, fileName: string, newMetaData?: Record<string, any>, newName?: string) {
+		let collection: Collection<any> | undefined = this.storage.collections[collectionName];
+		if (!collection) throw sapphireError.collectionNotExist(collectionName);
+		let item = await this.repository.get(id);
+		for(let file of collection.handler(item) || []) {
+			if(newMetaData) file.metadata = newMetaData;
+			if(newName) await file.rename(newName);
+		}
+	}
+
+	protected async findFile(id: number, collectionName: string, fileName: string): Promise<Attachment<any>> {
+		let collection: Collection<any> | undefined = this.storage.collections[collectionName];
+		if (!collection) throw sapphireError.collectionNotExist(collectionName);
+		let item = await this.repository.get(id);
+		let handler = collection.handler(item);
+		if(!handler) throw sapphireError.notFound({type: "handler"});
+		let file = handler.findFile(fileName);
+		if(!file) throw sapphireError.notFound({type: "file"});
+		return file;
+	}
+
+	async deleteFile(id: number, collectionName: string, fileName: string) {
+		let file = await this.findFile(id, collectionName, fileName);
+		await file.delete();
+	}
+
+	async changeFileOrder(id: number, collectionName: string, fileName: string, position: number) {
+		let file = await this.findFile(id, collectionName, fileName);
+		await file.setPositions(position);
+	}
 
 
 }

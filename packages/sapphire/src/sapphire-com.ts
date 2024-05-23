@@ -8,7 +8,7 @@ export abstract class SapphireCom {
 	protected constructor(
 		protected readonly formAdapter: IForm<any, any>,
 		protected readonly listAdapter: IList,
-		protected readonly tmpFile: (...args: any) => TmpFile,
+		protected readonly tmpFile: (...args: any) => Promise<TmpFile>,
 	) {
 	}
 
@@ -37,33 +37,28 @@ export abstract class SapphireCom {
 
 	// -----------------------------------------------------------------
 
-	// @Command()
-	// async file(args: {id: string, collectionName: string}, req: Request, {files}: Files) {
-	// 	if(!(await this.authResolver.hasRole(req, this.getRole("update")))) throw new ExtendedError("UNAUTHORIZED to upload file", "FORBIDDEN", undefined, 403);
-	// 	return this.formAdapter.file(parseInt(args.id), args.collectionName, files.map(f=>this.tmpFile(f)))
-	// }
-	//
-	// @Command()
-	// async collection(args: {id: string}, req: Request): Promise<any[]> {
-	// 	if(!(await this.authResolver.hasRole(req, this.getRole("read")))) throw new ExtendedError("UNAUTHORIZED to read collection info", "FORBIDDEN", undefined, 403);
-	// 	return this.formAdapter.collection(parseInt(args.id));
-	// }
-	//
-	// @Command()
-	// async changeFileData(args: {id: string, collectionName: string, fileName: string, newMetaData?: Record<string, any>, newName?: string}, req: Request) {
-	// 	if(!(await this.authResolver.hasRole(req, this.getRole("update")))) throw new ExtendedError("UNAUTHORIZED to change file data", "FORBIDDEN", undefined, 403);
-	// 	return this.formAdapter.changeFileData(parseInt(args.id), args.collectionName, args.fileName, args.newMetaData, args.newName);
-	// }
-	//
-	// @Command()
-	// async deleteFile(args: {id: string, collectionName: string, fileName: string}, req: Request) {
-	// 	if(!(await this.authResolver.hasRole(req, this.getRole("delete")))) throw new ExtendedError("UNAUTHORIZED to delete file", "FORBIDDEN", undefined, 403);
-	// 	return this.formAdapter.deleteFile(parseInt(args.id), args.collectionName, args.fileName);
-	// }
-	//
-	// @Command()
-	// async changeFileOrder(args: {id: string, collectionName: string, fileName: string, position: string}, req: Request) {
-	// 	if(!(await this.authResolver.hasRole(req, this.getRole("update")))) throw new ExtendedError("UNAUTHORIZED to change file order", "FORBIDDEN", undefined, 403);
-	// 	return this.formAdapter.changeFileOrder(parseInt(args.id), args.collectionName, args.fileName, parseInt(args.position));
-	// }
+	@Comet.Command({preprocess: [(state:CometState)=>state.cmd.instance.auth(state)]})
+	async file(@Comet.Args args: {id: string, collectionName: string}, @Comet.Files {files}: {files: Array<File>}, @Comet.Env env: any) {
+		return this.formAdapter.file(parseInt(args.id), args.collectionName, await Promise.all(files.map(f=>this.tmpFile(f))));
+	}
+
+	@Comet.Command({preprocess: [(state:CometState)=>state.cmd.instance.auth(state)]})
+	async collection(@Comet.Args args: {id: string}, @Comet.Env env: any): Promise<any[]> {
+		return this.formAdapter.collection(parseInt(args.id));
+	}
+
+	@Comet.Command({preprocess: [(state:CometState)=>state.cmd.instance.auth(state)]})
+	async changeFileData(@Comet.Args args: {id: string, collectionName: string, fileName: string, newMetaData?: Record<string, any>, newName?: string}, @Comet.Env env: any) {
+		return this.formAdapter.changeFileData(parseInt(args.id), args.collectionName, args.fileName, args.newMetaData, args.newName);
+	}
+
+	@Comet.Command({preprocess: [(state:CometState)=>state.cmd.instance.auth(state)]})
+	async deleteFile(@Comet.Args args: {id: string, collectionName: string, fileName: string}, @Comet.Env env: any) {
+		return this.formAdapter.deleteFile(parseInt(args.id), args.collectionName, args.fileName);
+	}
+
+	@Comet.Command({preprocess: [(state:CometState)=>state.cmd.instance.auth(state)]})
+	async changeFileOrder(@Comet.Args args: {id: string, collectionName: string, fileName: string, position: string}, @Comet.Env env: any) {
+		return this.formAdapter.changeFileOrder(parseInt(args.id), args.collectionName, args.fileName, parseInt(args.position));
+	}
 }

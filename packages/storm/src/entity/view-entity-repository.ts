@@ -37,7 +37,6 @@ export class ViewEntityRepository<
 		return this;
 	}
 
-
 	protected initialize() {}
 
 	@MaterializeIt

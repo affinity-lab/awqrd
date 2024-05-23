@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/storm-schema-helper",
-  "version": "1.0.62",
+  "version": "1.0.65",
   "description": "Schema Helper for Storm",
   "type": "module",
   "main": "dist/index.js",
