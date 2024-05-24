@@ -31,8 +31,7 @@ export abstract class SapphireCom {
 
 	@Comet.Command({preprocess: [(state:CometState)=>state.cmd.instance.auth(state)]})
 	async delete(@Comet.Args args: {id: number}, @Comet.Ctx ctx: any, @Comet.Env env: any) {
-		await this.formAdapter.delete(args.id);
-		return true;
+		return await this.formAdapter.delete(args.id);
 	}
 
 	// -----------------------------------------------------------------
