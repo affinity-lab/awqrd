@@ -1,6 +1,6 @@
 import {firstOrUndefined, MaterializeIt, type MaybePromise, type MaybeUndefined, type MaybeUnset, ProcessPipeline, type State, T_Class} from "@affinity-lab/util";
 import {sql} from "drizzle-orm";
-import {MySqlTableWithColumns} from "drizzle-orm/mysql-core/index";
+import {MySqlTableWithColumns} from "drizzle-orm/mysql-core";
 import type {MySql2Database} from "drizzle-orm/mysql2";
 import {stmt} from "../helper";
 import type {Dto, WithId, WithIds} from "../types";

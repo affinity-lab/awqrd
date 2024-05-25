@@ -4,38 +4,60 @@ import path from "path";
 
 const root = process.cwd();
 
+class Package {
+	name: string = "";
+	version: string = "";
+	path: string = "";
+	dependencies: string[] = [];
+
+	constructor(name:string,  ...dependencies: string[]) {
+		this.name = name;
+		this.path = path.join(root, 'packages', name);
+		this.dependencies = dependencies;
+	}
+}
 
 export let packages = {
-	util: {
-		version: "0.0.1",
-		path: path.join(root, "packages/util"),
-		name: "",
-		dependencies: []
-	},
-	storm: {
-		version: "0.0.1",
-		path: path.join(root, "packages/storm"),
-		name: "",
-		dependencies: ["util"]
-	},
-	comet: {
-		version: "0.0.1",
-		path: path.join(root, "packages/comet"),
-		name: "",
-		dependencies: ["util"]
-	},
-	schemaHelper: {
-		version: "0.0.1",
-		path: path.join(root, "packages/schema-helper"),
-		name: "",
-		dependencies: []
-	},
-	sapphire: {
-		version: "0.0.1",
-		path: path.join(root, "packages/sapphire"),
-		name: "",
-		dependencies: ["util", "comet", "storm"]
-	},
+	util: new Package("util"),
+	storm: new Package("storm", "util"),
+	stormCache: new Package("storm-cache", "storm", "util"),
+	stormStorage: new Package("storm-storage", "storm", "util"),
+	stormStorageServerBunHono: new Package("storm-storage-server-bun-hono", "storm", "util"),
+	stormTag: new Package("storm-tag", "storm", "util"),
+	stormValidator: new Package("storm-validator", "storm", "util"),
+	comet: new Package("comet", "util"),
+
+
+	// util: {
+	// 	version: "0.0.1",
+	// 	path: path.join(root, "packages/util"),
+	// 	name: "",
+	// 	dependencies: []
+	// },
+	// storm: {
+	// 	version: "0.0.1",
+	// 	path: path.join(root, "packages/storm"),
+	// 	name: "",
+	// 	dependencies: ["util"]
+	// },
+	// comet: {
+	// 	version: "0.0.1",
+	// 	path: path.join(root, "packages/comet"),
+	// 	name: "",
+	// 	dependencies: ["util"]
+	// },
+	// schemaHelper: {
+	// 	version: "0.0.1",
+	// 	path: path.join(root, "packages/schema-helper"),
+	// 	name: "",
+	// 	dependencies: []
+	// },
+	// sapphire: {
+	// 	version: "0.0.1",
+	// 	path: path.join(root, "packages/sapphire"),
+	// 	name: "",
+	// 	dependencies: ["util", "comet", "storm"]
+	// },
 }
 
 readPackages();
@@ -52,17 +74,22 @@ function build() {
 	buildPackage("util")
 	buildPackage("comet")
 	buildPackage("storm")
-	buildPackage("schemaHelper")
-	buildPackage("sapphire")
+	buildPackage("stormCache")
+	buildPackage("stormStorage")
+	buildPackage("stormStorageServerBunHono")
+	buildPackage("stormTag")
+	buildPackage("stormValidator")
+	// buildPackage("schemaHelper")
+	// buildPackage("sapphire")
 }
 
 
 function publish(code:string) {
-	publishPackage("util", code)
-	publishPackage("comet", code)
-	publishPackage("storm", code)
-	publishPackage("schemaHelper", code)
-	publishPackage("sapphire", code)
+	// publishPackage("util", code)
+	// publishPackage("comet", code)
+	// publishPackage("storm", code)
+	// publishPackage("schemaHelper", code)
+	// publishPackage("sapphire", code)
 }
 
 function publishPackage(name: keyof typeof packages, code:string) {

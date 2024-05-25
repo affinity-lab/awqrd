@@ -79,6 +79,26 @@ export class DBG {
 		console.log(chalk.bgBlack.white(bottom))
 	}
 
+	err(message: any, traceSkip = 2) {
+		if (!this.config.console.dbg) return;
+		let from: string;
+		if (message.stack)
+			from = message.stack!.substring(6).split("    at ")[traceSkip].replace(process.cwd(), "");
+		else
+			from = (new Error()).stack!.substring(6).split("    at ")[traceSkip].replace(process.cwd(), "");
+
+		let parts = /(.*?) \((.*?):(.*?):.*?\)/.exec(from)
+
+		console.log(
+			chalk.bold.bgBlack.blue(`[DBG] `) +
+			chalk.bold.cyan(parts![2]) +
+			chalk.blue("(" + parts![3] + ") ") +
+			chalk.bold.cyan(parts![1])
+		);
+		console.log(chalk.bold.bgBlack.blue(`:`), message);
+		console.log()
+	}
+
 	log(...messages: any[]) {
 		if (!this.config.console.dbg) return;
 		let from = (new Error()).stack!.substring(6).split("    at ")[2].replace(process.cwd(), "");

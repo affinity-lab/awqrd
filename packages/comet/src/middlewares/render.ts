@@ -1,7 +1,7 @@
 import {cometError} from "@affinity-lab/comet/src/error";
 import type {Middleware} from "@affinity-lab/util";
 import {ExtendedError} from "@affinity-lab/util";
-import {StatusCode} from "hono/dist/types/utils/http-status";
+import {StatusCode} from "hono/utils/http-status";
 import type {CometState} from "../client/client";
 
 export class RenderMiddleware implements Middleware {

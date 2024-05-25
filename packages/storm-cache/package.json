@@ -1,7 +1,9 @@
 {
-  "name": "@affinity-lab/sapphire-awqrd",
-  "version": "1.0.26",
-  "description": "Backend for sapphire",
+  "name": "@affinity-lab/storm-cache",
+  "author": "Affinity Works",
+  "license": "MIT",
+  "version": "1.0.82",
+  "description": "Storm Cache plugin",
   "types": "types/index.d.ts",
   "type": "module",
   "main": "dist/index.js",
@@ -9,19 +11,11 @@
     "prebuild": "bunx rimraf dist && bunx rimraf types",
     "build": "bunx tsc"
   },
-  "author": "Your Name",
-  "license": "MIT",
   "dependencies": {
-    "drizzle-orm": "^0.30.6",
-    "fast-glob": "^3.3.2",
     "hono": "^4.1.7",
-    "minimatch": "^9.0.4",
-    "mysql2": "^3.9.3",
     "sharp": "^0.33.3",
-    "zod": "^3.22.4",
-    "@affinity-lab/util": "2.0.55",
-    "@affinity-lab/storm": "1.0.68",
-    "@affinity-lab/comet": "1.0.72"
+    "@affinity-lab/util": "2.0.67",
+    "@affinity-lab/storm": "1.0.78"
   },
   "devDependencies": {
     "@types/bun": "latest",

@@ -3,29 +3,35 @@
   "description": "AWQRD package (contains: Storm and Comet)",
   "type": "module",
   "scripts": {
-    "build": "bun build.ts build",
-    "publish": "bun build.ts publish"
+	"build": "bun build.ts build",
+	"publish": "bun build.ts publish"
   },
   "devDependencies": {
-    "@types/bun": "^1.1.1",
-    "drizzle-kit": "^0.20.14",
-    "@affinity-lab/util": "workspace:packages/util",
-    "@affinity-lab/storm": "workspace:packages/storm",
-    "@affinity-lab/comet": "workspace:packages/comet",
-    "@affinity-lab/storm-schema-helper": "workspace:packages/schema-helper",
-    "@affinity-lab/sapphire-awqrd": "workspace:packages/sapphire"
+	"@types/bun": "^1.1.1",
+	"drizzle-kit": "^0.20.14",
+	"@affinity-lab/util": "workspace:packages/util",
+	"@affinity-lab/storm-cache": "workspace:packages/storm-cache",
+	"@affinity-lab/storm-storage": "workspace:packages/storm-storage",
+	"@affinity-lab/storm-storage-server-bun-hono": "workspace:packages/storm-storage-server-bun-hono",
+	"@affinity-lab/storm-tag": "workspace:packages/storm-tag",
+	"@affinity-lab/storm-validator": "workspace:packages/storm-validator",
+	"@affinity-lab/comet": "workspace:packages/comet",
+	"@affinity-lab/sapphire-awqrd": "workspace:packages/sapphire"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+	"typescript": "^5.0.0"
   },
   "dependencies": {
   },
   "workspaces": [
-    "packages/schema-helper",
-    "packages/comet",
-    "packages/util",
-    "packages/storm",
-    "packages/sapphire"
-
+	"packages/comet",
+	"packages/util",
+	"packages/storm",
+	"packages/storm-cache",
+	"packages/storm-storage",
+	"packages/storm-storage-server-bun-hono",
+	"packages/storm-tag",
+	"packages/storm-validator",
+	"packages/sapphire"
   ]
 }

@@ -1,4 +1,3 @@
-import {ViewEntityRepositoryInterface} from "@affinity-lab/storm/src/entity/view-entity-repository-interface";
 import {MaterializeIt} from "@affinity-lab/util";
 import {Import} from "../helper";
 import {EntityRepositoryInterface} from "./entity-repository-interface";

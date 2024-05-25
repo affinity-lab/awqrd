@@ -1,21 +1,16 @@
 import {MaterializeIt, MaybeNull, omitFieldsIP, pickFieldsIP} from "@affinity-lab/util";
-
 import {Export} from "../helper";
 import {ViewEntityRepositoryInterface} from "./view-entity-repository-interface";
-
-
-
-
 
 
 /**
  * Class representing a storm view entity.
  */
-export abstract class ViewEntity{
+export abstract class ViewEntity {
 
 	static repository: ViewEntityRepositoryInterface;
 	get $repository() { return (this.constructor as typeof ViewEntity).repository; }
-	
+
 	@Export id: MaybeNull<number> = null;
 
 	constructor() {}
