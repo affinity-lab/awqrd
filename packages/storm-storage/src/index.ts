@@ -4,7 +4,7 @@ export * from "./collection-handler";
 export * from "./storage";
 export * from "./helper/error";
 export * from "./helper/mimetype-map";
-export * from "./helper/storm-storage-schema-factory";
+export * from "./helper/schem-helpers";
 export * from "./helper/storage-plugin";
 export * from "./helper/types";
 export * from "./image/types";

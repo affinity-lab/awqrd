@@ -1,30 +1,10 @@
 import {ClassMetaData, type State} from "@affinity-lab/util";
 import {eq, sql} from "drizzle-orm";
-import {MySqlColumn} from "drizzle-orm/mysql-core";
-import {int} from "drizzle-orm/mysql-core";
+import {int, MySqlColumn} from "drizzle-orm/mysql-core";
 import type {MySqlSelectWithout} from "drizzle-orm/mysql-core/query-builders/select.types";
 import {EntityRepositoryInterface} from "./entity/entity-repository-interface";
-import {Dto} from "./types";
 
-/**
- * Creates an ID column definition.
- */
-export function id() {
-	return int("id").autoincrement().primaryKey();
-}
 
-/**
- * Creates a reference column definition.
- * @param name - The name of the column.
- * @param field - A function that returns the reference field.
- * @param [nullable=false] - Indicates whether the column is nullable (default: false).
- * @returns  A reference column definition.
- */
-export function reference(name: string, field: () => MySqlColumn, nullable: boolean = false) {
-	return nullable
-		? int(name).references(field)
-		: int(name).notNull().references(field);
-}
 /**
  * Creates an SQL expression for checking if a column's value is in a list of IDs.
  * @param col - The column to check.
@@ -132,3 +112,16 @@ export function Import(target: any, name: PropertyKey,): void {
 }
 
 Import.metadata = new ClassMetaData()
+
+export let stormSchemaHelpers = {
+
+	id: function () {
+		return int("id").autoincrement().primaryKey();
+	},
+
+	reference: function (name: string, field: () => MySqlColumn, nullable: boolean = false) {
+		return nullable
+			? int(name).references(field)
+			: int(name).notNull().references(field);
+	}
+}

@@ -1,5 +1,5 @@
-import {EntityRepositoryInterface} from "@affinity-lab/storm";
 import type {WithIdOptional} from "@affinity-lab/storm";
+import {EntityRepositoryInterface} from "@affinity-lab/storm";
 import {bytes} from "@affinity-lab/util";
 import fs from "fs";
 import {minimatch} from "minimatch";
@@ -74,17 +74,11 @@ export abstract class Collection<METADATA extends Record<string, any> = {}> {
 	 * Get a collection handler
 	 * @param entity
 	 */
-	handler(entity: WithIdOptional<Record<string, any>>): CollectionHandler<METADATA> | undefined {
-		return entity.id ? new CollectionHandler<METADATA>(this, entity) : undefined;
-	}
+	handler(entity: WithIdOptional<Record<string, any>>): CollectionHandler<METADATA> | undefined { return entity.id ? new CollectionHandler<METADATA>(this, entity) : undefined;}
 
-	protected async updateMetadata(id: number, filename: string, metadata: Partial<METADATA>) {
-		await this._storage.updateMetadata(this.name, id, filename, metadata);
-	}
+	protected async updateMetadata(id: number, filename: string, metadata: Partial<METADATA>) { await this._storage.updateMetadata(this.name, id, filename, metadata)}
 
-	protected async prepareFile(file: ITmpFile): Promise<{ file: ITmpFile, metadata: Record<string, any> }> {
-		return {file, metadata: {}};
-	}
+	protected async prepareFile(file: ITmpFile): Promise<{ file: ITmpFile, metadata: Record<string, any> }> { return {file, metadata: {}};}
 
 	/**
 	 * Prepare the file for storage
@@ -99,27 +93,20 @@ export abstract class Collection<METADATA extends Record<string, any> = {}> {
 		let id = collectionHandler.id;
 
 		// check if entity exists
-
 		if (await this.entityRepository.get(id) === undefined) throw storageError.ownerNotExists(this.name, id);
+
 		// check limit
+		if (collectionHandler.length >= this.rules.limit.count) throw storageError.tooManyFiles(this.name, id, filename, this.rules.limit.count);
 
-		if (collectionHandler.length >= this.rules.limit.count) {
-			throw storageError.tooManyFiles(this.name, id, filename, this.rules.limit.count);
-		}
 		// check extension
-
-		if (this.rules.ext !== undefined && !this.rules.ext.includes(ext)) {
-			throw storageError.extensionNotAllowed(this.name, id, filename, this.rules.ext);
-		}
-		// check size
-
+		if (this.rules.ext !== undefined && !this.rules.ext.includes(ext)) throw storageError.extensionNotAllowed(this.name, id, filename, this.rules.ext);
 
 		// prepare (modify, replace, whatever) the file
 		({file, metadata} = await this.prepareFile(file));
+
+		// check size
 		let size = stat.size;
-		if (size > this.rules.limit!.size!) {
-			throw storageError.fileTooLarge(this.name, id, filename, this.rules.limit!.size!);
-		}
+		if (size > this.rules.limit!.size!) throw storageError.fileTooLarge(this.name, id, filename, this.rules.limit!.size!);
 
 		return {file, metadata};
 	}
@@ -127,14 +114,12 @@ export abstract class Collection<METADATA extends Record<string, any> = {}> {
 	/**
 	 * Hook for when an attachment is removed
 	 */
-	async onDelete() {
-	}
+	async onDelete() {}
 
 	/**
 	 * Hook for when an attachment is modified
 	 */
-	async onModify() {
-	}
+	async onModify() {}
 
 	/**
 	 * Get attachments for an entity

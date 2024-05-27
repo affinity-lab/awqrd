@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/storm",
-  "version": "1.0.78",
+  "version": "1.0.89",
   "description": "Storm ORM for drizzle",
   "types": "types/index.d.ts",
   "type": "module",
@@ -18,7 +18,7 @@
     "mysql2": "^3.9.3",
     "sharp": "^0.33.3",
     "zod": "^3.22.4",
-    "@affinity-lab/util": "2.0.67"
+    "@affinity-lab/util": "2.0.78"
   },
   "devDependencies": {
     "@types/bun": "latest",
