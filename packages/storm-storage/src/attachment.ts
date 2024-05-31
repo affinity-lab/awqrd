@@ -1,5 +1,8 @@
+import fs from "fs";
 import {type Collection} from "./collection";
+import {mimeTypeMap} from "./helper/mimetype-map";
 import type {AttachmentObject} from "./helper/types";
+import path from "path";
 
 export class Attachment<METADATA extends Record<string, any>> implements AttachmentObject {
 
@@ -52,6 +55,23 @@ export class Attachment<METADATA extends Record<string, any>> implements Attachm
 				return false;
 			}
 		})
+	}
+
+	/**
+	 * returns the path to the attachment
+	 * */
+	get path() {return this.collection.getPath(this.#entityId);}
+
+	async base64() {
+		let filePath = path.join(this.path, this.name);
+		let buffer = await fs.promises.readFile(filePath);
+		return buffer.toString('base64');
+	}
+
+	async dataUrl(): Promise<string> {
+		let filePath = path.join(this.path, this.name);
+		let buffer = await fs.promises.readFile(filePath);
+		return "data:" + mimeTypeMap[path.extname(this.name)] + ';base64,' + buffer.toString('base64');
 	}
 
 	toJSON() {

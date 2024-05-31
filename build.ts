@@ -26,38 +26,7 @@ export let packages = {
 	stormTag: new Package("storm-tag", "storm", "util"),
 	stormValidator: new Package("storm-validator", "storm", "util"),
 	comet: new Package("comet", "util"),
-
-
-	// util: {
-	// 	version: "0.0.1",
-	// 	path: path.join(root, "packages/util"),
-	// 	name: "",
-	// 	dependencies: []
-	// },
-	// storm: {
-	// 	version: "0.0.1",
-	// 	path: path.join(root, "packages/storm"),
-	// 	name: "",
-	// 	dependencies: ["util"]
-	// },
-	// comet: {
-	// 	version: "0.0.1",
-	// 	path: path.join(root, "packages/comet"),
-	// 	name: "",
-	// 	dependencies: ["util"]
-	// },
-	// schemaHelper: {
-	// 	version: "0.0.1",
-	// 	path: path.join(root, "packages/schema-helper"),
-	// 	name: "",
-	// 	dependencies: []
-	// },
-	// sapphire: {
-	// 	version: "0.0.1",
-	// 	path: path.join(root, "packages/sapphire"),
-	// 	name: "",
-	// 	dependencies: ["util", "comet", "storm"]
-	// },
+	sapphire: new Package("sapphire", "comet", "util", "storm", "stormStorage"),
 }
 
 readPackages();
@@ -79,17 +48,20 @@ function build() {
 	buildPackage("stormStorageServerBunHono")
 	buildPackage("stormTag")
 	buildPackage("stormValidator")
-	// buildPackage("schemaHelper")
-	// buildPackage("sapphire")
+	buildPackage("sapphire")
 }
 
 
 function publish(code:string) {
-	// publishPackage("util", code)
-	// publishPackage("comet", code)
-	// publishPackage("storm", code)
-	// publishPackage("schemaHelper", code)
-	// publishPackage("sapphire", code)
+	publishPackage("util", code)
+	publishPackage("comet", code)
+	publishPackage("storm", code)
+	publishPackage("stormCache", code)
+	publishPackage("stormStorage", code)
+	publishPackage("stormTag", code)
+	publishPackage("stormValidator", code)
+	publishPackage("stormStorageServerBunHono", code)
+	publishPackage("sapphire", code)
 }
 
 function publishPackage(name: keyof typeof packages, code:string) {
@@ -134,6 +106,7 @@ function buildPackage(name: keyof typeof packages) {
 	updateVersion(pkg.version);
 
 	for (const dependency of pkg.dependencies) {
+		console.log(dependency)
 		let name = packages[dependency as keyof typeof packages].name;
 		let version = packages[dependency as keyof typeof packages].version;
 		console.log(`⏵ Updating dependecy ${name} to version: ${version}`);

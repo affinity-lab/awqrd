@@ -9,4 +9,4 @@ export const sapphireError = {
 	fileNotProvided: () => createErrorData("File is not provided", undefined, 400)
 };
 
-preprocessErrorTree(sapphireError, "COMET");
+preprocessErrorTree(sapphireError, "SAPPHIRE");

@@ -9,7 +9,7 @@ export class ValidateMiddleware implements Middleware {
 		if (typeof state.cmd.config.validate === "object") {
 			let parsed = state.cmd.config.validate.safeParse(state.args);
 			if (!parsed.success) throw cometError.validation(parsed.error.issues);
-			state.args = parsed.data;
+			state.args = {...state.args, ...parsed.data};
 		}
 		return await next()
 	}

@@ -1,8 +1,10 @@
-import {Attachment, Collection, type Dto, Entity, EntityRepositoryInterface, Storage} from "@affinity-lab/storm";
+import {type Dto, Entity, EntityRepositoryInterface} from "@affinity-lab/storm";
 import {type MaybeUnset, T_Class, TmpFile} from "@affinity-lab/util";
 import {Column, getTableName} from "drizzle-orm";
 import {type MySqlTableWithColumns} from "drizzle-orm/mysql-core";
 import {sapphireError} from "./error";
+import {Attachment, Collection, Storage} from "@affinity-lab/storm-storage";
+
 
 
 export abstract class IForm<
@@ -56,6 +58,7 @@ export abstract class IForm<
 
 	async delete(id: number) {
 		await this.repository.delete(await this.repository.get(id));
+		return true;
 	}
 
 	async file(id: number, collectionName: string, files: Array<TmpFile>) {
@@ -64,6 +67,7 @@ export abstract class IForm<
 		if (!collection) throw sapphireError.collectionNotExist(collectionName);
 		if (files) for (let file of files) await collection.handler(item)?.add(file);
 		else throw sapphireError.fileNotProvided();
+		return true;
 	}
 
 	async collection(id: number) {
@@ -77,7 +81,7 @@ export abstract class IForm<
 					collections.push({
 						name: collection.name,
 						items: files,
-						publicMetaFields: collection.writableMetaFields,
+						publicMetaFields: Object.entries(collection.writableMetaFields).map((obj) => {return {name: obj[0], ...obj[1]}}),
 						rules: {...collection.rules, limit: collection.rules.limit.count}
 					});
 				}
@@ -90,10 +94,13 @@ export abstract class IForm<
 		let collection: Collection<any> | undefined = this.storage.collections[collectionName];
 		if (!collection) throw sapphireError.collectionNotExist(collectionName);
 		let item = await this.repository.get(id);
-		for(let file of collection.handler(item) || []) {
-			if(newMetaData) file.metadata = newMetaData;
-			if(newName) await file.rename(newName);
+		let file = await this.findFile(id, collectionName, fileName);
+		if(newMetaData) {
+			Object.keys(collection.writableMetaFields).forEach(key => {if(newMetaData[key]) file.metadata[key] = newMetaData[key]})
+			await file.saveMetaData();
 		}
+		if(newName && newName.trim() !== fileName.trim()) await file.rename(newName);
+		return true;
 	}
 
 	protected async findFile(id: number, collectionName: string, fileName: string): Promise<Attachment<any>> {
@@ -102,6 +109,7 @@ export abstract class IForm<
 		let item = await this.repository.get(id);
 		let handler = collection.handler(item);
 		if(!handler) throw sapphireError.notFound({type: "handler"});
+		await handler.load();
 		let file = handler.findFile(fileName);
 		if(!file) throw sapphireError.notFound({type: "file"});
 		return file;
@@ -110,11 +118,13 @@ export abstract class IForm<
 	async deleteFile(id: number, collectionName: string, fileName: string) {
 		let file = await this.findFile(id, collectionName, fileName);
 		await file.delete();
+		return true;
 	}
 
 	async changeFileOrder(id: number, collectionName: string, fileName: string, position: number) {
 		let file = await this.findFile(id, collectionName, fileName);
 		await file.setPositions(position);
+		return true;
 	}
 
 

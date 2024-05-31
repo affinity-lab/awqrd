@@ -21,9 +21,9 @@ export abstract class Collection<METADATA extends Record<string, any> = {}> {
 	/**
 	 * The storage of the collection
 	 */
-	get storage() {
-		return this._storage
-	}
+	get storage() { return this._storage}
+
+	getPath(entityId: number) {return this.storage.getPath(this.name, entityId);}
 
 	/**
 	 * The writable metadata fields

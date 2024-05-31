@@ -8,7 +8,7 @@ export abstract class SapphireCom {
 	protected constructor(
 		protected readonly formAdapter: IForm<any, any>,
 		protected readonly listAdapter: IList,
-		protected readonly tmpFile: (...args: any) => Promise<TmpFile>,
+		protected readonly tmpFile?: (...args: any) => Promise<TmpFile>,
 	) {
 	}
 
@@ -31,15 +31,15 @@ export abstract class SapphireCom {
 
 	@Comet.Command({preprocess: [(state:CometState)=>state.cmd.instance.auth(state)]})
 	async delete(@Comet.Args args: {id: number}, @Comet.Ctx ctx: any, @Comet.Env env: any) {
-		await this.formAdapter.delete(args.id);
-		return true;
+		return await this.formAdapter.delete(args.id);
 	}
 
 	// -----------------------------------------------------------------
 
 	@Comet.Command({preprocess: [(state:CometState)=>state.cmd.instance.auth(state)]})
 	async file(@Comet.Args args: {id: string, collectionName: string}, @Comet.Files {files}: {files: Array<File>}, @Comet.Env env: any) {
-		return this.formAdapter.file(parseInt(args.id), args.collectionName, await Promise.all(files.map(f=>this.tmpFile(f))));
+		if(!this.tmpFile) throw Error("NINCS MEGADVA TMP FILE Tukkó!!!")
+		return this.formAdapter.file(parseInt(args.id), args.collectionName, await Promise.all(files.map(f=>this.tmpFile!(f))));
 	}
 
 	@Comet.Command({preprocess: [(state:CometState)=>state.cmd.instance.auth(state)]})
