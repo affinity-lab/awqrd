@@ -8,7 +8,7 @@ export class ErrorHandlerMiddleware implements Middleware {
 		if(logger) this.errorHandler = (e: any) => !(e instanceof ExtendedError) && !(e.constructor.name === "ZodError") && logger.log(e);
 	}
 
-	async handle(state: CometState, next: Function) {
+	async handle(state: CometState, next: Function): Promise<Response> {
 		try {
 			return state.ctx.json(await next())
 		} catch (e: any) {

@@ -738,6 +738,7 @@ export let mimeTypeMap: Record<string, string> = {
 	".wbxml": "application/vnd.wap.wbxml",
 	".wcm": "application/vnd.ms-works",
 	".wdb": "application/vnd.ms-works",
+	".webp": "image/webp",
 	".wiz": "application/msword",
 	".wks": "application/vnd.ms-works",
 	".wm": "video/x-ms-wm",

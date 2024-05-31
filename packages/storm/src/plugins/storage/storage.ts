@@ -83,7 +83,7 @@ export class Storage {
 		)
 	}
 
-	protected getPath(name: string, id: number) { return Path.resolve(this.path, name, id.toString(36).padStart(6, "0").match(/.{1,2}/g)!.join("/"));}
+	getPath(name: string, id: number) { return Path.resolve(this.path, name, id.toString(36).padStart(6, "0").match(/.{1,2}/g)!.join("/"));}
 
 	protected getCacheKey(name: string, id: number): string {return `${name}-${id}`;}
 
