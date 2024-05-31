@@ -30,6 +30,9 @@ export class Comet {
 	static Ctx(target: any, propertyKey: string, index: number) {
 		Comet.classMetaData.get(target.constructor, true).set(["params", propertyKey, index.toString()], "ctx");
 	}
+	static Params(target: any, propertyKey: string, index: number) {
+		Comet.classMetaData.get(target.constructor, true).set(["params", propertyKey, index.toString()], "params");
+	}
 
 
 	static Command(config: CometCommandConfig = {}): (target: any, propertyKey: string) => void {

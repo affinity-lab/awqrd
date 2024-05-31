@@ -1,5 +1,6 @@
 import type {Middleware} from "@affinity-lab/util";
-import type {CometState} from "../client/client";
+
+import {CometState} from "../client/comet-state";
 
 export class PreprocessMiddleware implements Middleware {
 	async handle(state: CometState, next: Function) {

@@ -1,5 +1,5 @@
-import { EntityRepositoryInterface } from "@affinity-lab/storm";
 import type { WithIdOptional } from "@affinity-lab/storm";
+import { EntityRepositoryInterface } from "@affinity-lab/storm";
 import { Attachment } from "./attachment";
 import { CollectionHandler } from "./collection-handler";
 import type { CollectionOptions, ITmpFile, MetaField, Rules } from "./helper/types";

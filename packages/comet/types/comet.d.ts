@@ -15,6 +15,7 @@ export declare class Comet {
     static Env(target: any, propertyKey: string, index: number): void;
     static Client(target: any, propertyKey: string, index: number): void;
     static Ctx(target: any, propertyKey: string, index: number): void;
+    static Params(target: any, propertyKey: string, index: number): void;
     static Command(config?: CometCommandConfig): (target: any, propertyKey: string) => void;
     static Group(config?: CometGroupConfig): (target: any) => void;
 }

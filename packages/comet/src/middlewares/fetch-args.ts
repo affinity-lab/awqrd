@@ -1,25 +1,16 @@
-import {reform} from "reformdata";
 import type {Middleware} from "@affinity-lab/util";
-import type {CometState} from "../client/client";
-import {cometError} from "../error";
+
+import {CometState} from "../client/comet-state";
 
 export class FetchArgsMiddleware implements Middleware {
+
+	constructor(protected argParser: (ctx: any) => Promise<{ args: any, files: any, params: any }>) {}
+
 	async handle(state: CometState, next: Function) {
-		let contentType = state.ctx.req.header("Content-type");
-
-		if (contentType === "application/json") {
-			state.args = await state.ctx.req.json();
-		} else if (contentType?.startsWith("multipart/form-data")) {
-			let reformData = reform(await state.ctx.req.formData()) as Record<string, any>
-			for (let arg in reformData) {
-				if (reformData[arg] instanceof File) state.files[arg] = [reformData[arg]];
-				else if (Array.isArray(reformData[arg]) && reformData[arg][0] instanceof File) state.files[arg] = reformData[arg];
-				else state.args[arg] = reformData[arg];
-			}
-		} else {
-			throw cometError.contentTypeNotAccepted(contentType?? "undefined")
-		}
-
-		return await next()
+		let {args, files, params} = await this.argParser(state.ctx);
+		state.args = args;
+		state.files = files;
+		state.params = params;
+		return await next();
 	}
 }

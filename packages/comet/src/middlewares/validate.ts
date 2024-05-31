@@ -1,6 +1,7 @@
 import {z} from "zod";
 import type {Middleware} from "@affinity-lab/util";
-import type {CometState} from "../client/client";
+
+import {CometState} from "../client/comet-state";
 import {cometError} from "../error";
 
 export class ValidateMiddleware implements Middleware {

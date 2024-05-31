@@ -3,7 +3,7 @@ export declare class ClientGroup {
     private clients;
     constructor(...clients: Array<Client>);
     get(version: number): Client | undefined;
-    all(): Client[];
+    all(): Client<any>[];
     range(from?: number, to?: number): Client[];
     pick(...versions: number[]): Client[];
     omit(...versions: number[]): Client[];

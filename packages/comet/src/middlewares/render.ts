@@ -1,8 +1,11 @@
 import {cometError} from "@affinity-lab/comet/src/error";
 import type {Middleware} from "@affinity-lab/util";
 import {ExtendedError} from "@affinity-lab/util";
-import {StatusCode} from "hono/utils/http-status";
-import type {CometState} from "../client/client";
+
+import {CometState} from "../client/comet-state";
+
+
+export type Result = { result: any, status: number }
 
 export class RenderMiddleware implements Middleware {
 
@@ -12,14 +15,14 @@ export class RenderMiddleware implements Middleware {
 		this.errorHandlers = errorHandlers;
 	}
 
-	async handle(state: CometState, next: Function) {
+	async handle(state: CometState, next: Function): Promise<Result> {
 		try {
 			if (state.client.unsupported) throw cometError.client.unsupported();
-			return state.ctx.json(await next())
+			return {result: await next(), status: 200}
 		} catch (error) {
 			for (let errorHandler of this.errorHandlers) error = errorHandler(error) ?? error;
-			if (error instanceof ExtendedError) return state.ctx.json(error, error.httpResponseCode as StatusCode)
-			else return state.ctx.json({error: error}, 500)
+			if (error instanceof ExtendedError) return {result: error, status: error.httpResponseCode}
+			else return {result: {error}, status: 500}
 		}
 	}
 }

@@ -1,26 +1,9 @@
 import {type Middleware, type MiddlewareFn, Pipeline} from "@affinity-lab/util";
-import type {Context} from "hono";
 import {cometError} from "../error";
+import {CometState} from "./comet-state";
+import {Command} from "./command";
 
-type Command<Instance extends Object, MethodName extends keyof Instance> = {
-	instance: Instance, // The object that contains the method to be executed
-	key: MethodName, // The name of the method to be executed on the instance
-	config: Record<string, any> // Configuration options for the method execution
-	name: string // The name of the command
-	params: string[] // The names of the parameters that the method accepts
-}
-
-export type CometState = {
-	args: Record<string, any>
-	env: Record<string, any>
-	files: Record<string, Array<File>>
-	id: string
-	ctx: Context
-	cmd: Command<any, any>
-	client: Client
-}
-
-export abstract class Client {
+export abstract class Client<CTX=any> {
 	#commands: Record<string, Command<any, any>> = {};
 	readonly id: string = crypto.randomUUID();
 	private pipeline: Pipeline<any, any>;
@@ -33,7 +16,7 @@ export abstract class Client {
 		this.pipeline = new Pipeline(...middlewares, this.execute.bind(this));
 	}
 
-	authApi(apiKey: string | undefined) {
+	async authApi(apiKey: string | undefined): Promise<boolean> {
 		apiKey;
 		return true;
 	}
@@ -49,10 +32,10 @@ export abstract class Client {
 		return state.cmd.instance[state.cmd.key](...args);
 	}
 
-	async resolve(command: string, ctx: Context) {
+	async resolve(command: string, ctx: CTX) {
 		command = command.toLowerCase();
 		let cmd = this.#commands[command];
-		return await this.pipeline.run({ctx, args: {}, cmd, client: this, env: {}, id: this.id + "." + command, files: {}});
+		return await this.pipeline.run({ctx, args: {}, params:{}, files: {}, cmd, client: this, env: {}, id: this.id + "." + command});
 	}
 
 	add(name: string, instance: any, key: string, config: Record<string, any>, params: string[]) {

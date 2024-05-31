@@ -1,0 +1,67 @@
+import {loadModuleDefaultExports, type MetaDataStore, omitFields} from "@affinity-lab/util";
+import {Comet} from "../comet";
+import {cometError} from "../error";
+import {Client} from "./client";
+import {ClientGroup} from "./client-group";
+
+type ClientInfo = { name: string | undefined, version: number | string | undefined, apiKey: string | undefined }
+
+export abstract class Clients {
+	constructor(readonly clients: Record<string, ClientGroup>) {}
+
+	protected group(name: string): ClientGroup | undefined { return this.clients[name];}
+
+	protected async find(name: string | undefined, version: number | string | undefined, apiKey: string | undefined): Promise<Client> {
+
+		if (name === undefined) throw cometError.client.noInfo()
+		if (version === undefined) throw cometError.client.noInfo()
+		if (typeof version === "string") version = parseInt(version);
+
+		let group = this.group(name);
+		if (!group) throw cometError.client.notFound(name, version);
+		let client = group?.get(version)
+		if (!client) throw cometError.client.notFound(name, version);
+		if (client.unsupported) throw cometError.client.unsupported();
+		let apiKeyAccepted = await client.authApi(apiKey)
+		if (!apiKeyAccepted) throw cometError.client.notAuthorized(name, version);
+
+		return client;
+	}
+
+	readCommands(commandsPath: string) {
+
+		loadModuleDefaultExports(commandsPath);
+
+		let allClients: Array<Client> = [];
+		for (const key in this.clients) allClients.push(...this.clients[key].all());
+
+		Comet.classMetaData.stores.forEach((store: MetaDataStore) => {
+			let config = Comet.classMetaData.read(store.target, {flatten: false, simple: true});
+
+			if (config === undefined) throw Error("Config not found for " + store.target.name + ". Did you forget to add the @Comet decorator?");
+			let group = config["group"];
+			if(group) {
+				let cometInstance = new (store.target as new () => any)(); // TODO typehint
+
+				for (const key in config["command"]) {
+					let name = ((group["name"] || store.target.name) + "." + (config["command"][key]["name"] || key)).toLowerCase();
+					let clients = config["command"][key]["clients"] || group["clients"] || allClients;
+
+					let params:string[] = [];
+					if(config["params"] !== undefined) {
+						for (const param in config["params"][key]) {
+							params[parseInt(param)] = config["params"][key][param];
+						}
+					}
+
+					clients.forEach((client:Client) => {
+						config!["command"][key] = omitFields(config!["command"][key], "name", "clients")
+						client.add(name, cometInstance, key, config!["command"][key], params)
+					});
+				}
+			}
+		})
+	}
+
+	abstract get(ctx: any): Promise<Client<any>>;
+}
