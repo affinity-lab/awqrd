@@ -1,4 +1,3 @@
-import {z} from "zod";
 import type {Middleware} from "@affinity-lab/util";
 
 import {CometState} from "../client/comet-state";

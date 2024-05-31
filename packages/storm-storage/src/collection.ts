@@ -70,6 +70,10 @@ export abstract class Collection<METADATA extends Record<string, any> = {}> {
 		this._storage.addCollection(this);
 	}
 
+	getPath(entityId: number) {
+		return this.storage.getPath(this.name, entityId);
+	}
+
 	/**
 	 * Get a collection handler
 	 * @param entity

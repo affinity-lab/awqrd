@@ -1,5 +1,4 @@
 import {fileExists} from "@affinity-lab/util";
-import {createHash} from "crypto";
 import {Hono} from "hono";
 import {serveStatic} from "hono/bun";
 import Path from "path";

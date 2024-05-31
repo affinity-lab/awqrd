@@ -7,55 +7,35 @@ import path from "path";
 export class Attachment<METADATA extends Record<string, any>> implements AttachmentObject {
 
 	#collection: Collection<METADATA>;
-	#entityId: number
-	#name: string
-	#id: string
-	#size: number
-	#metadata: METADATA
+	#entityId: number;
+	#name: string;
+	#id: string;
+	#size: number;
+	#metadata: METADATA;
 	/**
 	 * The metadata of the attachment
 	 */
-	public metadata: METADATA
+	public metadata: METADATA;
 	/**
 	 * The file size of the attachment
 	 */
-	get size(): number {return this.#size}
+	get size(): number {return this.#size;}
 	/**
 	 * The id of the attachment
 	 */
-	get id(): string {return this.#id}
+	get id(): string {return this.#id;}
 	/**
 	 * The filename of the attachment
 	 */
-	get name(): string {return this.#name}
+	get name(): string {return this.#name;}
 	/**
 	 * The collection of the attachment
 	 */
-	get collection(): Collection<METADATA> {return this.#collection}
+	get collection(): Collection<METADATA> {return this.#collection;}
 	/**
 	 * The entity id of the attachment
 	 */
-	get entityId(): number {return this.#entityId}
-
-	constructor(attachmentObject: AttachmentObject, collection: Collection<METADATA>, entityId: number) {
-		this.#entityId = entityId
-		this.#collection = collection
-		this.#name = attachmentObject.name
-		this.#id = attachmentObject.id
-		this.#size = attachmentObject.size
-		this.#metadata = attachmentObject.metadata as METADATA
-		this.metadata = new Proxy<METADATA>(this.#metadata, {
-			get: (target, prop) => target[prop.toString()],
-			set: (target, prop, value) => {
-				let p = prop.toString() as keyof METADATA;
-				if (collection.writableMetaFields.hasOwnProperty(p)) {
-					target[p] = value;
-					return true;
-				}
-				return false;
-			}
-		})
-	}
+	get entityId(): number {return this.#entityId;}
 
 	/**
 	 * returns the path to the attachment
@@ -72,6 +52,26 @@ export class Attachment<METADATA extends Record<string, any>> implements Attachm
 		let filePath = path.join(this.path, this.name);
 		let buffer = await fs.promises.readFile(filePath);
 		return "data:" + mimeTypeMap[path.extname(this.name)] + ';base64,' + buffer.toString('base64');
+	}
+
+	constructor(attachmentObject: AttachmentObject, collection: Collection<METADATA>, entityId: number) {
+		this.#entityId = entityId;
+		this.#collection = collection;
+		this.#name = attachmentObject.name;
+		this.#id = attachmentObject.id;
+		this.#size = attachmentObject.size;
+		this.#metadata = attachmentObject.metadata as METADATA;
+		this.metadata = new Proxy<METADATA>(this.#metadata, {
+			get: (target, prop) => target[prop.toString()],
+			set: (target, prop, value) => {
+				let p = prop.toString() as keyof METADATA;
+				if (collection.writableMetaFields.hasOwnProperty(p)) {
+					target[p] = value;
+					return true;
+				}
+				return false;
+			}
+		})
 	}
 
 	toJSON() {
