@@ -2,8 +2,8 @@ import {fileExists} from "@affinity-lab/util";
 import {Hono} from "hono";
 import {serveStatic} from "hono/bun";
 import Path from "path";
-import {filePathFromUrl} from "./storm-storage-file-server";
 import {createThumbnail, parseImgParams} from "./helpers";
+import {filePathFromUrl} from "./storm-storage-file-server";
 
 /**
  * Function for serving images from a specified directory with dynamic URL paths and image processing.
@@ -14,7 +14,7 @@ import {createThumbnail, parseImgParams} from "./helpers";
  * @param {string} filesPath - The path to the files directory
  * @param {boolean} skipHashCheck - Flag to skip hash check for images
  */
-export function stormImgServerHono(app: Hono, imgPath: string, prefix: string, filesPath: string) {
+export function stormImgServer(app: Hono, imgPath: string, prefix: string, filesPath: string) {
 	prefix = prefix.replace(/\/+/g, '/').replace(/^\/|\/$/g, '')
 	app.get(
 		`/${prefix}/:collection-with-id/:img/:file`,

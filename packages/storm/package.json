@@ -1,16 +1,22 @@
 {
   "name": "@affinity-lab/storm",
-  "version": "1.0.115",
+  "version": "1.0.118",
   "description": "Storm ORM for drizzle",
+  "author": "Affinity Works",
+  "license": "MIT",
   "types": "types/index.d.ts",
   "type": "module",
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src",
+    "types",
+    "tsconfig.json"
+  ],
   "scripts": {
     "prebuild": "bunx rimraf dist && bunx rimraf types",
     "build": "bunx tsc"
   },
-  "author": "Affinity Works",
-  "license": "MIT",
   "dependencies": {
     "drizzle-orm": "^0.30.6",
     "fast-glob": "^3.3.2",
@@ -18,7 +24,7 @@
     "mysql2": "^3.9.3",
     "sharp": "^0.33.3",
     "zod": "^3.22.4",
-    "@affinity-lab/util": "2.0.107"
+    "@affinity-lab/util": "2.0.110"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -26,5 +32,6 @@
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
-  }
+  },
+  "directories": {}
 }

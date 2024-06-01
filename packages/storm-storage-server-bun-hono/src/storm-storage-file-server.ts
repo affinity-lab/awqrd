@@ -12,7 +12,7 @@ export function filePathFromUrl(path: string) {
 }
 
 //todo: Add guards option
-export function stormStorageServerHono(app: Hono, path: string, prefix: string) {
+export function stormStorageServer(app: Hono, path: string, prefix: string) {
 	app.get(
 		`${prefix}*`,
 		serveStatic({

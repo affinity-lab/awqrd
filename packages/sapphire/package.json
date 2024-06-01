@@ -1,16 +1,22 @@
 {
   "name": "@affinity-lab/sapphire-awqrd",
-  "version": "1.0.33",
+  "version": "1.0.36",
   "description": "Backend for sapphire",
+  "author": "Affinity Works",
+  "license": "MIT",
   "types": "types/index.d.ts",
   "type": "module",
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src",
+    "types",
+    "tsconfig.json"
+  ],
   "scripts": {
     "prebuild": "bunx rimraf dist && bunx rimraf types",
     "build": "bunx tsc"
   },
-  "author": "Affinity Works",
-  "license": "MIT",
   "dependencies": {
     "drizzle-orm": "^0.30.6",
     "fast-glob": "^3.3.2",
@@ -19,10 +25,10 @@
     "mysql2": "^3.9.3",
     "sharp": "^0.33.3",
     "zod": "^3.22.4",
-    "@affinity-lab/util": "2.0.107",
-    "@affinity-lab/storm": "1.0.115",
-    "@affinity-lab/storm-storage": "1.0.116",
-    "@affinity-lab/comet": "1.0.119"
+    "@affinity-lab/util": "2.0.110",
+    "@affinity-lab/storm": "1.0.118",
+    "@affinity-lab/storm-storage": "1.0.119",
+    "@affinity-lab/comet": "1.0.123"
   },
   "devDependencies": {
     "@types/bun": "latest",

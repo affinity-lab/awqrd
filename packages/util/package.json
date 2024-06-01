@@ -1,12 +1,18 @@
 {
   "name": "@affinity-lab/util",
+  "version": "2.0.110",
+  "description": "Utils for Comet and Storm",
   "author": "Affinity Works",
   "license": "MIT",
-  "version": "2.0.107",
-  "description": "Utils for Comet and Storm",
   "types": "types/index.d.ts",
   "type": "module",
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src",
+    "types",
+    "tsconfig.json"
+  ],
   "scripts": {
     "prebuild": "bunx rimraf dist && bunx rimraf types",
     "build": "bunx tsc"

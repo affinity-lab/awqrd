@@ -1,12 +1,18 @@
 {
   "name": "@affinity-lab/storm-tag",
+  "version": "1.0.119",
+  "description": "Storm tag plugin",
   "author": "Affinity Works",
   "license": "MIT",
-  "version": "1.0.116",
-  "description": "Storm tag plugin",
   "types": "types/index.d.ts",
   "type": "module",
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src",
+    "types",
+    "tsconfig.json"
+  ],
   "scripts": {
     "prebuild": "bunx rimraf dist && bunx rimraf types",
     "build": "bunx tsc"
@@ -14,8 +20,8 @@
   "dependencies": {
     "hono": "^4.1.7",
     "sharp": "^0.33.3",
-    "@affinity-lab/util": "2.0.107",
-    "@affinity-lab/storm": "1.0.115"
+    "@affinity-lab/util": "2.0.110",
+    "@affinity-lab/storm": "1.0.118"
   },
   "devDependencies": {
     "@types/bun": "latest",
