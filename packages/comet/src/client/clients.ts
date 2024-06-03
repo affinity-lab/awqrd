@@ -6,10 +6,19 @@ import {ClientGroup} from "./client-group";
 
 type ClientInfo = { name: string | undefined, version: number | string | undefined, apiKey: string | undefined }
 
-export abstract class Clients {
-	constructor(readonly clients: Record<string, ClientGroup>) {}
+export abstract class Clients<GROUPS extends string = string> {
+	constructor(readonly clients: Record<GROUPS, ClientGroup>) {}
 
-	protected group(name: string): ClientGroup | undefined { return this.clients[name];}
+	public group(name: GROUPS): ClientGroup | undefined { return this.clients[name];}
+
+	public client(name: GROUPS, version: number | [number, number]): Array<Client> {
+		let group = this.group(name);
+		if (!group) return [];
+		if (typeof version === "number") {
+			let client = group.get(version);
+			return client ? [client] : [];
+		} else return group.range(version[0], version[1]);
+	}
 
 	protected async find(name: string | undefined, version: number | string | undefined, apiKey: string | undefined): Promise<Client> {
 
@@ -17,7 +26,7 @@ export abstract class Clients {
 		if (version === undefined) throw cometError.client.noInfo()
 		if (typeof version === "string") version = parseInt(version);
 
-		let group = this.group(name);
+		let group = this.group(name as GROUPS)
 		if (!group) throw cometError.client.notFound(name, version);
 		let client = group?.get(version)
 		if (!client) throw cometError.client.notFound(name, version);
@@ -40,21 +49,21 @@ export abstract class Clients {
 
 			if (config === undefined) throw Error("Config not found for " + store.target.name + ". Did you forget to add the @Comet decorator?");
 			let group = config["group"];
-			if(group) {
+			if (group) {
 				let cometInstance = new (store.target as new () => any)(); // TODO typehint
 
 				for (const key in config["command"]) {
 					let name = ((group["name"] || store.target.name) + "." + (config["command"][key]["name"] || key)).toLowerCase();
 					let clients = config["command"][key]["clients"] || group["clients"] || allClients;
 
-					let params:string[] = [];
-					if(config["params"] !== undefined) {
+					let params: string[] = [];
+					if (config["params"] !== undefined) {
 						for (const param in config["params"][key]) {
 							params[parseInt(param)] = config["params"][key][param];
 						}
 					}
 
-					clients.forEach((client:Client) => {
+					clients.forEach((client: Client) => {
 						config!["command"][key] = omitFields(config!["command"][key], "name", "clients")
 						client.add(name, cometInstance, key, config!["command"][key], params)
 					});
