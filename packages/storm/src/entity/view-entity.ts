@@ -1,6 +1,7 @@
 import {MaterializeIt, MaybeNull, omitFieldsIP, pickFieldsIP} from "@affinity-lab/util";
 import {Export} from "../helper";
 import {ViewEntityRepositoryInterface} from "./view-entity-repository-interface";
+import {entityError} from "../error";
 
 
 /**
@@ -12,6 +13,11 @@ export abstract class ViewEntity {
 	get $repository() { return (this.constructor as typeof ViewEntity).repository; }
 
 	@Export id: MaybeNull<number> = null;
+
+	get $id(): number {
+		if (this.id) return this.id;
+		throw entityError.itemNotExists()
+	}
 
 	constructor() {}
 
