@@ -7,8 +7,8 @@ export class TmpFile {
 
 	get filename() {return path.basename(this.file);}
 	constructor(public file: string) {}
-	release(): void | Promise<void> {
-		fs.promises.unlink(this.file).then(() => fs.promises.rmdir(path.dirname(this.file)));
+	async release(): Promise<void> {
+		if(await fs.promises.exists(this.file))	await fs.promises.unlink(this.file).then(() => fs.promises.rmdir(path.dirname(this.file)));
 	}
 }
 
@@ -29,7 +29,7 @@ export class TmpFileFactory {
 	}
 	async createFromBuffer(filename: string, buffer: Buffer) {
 		let target = path.join(await this.targetDir, path.basename(filename))
-		fs.writeFileSync(target, buffer);
+		await fs.promises.writeFile(target, buffer);
 		return new TmpFile(target);
 	}
 	async createFromFilePath(file: string, removeOriginal: boolean = true) {

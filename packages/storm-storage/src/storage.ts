@@ -183,7 +183,7 @@ export class Storage {
 			)).execute({name, id});
 			this.cache?.del(this.getCacheKey(name, id));
 		}
-		file.release();
+		await file.release();
 	}
 
 	/**

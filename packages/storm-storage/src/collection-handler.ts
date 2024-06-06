@@ -63,7 +63,7 @@ export class CollectionHandler<METADATA extends Record<string, any>> extends Arr
 			prepared.file,
 			prepared.metadata
 		);
-		prepared.file.release();
+		await prepared.file.release();
 		await this.load();
 	}
 
