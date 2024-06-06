@@ -1,0 +1,32 @@
+{
+  "name": "@affinity-lab/comet-hono-bun",
+  "version": "1.0.40",
+  "description": "Hono bun for comet",
+  "author": "Affinity Works",
+  "license": "MIT",
+  "types": "types/index.d.ts",
+  "type": "module",
+  "main": "dist/index.js",
+  "files": [
+	"dist",
+	"src",
+	"types",
+	"tsconfig.json"
+  ],
+  "scripts": {
+	"prebuild": "bunx rimraf dist && bunx rimraf types",
+	"build": "bunx tsc"
+  },
+  "dependencies": {
+	"hono": "^4.1.7",
+	"reformdata": "^0.2.2",
+	"@affinity-lab/comet": "1.0.129"
+  },
+  "devDependencies": {
+	"@types/bun": "latest",
+	"@types/node": "^20.12.8"
+  },
+  "peerDependencies": {
+	"typescript": "^5.0.0"
+  }
+}

@@ -26,6 +26,7 @@ export let packages = {
 	stormTag: new Package("storm-tag", "storm", "util"),
 	stormValidator: new Package("storm-validator", "storm", "util"),
 	comet: new Package("comet", "util"),
+	cometBunHono: new Package("comet-bun-hono", "comet"),
 	sapphire: new Package("sapphire", "comet", "util", "storm", "stormStorage"),
 }
 
@@ -49,6 +50,7 @@ function build() {
 	buildPackage("stormTag")
 	buildPackage("stormValidator")
 	buildPackage("sapphire")
+	buildPackage("cometBunHono")
 }
 
 
@@ -62,6 +64,7 @@ function publish(code:string) {
 	publishPackage("stormValidator", code)
 	publishPackage("stormStorageServerBunHono", code)
 	publishPackage("sapphire", code)
+	publishPackage("cometBunHono", code)
 }
 
 function publishPackage(name: keyof typeof packages, code:string) {
