@@ -2,20 +2,22 @@ import chalk from "chalk";
 import process from "process";
 import {highlight} from "sql-highlight";
 
+type BgBlackColors = "black" | "red" | "green" | "yellow" | "blue" | "magenta" | "cyan" | "white" | "gray" | "redBright" | "greenBright" | "yellowBright" | "blueBright" | "magentaBright" | "cyanBright" | "whiteBright";
+
 export class DBG {
 	constructor(private config:
-		{
-			console: {
-				dbg: boolean,
-				sql: boolean,
-				req: boolean,
-			},
-			file: {
-				dbg: string | undefined,
-				sql: string | undefined,
-				req: string | undefined,
-			}
-		}) {}
+					{
+						console: {
+							dbg: boolean,
+							sql: boolean,
+							req: boolean,
+						},
+						file: {
+							dbg: string | undefined,
+							sql: string | undefined,
+							req: string | undefined,
+						}
+					}) {}
 
 	req(p: string) {
 		if (!this.config.console.req) return;
@@ -57,11 +59,11 @@ export class DBG {
 		console.log()
 	}
 
-	msg(message: string | any) {
+	msg(message: string | any, color: BgBlackColors = "greenBright") {
 		let formatted: any;
 		let raw: string;
 		if (typeof message === "string") {
-			formatted = chalk.bgBlack.greenBright.bold(message);
+			formatted = chalk.bgBlack[color].bold(message);
 			raw = message;
 		} else {
 			formatted = message;
