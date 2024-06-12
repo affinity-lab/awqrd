@@ -16,8 +16,9 @@ export abstract class Client<CTX=any> {
 		this.pipeline = new Pipeline(...middlewares, this.execute.bind(this));
 	}
 
+	get commands() {return this.#commands;}
+
 	async authApi(apiKey: string | undefined): Promise<boolean> {
-		apiKey;
 		return true;
 	}
 

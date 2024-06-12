@@ -6,7 +6,7 @@ export const cometError = {
 		unsupported: ()=> createErrorData("The client is no longer supported", {}, 505),
 		noInfo: () => createErrorData("Client information not provided."),
 		notFound: (name: string, version: number) => createErrorData(`Client not found ${name}(${version})`),
-		notAuthorized: (name: string, version: number) => createErrorData(`Client not authorized ${name}(${version})`),
+		notAllowed: (name: string, version: number) => createErrorData(`Client not authorized - client: ${name} (version:${version})`, undefined, 405),
 	},
 	contentTypeNotAccepted: (contentType: string) => createErrorData(`ContentType ${contentType} not accepted`),
 	validation: (issues: Record<string, any>) => createErrorData("Validation extended-error", issues, 400),

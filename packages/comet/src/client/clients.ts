@@ -9,6 +9,17 @@ type ClientInfo = { name: string | undefined, version: number | string | undefin
 export abstract class Clients<GROUPS extends string = string> {
 	constructor(readonly clients: Record<GROUPS, ClientGroup>) {}
 
+	public describe() {
+		for (let group in this.clients) {
+			for (let client of this.clients[group].all()) {
+				console.log(`${group}: ${client.version}`);
+				for (let command in client.commands) {
+					console.log("\t- ", command, client.commands[command].instance.constructor.name, client.commands[command].key);
+				}
+			}
+		}
+	}
+
 	public group(name: GROUPS): ClientGroup | undefined { return this.clients[name];}
 
 	public client(name: GROUPS, version: number | [number, number]): Array<Client> {
@@ -31,8 +42,8 @@ export abstract class Clients<GROUPS extends string = string> {
 		let client = group?.get(version)
 		if (!client) throw cometError.client.notFound(name, version);
 		if (client.unsupported) throw cometError.client.unsupported();
-		let apiKeyAccepted = await client.authApi(apiKey)
-		if (!apiKeyAccepted) throw cometError.client.notAuthorized(name, version);
+		let apiKeyAccepted = await client.authApi(apiKey);
+		if (!apiKeyAccepted) throw cometError.client.notAllowed(name, version);
 
 		return client;
 	}
