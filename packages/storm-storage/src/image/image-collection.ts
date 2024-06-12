@@ -5,7 +5,7 @@ import type {CollectionOptions, ITmpFile, MetaField} from "../helper/types";
 import type {Storage} from "../storage";
 import {type ImgFocus, imgFocusOptions, type ImgRGB} from "./types";
 
-type ImageAttachmentMetadata = {
+export type ImageAttachmentMetadata = {
 	title?: string
 	focus: ImgFocus
 	readonly width?: number
@@ -30,7 +30,7 @@ export class ImageCollection extends Collection<ImageAttachmentMetadata> {
 		},
 		rules: CollectionOptions) {
 		super(name, groupDefinition, rules);
-		this.rules.ext = [".png", ".webp", ".gif", ".jpg", ".jpeg", ".tiff"]
+		if(this.rules.ext === undefined) this.rules.ext = [".png", ".webp", ".gif", ".jpg", ".jpeg", ".tiff"];
 	}
 
 	protected async prepareFile(file: ITmpFile): Promise<{ file: ITmpFile; metadata: ImageAttachmentMetadata }> {

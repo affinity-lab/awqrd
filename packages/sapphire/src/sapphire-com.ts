@@ -2,6 +2,7 @@ import {IForm} from "./form";
 import {IList} from "./list";
 import {TmpFile} from "@affinity-lab/util";
 import {Comet, type CometState} from "@affinity-lab/comet";
+import {sapphireError} from "./error";
 
 
 export abstract class SapphireCom {
@@ -39,6 +40,7 @@ export abstract class SapphireCom {
 	@Comet.Command({preprocess: [(state:CometState)=>state.cmd.instance.auth(state)]})
 	async file(@Comet.Args args: {id: string, collectionName: string}, @Comet.Files {files}: {files: Array<File>}, @Comet.Env env: any) {
 		if(!this.tmpFile) throw Error("NINCS MEGADVA TMP FILE!!!")
+		if(!files) throw sapphireError.fileNotProvided();
 		return this.formAdapter.file(parseInt(args.id), args.collectionName, await Promise.all(files.map(f=>this.tmpFile!(f))));
 	}
 
