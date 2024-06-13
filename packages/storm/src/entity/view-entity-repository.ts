@@ -186,5 +186,5 @@ export class ViewEntityRepository<
 	 * @param item - The item to reload.
 	 * @returns A promise that resolves once the item has been reloaded.
 	 */
-	async reload(item: ITEM) { this.getRawDTO(item.id).then(dto => { dto && this.applyItemDTO(item, dto!)})};
+	async reload(item: ITEM) { await this.getRawDTO(item.id).then(dto => { dto && this.applyItemDTO(item, dto!)})};
 }

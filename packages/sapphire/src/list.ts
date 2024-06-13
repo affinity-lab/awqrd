@@ -5,9 +5,10 @@ import {
 	type MySqlTableWithColumns
 } from "drizzle-orm/mysql-core";
 import {type MySql2Database} from "drizzle-orm/mysql2";
-import {and, asc, desc, getTableName, like, or, sql, SQL, type SQLWrapper} from "drizzle-orm";
+import {and, asc, desc, getTableName, or, sql, SQL, type SQLWrapper} from "drizzle-orm";
 import type {AnyMySqlSelectQueryBuilder} from "drizzle-orm/mysql-core/query-builders/select.types";
 import type {GetSelectTableSelection, SelectResultField} from "drizzle-orm/query-builders/select.types";
+import {likeString} from "@affinity-lab/storm";
 type MaybeArray<T> = T | Array<T>;
 type Order = { by: MySqlColumn, reverse: boolean | undefined };
 export type Orders = Record<string, Array<Order>>;
@@ -86,8 +87,8 @@ export class IList<SCHEMA extends MySqlTableWithColumns<any> = any> {
 		if (typeof key === "undefined" || key.trim().length === 0) return or()!;
 		let likes: Array<SQL> = [];
 		for (let col of Array.isArray(this.quickSearchFields) ? this.quickSearchFields : [this.quickSearchFields]) {
-			if (col instanceof MySqlColumn) likes.push(like(col as MySqlColumn, `%${key}%`));
-			else likes.push(like(col!.table[col!.field], `%${key}%`));
+			if (col instanceof MySqlColumn) likes.push(sql`LOWER(${col}) like LOWER(${likeString.contains(key)})`);
+			else likes.push( sql`LOWER(${col!.table[col!.field]}) like LOWER(${likeString.contains(key)})`)
 		}
 		return or(...likes)!;
 	}

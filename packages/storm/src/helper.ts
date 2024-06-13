@@ -115,6 +115,14 @@ Import.metadata = new ClassMetaData()
 
 export let stormSchemaHelpers = {
 
+	in: function (col: MySqlColumn, array: Array<any>) {
+		return sql`${col} in (${array})`;
+	},
+
+	like: function (col: MySqlColumn, key: string) {
+		return sql`LOWER(${col}) like LOWER(${likeString.contains(key)})`;
+	},
+
 	id: function () {
 		return int("id").autoincrement().primaryKey();
 	},
