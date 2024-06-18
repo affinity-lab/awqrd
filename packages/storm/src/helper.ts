@@ -114,9 +114,8 @@ export function Import(target: any, name: PropertyKey,): void {
 Import.metadata = new ClassMetaData()
 
 export let stormSchemaHelpers = {
-
-	in: function (col: MySqlColumn, array: Array<any>) {
-		return sql`${col} in (${array})`;
+	id: function () {
+		return int("id").autoincrement().primaryKey();
 	},
 
 	reference: function (name: string, field: () => MySqlColumn, nullable: boolean = false) {
@@ -131,7 +130,7 @@ export let stormSqlHelpers = {
 		return sql`LOWER(${col}) like LOWER(${likeString.contains(key)})`;
 	},
 
-	id: function () {
-		return int("id").autoincrement().primaryKey();
+	in: function (col: MySqlColumn, array: Array<any>) {
+		return sql`${col} in (${array})`;
 	},
 }

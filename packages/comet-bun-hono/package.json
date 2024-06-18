@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/comet-hono-bun",
-  "version": "1.0.56",
+  "version": "1.0.57",
   "description": "Hono bun for comet",
   "author": "Affinity Works",
   "license": "MIT",
@@ -20,7 +20,7 @@
   "dependencies": {
     "hono": "^4.1.7",
     "reformdata": "^0.2.2",
-    "@affinity-lab/comet": "1.0.145"
+    "@affinity-lab/comet": "1.0.146"
   },
   "devDependencies": {
     "@types/bun": "latest",
