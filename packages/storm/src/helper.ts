@@ -119,6 +119,14 @@ export let stormSchemaHelpers = {
 		return sql`${col} in (${array})`;
 	},
 
+	reference: function (name: string, field: () => MySqlColumn, nullable: boolean = false) {
+		return nullable
+			? int(name).references(field)
+			: int(name).notNull().references(field);
+	}
+}
+
+export let stormSqlHelpers = {
 	like: function (col: MySqlColumn, key: string) {
 		return sql`LOWER(${col}) like LOWER(${likeString.contains(key)})`;
 	},
@@ -126,10 +134,4 @@ export let stormSchemaHelpers = {
 	id: function () {
 		return int("id").autoincrement().primaryKey();
 	},
-
-	reference: function (name: string, field: () => MySqlColumn, nullable: boolean = false) {
-		return nullable
-			? int(name).references(field)
-			: int(name).notNull().references(field);
-	}
 }
