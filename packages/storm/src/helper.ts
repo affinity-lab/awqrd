@@ -1,5 +1,5 @@
 import {ClassMetaData, type State} from "@affinity-lab/util";
-import {eq, sql} from "drizzle-orm";
+import {eq, Placeholder, sql} from "drizzle-orm";
 import {int, MySqlColumn} from "drizzle-orm/mysql-core";
 import type {MySqlSelectWithout} from "drizzle-orm/mysql-core/query-builders/select.types";
 import {EntityRepositoryInterface} from "./entity/entity-repository-interface";
@@ -130,7 +130,7 @@ export let stormSqlHelpers = {
 		return sql`LOWER(${col}) like LOWER(${likeString.contains(key)})`;
 	},
 
-	in: function (col: MySqlColumn, array: Array<any>) {
+	in: function (col: MySqlColumn, array: Array<any> | Placeholder) {
 		return sql`${col} in (${array})`;
 	},
 }
