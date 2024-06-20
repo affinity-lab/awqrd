@@ -37,6 +37,13 @@ export class GroupTagRepository<
 		)
 	}
 
+	@MaterializeIt
+	protected get stmt_getByGroup() {
+		return stmt<{groupId: number | string }, Array<ITEM>>(
+			this.db.select().from(this.schema).where(sql`groupId = ${sql.placeholder("groupId")}`), this.instantiate.all
+		)
+	}
+
 	// protected stmt_groupGetByName = stmt<{ names: Array<string>, groupId: number | string }, Array<ITEM>>(this.db.select().from(this.schema).where(sql`name IN (${sql.placeholder("names")}) AND groupId = ${sql.placeholder("groupId")}`), this.instantiate.all)
 
 	/**
