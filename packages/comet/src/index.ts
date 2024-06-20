@@ -10,3 +10,4 @@ export * from "./client/clients"
 export * from "./client/client-group"
 export {CometState} from "./client/comet-state";
 export {Command} from "./client/command";
+export * from "./client/client-with-jwt";
