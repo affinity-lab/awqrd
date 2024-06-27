@@ -7,7 +7,6 @@ import {
 import {type MySql2Database} from "drizzle-orm/mysql2";
 import {and, asc, desc, getTableName, or, sql, SQL, type SQLWrapper} from "drizzle-orm";
 import type {AnyMySqlSelectQueryBuilder} from "drizzle-orm/mysql-core/query-builders/select.types";
-import type {GetSelectTableSelection, SelectResultField} from "drizzle-orm/query-builders/select.types";
 import {likeString} from "@affinity-lab/storm";
 type MaybeArray<T> = T | Array<T>;
 type Order = { by: MySqlColumn, reverse: boolean | undefined };
@@ -16,8 +15,8 @@ export type Search = MaybeArray<MySqlColumn | JoinedQuickSearch> | undefined;
 export type Filter = SQLWrapper | SQL | undefined;
 export type BaseSelect<A extends AnyMySqlSelectQueryBuilder = any, B extends boolean = any, C extends keyof A & string = any> = MySqlSelectWithout<A, B, C>;
 
-export class JoinedQuickSearch {
-	constructor(readonly table: MySqlTableWithColumns<any>, readonly field: string, readonly connection: SQL) {
+export class JoinedQuickSearch<T extends MySqlTableWithColumns<any> = any> {
+	constructor(readonly table: T, readonly field: MaybeArray<keyof T>, readonly connection: SQL) {
 	}
 }
 
@@ -29,12 +28,12 @@ export class IList<SCHEMA extends MySqlTableWithColumns<any> = any> {
 	) {
 	}
 
-	protected export(item: { [K in keyof { [Key in keyof GetSelectTableSelection<SCHEMA> & string]: SelectResultField<GetSelectTableSelection<SCHEMA>[Key], true> }]: { [Key in keyof GetSelectTableSelection<SCHEMA> & string]: SelectResultField<GetSelectTableSelection<SCHEMA>[Key], true> }[K] }) {
+	protected export(item: any) {
 		return item;
 	}
 
-	public async page(reqPageIndex: number, pageSize: number, search?: string, order?: string, filter?: Record<string, any>) {
-		let w = await this.where(search, filter)
+	public async page(reqPageIndex: number, pageSize: number, search?: string, order?: string, filter?: Record<string, any>, env?: Record<string, any>) {
+		let w = await this.where(search, filter, env)
 		let select = this.select(w);
 		select = this.orderBy(select, order);
 		let c = await this.count(w);
@@ -70,16 +69,16 @@ export class IList<SCHEMA extends MySqlTableWithColumns<any> = any> {
 		return base.limit(pageSize).offset(pageIndex * pageSize)
 	}
 
-	private async where(search?: string, filter?: Record<string, any>): Promise<SQL | undefined> {
-		const f: Array<Filter> = [await this.defaultFilter(filter), await this.composeFilter(filter), await this.quickSearchFilter(search)].filter(filters => !!filters);
+	private async where(search?: string, filter?: Record<string, any>, env?: Record<string, any>): Promise<SQL | undefined> {
+		const f: Array<Filter> = [await this.defaultFilter(env), await this.composeFilter(filter, env), await this.quickSearchFilter(search)].filter(filters => !!filters);
 		return and(...f);
 	}
 
-	protected async defaultFilter(args: Record<string, any> | undefined): Promise<Filter> {
+	protected async defaultFilter(env: Record<string, any> | undefined): Promise<Filter> {
 		return undefined;
 	}
 
-	protected async composeFilter(args: Record<string, any> | undefined): Promise<Filter> {
+	protected async composeFilter(args: Record<string, any> | undefined, env: Record<string, any> | undefined): Promise<Filter> {
 		return undefined;
 	}
 
@@ -88,7 +87,10 @@ export class IList<SCHEMA extends MySqlTableWithColumns<any> = any> {
 		let likes: Array<SQL> = [];
 		for (let col of Array.isArray(this.quickSearchFields) ? this.quickSearchFields : [this.quickSearchFields]) {
 			if (col instanceof MySqlColumn) likes.push(sql`LOWER(${col}) like LOWER(${likeString.contains(key)})`);
-			else likes.push( sql`LOWER(${col!.table[col!.field]}) like LOWER(${likeString.contains(key)})`)
+			else {
+				if(Array.isArray(col!.field)) for (let f of col!.field) likes.push( sql`LOWER(${col!.table[f as string]}) like LOWER(${likeString.contains(key)})`);
+				else likes.push( sql`LOWER(${col!.table[col!.field as string]}) like LOWER(${likeString.contains(key)})`);
+			}
 		}
 		return or(...likes)!;
 	}

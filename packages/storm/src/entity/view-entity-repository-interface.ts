@@ -1,16 +1,15 @@
 import {MaybeUndefined, MaybeUnset, ProcessPipeline, T_Class} from "@affinity-lab/util";
-import {MySqlTableWithColumns} from "drizzle-orm/mysql-core";
+import {MySqlTable, MySqlView} from "drizzle-orm/mysql-core";
 import type {MySql2Database} from "drizzle-orm/mysql2";
-import type {Dto} from "../types";
-
+import type {ViewDto} from "../types";
 import {ViewEntity} from "./view-entity";
 
 
 export interface ViewEntityRepositoryInterface<
-	SCHEMA extends MySqlTableWithColumns<any> = any,
+	SCHEMA extends MySqlTable<any> | MySqlView<any, any, any> = any,
 	ITEM extends ViewEntity = any,
 	ENTITY extends T_Class<ITEM, typeof ViewEntity> = any,
-	DTO extends Dto<SCHEMA> = any
+	DTO extends ViewDto<SCHEMA> = any
 > {
 	readonly db: MySql2Database<any>
 	readonly schema: SCHEMA,

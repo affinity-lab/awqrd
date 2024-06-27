@@ -1,4 +1,4 @@
-import {ProcessPipeline, T_Class} from "@affinity-lab/util";
+import {MaybeUndefined, ProcessPipeline, T_Class} from "@affinity-lab/util";
 import {MySqlTableWithColumns} from "drizzle-orm/mysql-core";
 import {MySqlTable} from "drizzle-orm/mysql-core";
 import type {Dto} from "../types";
@@ -11,7 +11,7 @@ export interface EntityRepositoryInterface<
 	ITEM extends Entity = any,
 	ENTITY extends T_Class<ITEM, typeof Entity> = any,
 	DTO extends Dto<SCHEMA> = any
-> extends ViewEntityRepositoryInterface <SCHEMA, ITEM, ENTITY, DTO> {
+> extends ViewEntityRepositoryInterface <SCHEMA, ITEM, ENTITY> {
 	pipelines: {
 		getAll: ProcessPipeline<"prepare" | "action" | "finalize">;
 		getOne: ProcessPipeline<"prepare" | "action" | "finalize">;
@@ -20,6 +20,11 @@ export interface EntityRepositoryInterface<
 		update: ProcessPipeline<"prepare" | "action" | "finalize">;
 		delete: ProcessPipeline<"prepare" | "action" | "finalize">;
 		overwrite: ProcessPipeline<"prepare" | "action" | "finalize">;
+	};
+	instantiate: {
+		all: (dtoSet: Array<DTO>) => Promise<Array<ITEM>>;
+		one: (dto: (DTO | undefined)) => Promise<undefined | ITEM>;
+		first: (dtoSet: Array<DTO>) => Promise<MaybeUndefined<ITEM>>
 	};
 	addPlugin(plugin: (repository: EntityRepositoryInterface) => any): this;
 	save(item: ITEM | undefined): Promise<any>;

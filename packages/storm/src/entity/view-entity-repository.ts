@@ -1,9 +1,9 @@
 import {firstOrUndefined, MaterializeIt, type MaybePromise, type MaybeUndefined, type MaybeUnset, ProcessPipeline, type State, T_Class} from "@affinity-lab/util";
 import {sql} from "drizzle-orm";
-import {MySqlTableWithColumns} from "drizzle-orm/mysql-core";
+import {MySqlTable, MySqlView} from "drizzle-orm/mysql-core";
 import type {MySql2Database} from "drizzle-orm/mysql2";
 import {stmt} from "../helper";
-import type {Dto, WithId, WithIds} from "../types";
+import type {ViewDto, WithId, WithIds} from "../types";
 
 import {ViewEntity} from "./view-entity";
 import {ViewEntityRepositoryInterface} from "./view-entity-repository-interface";
@@ -15,20 +15,23 @@ import {ViewEntityRepositoryInterface} from "./view-entity-repository-interface"
  * @template ITEM - The type of the entity class.
  */
 export class ViewEntityRepository<
-	SCHEMA extends MySqlTableWithColumns<any>,
+	SCHEMA extends MySqlTable<any> | MySqlView<any, any, any>,
 	ITEM extends ViewEntity,
 	ENTITY extends T_Class<ITEM, typeof ViewEntity> = T_Class<ITEM, typeof ViewEntity>,
-	DTO extends Dto<SCHEMA> = Dto<SCHEMA>
+	DTO extends ViewDto<SCHEMA> = ViewDto<SCHEMA>
 >
 	implements ViewEntityRepositoryInterface<SCHEMA, ITEM, ENTITY, DTO> {
 	readonly fields: string[];
-	readonly pipelines = this.pipelineFactory();
-	readonly instantiate = this.instantiateFactory();
-	protected readonly exec = this.pipelineExecFactory();
+	pipelines;
+	instantiate;
+	protected exec;
 
 	constructor(readonly db: MySql2Database<any>, readonly schema: SCHEMA, readonly entity: ENTITY) {
-		this.fields = Object.keys(schema);
-		entity.repository = this
+		this.fields = Object.keys(schema as Record<string, any>);
+		entity.repository = this;
+		this.pipelines = this.pipelineFactory();
+		this.instantiate = this.instantiateFactory();
+		this.exec = this.pipelineExecFactory();
 		this.initialize();
 	}
 

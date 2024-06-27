@@ -12,12 +12,12 @@ export class ErrorHandlerMiddleware implements Middleware {
 			return {result: await next(), status: 200}
 		} catch (e: any) {
 			if (this.errorHandler !== undefined) {this.errorHandler(e)}
-			if (e instanceof ExtendedError) return {result: {error: e}, status: e.httpResponseCode};
-			else if (e.constructor.name === "ZodError") {
+			if (e.constructor.name === "ZodError" || e.httpResponseCode === 422) {
 				let errors: Record<string, any> = {}
-				for (let i of e.issues) !errors[i.path[0]] ? errors[i.path[0]] = [pickFields(i, "code", "message")] : errors[i.path[0]].push(pickFields(i, "code", "message"));
+				for (let i of e instanceof ExtendedError ? e.details : e.issues) !errors[i.path[0]] ? errors[i.path[0]] = [pickFields(i, "code", "message")] : errors[i.path[0]].push(pickFields(i, "code", "message"));
 				return {result: errors, status: 422};
-			} else return {result: {error: `Internal Server Error (${e})`}, status: 500};
+			} if (e instanceof ExtendedError) return {result: {error: e}, status: e.httpResponseCode};
+			else return {result: {error: `Internal Server Error (${e})`}, status: 500};
 		}
 	}
 }

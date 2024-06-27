@@ -3,7 +3,7 @@ import {omitFieldsIP, pickFieldsIP, ProcessPipeline, type State} from "@affinity
 import {sql} from "drizzle-orm";
 import {MySqlTableWithColumns} from "drizzle-orm/mysql-core";
 import type {MySql2Database, MySqlRawQueryResult} from "drizzle-orm/mysql2";
-import type {Dto} from "../types";
+import type {Dto, ViewDto} from "../types";
 import {Entity} from "./entity";
 import type {EntityRepositoryInterface} from "./entity-repository-interface";
 import {ViewEntityRepository} from "./view-entity-repository";
@@ -21,8 +21,8 @@ export class EntityRepository<
 	ENTITY extends T_Class<ITEM, typeof Entity> = T_Class<ITEM, typeof Entity>,
 	DTO extends Dto<SCHEMA> = Dto<SCHEMA>
 >
-	extends ViewEntityRepository<SCHEMA, ITEM, ENTITY, DTO>
-	implements EntityRepositoryInterface<SCHEMA, ITEM, ENTITY, DTO> {
+	extends ViewEntityRepository<SCHEMA, ITEM, ENTITY, ViewDto<SCHEMA>>
+	implements EntityRepositoryInterface<SCHEMA, ITEM, ENTITY> {
 
 
 	protected pipelineFactory() {
@@ -89,11 +89,18 @@ export class EntityRepository<
 		}
 	}
 
-	public readonly pipelines = this.pipelineFactory();
-	protected readonly exec = this.pipelineExecFactory();
+	public readonly pipelines;
+	protected readonly exec;
 
 	constructor(db: MySql2Database<any>, schema: SCHEMA, entity: ENTITY) {
 		super(db, schema, entity);
+		this.pipelines = this.pipelineFactory();
+		this.exec = this.pipelineExecFactory();
+		this.instantiate = this.instantiateFactory();
+		this.initialize();
+	}
+
+	protected initialize() {
 	}
 
 	addPlugin(plugin: (repository: EntityRepositoryInterface) => any) {
@@ -146,6 +153,21 @@ export class EntityRepository<
 	 */
 	protected transformUpdateDTO(dto: DTO): MaybePromise<void> {
 		this.transformSaveDTO(dto);
+	}
+
+	/**
+	 * Prepares the item DTO. This is a hook method intended for subclass overrides.
+	 * @param dto The DTO to prepare.
+	 */
+	protected transformItemDTO(dto: Dto<SCHEMA>): MaybePromise<void> {}
+	/**
+	 * Applies the DTO to the item.
+	 * @param item The item to apply the DTO to.
+	 * @param dto The data transfer object (DTO) containing the data to be applied to the item.
+	 */
+	protected async applyItemDTO(item: ITEM, dto: Dto<SCHEMA>) {
+		this.transformItemDTO(dto);
+		Object.assign(item, dto);
 	}
 
 	/**

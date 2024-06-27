@@ -9,7 +9,7 @@ export const cometError = {
 		notAllowed: (name: string, version: number) => createErrorData(`Client not authorized - client: ${name} (version:${version})`, undefined, 405),
 	},
 	contentTypeNotAccepted: (contentType: string) => createErrorData(`ContentType ${contentType} not accepted`),
-	validation: (issues: Record<string, any>) => createErrorData("Validation extended-error", issues, 400),
+	validation: (issues: Record<string, any>) => createErrorData("Validation extended-error", issues, 422),
 	unauthorized: () => createErrorData("Unauthorized", {}, 401),
 	forbidden: () => createErrorData("Forbidden", {}, 403),
 	conflict: (details: Record<string, any> = {}) => createErrorData("Conflict", details, 409),
