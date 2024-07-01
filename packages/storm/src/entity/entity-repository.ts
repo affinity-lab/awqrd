@@ -190,10 +190,10 @@ export class EntityRepository<
 	 */
 	public async save(item: ITEM | undefined) {
 		try {
-			if (item) return item.id ? this.update(item) : this.insert(item)
+			if (item) return item.id ? await this.update(item) : await this.insert(item)
 		} catch (e) {
-			if ((e as any).errno == 1062) throw entityError.duplicateEntry(e);
-			throw e;
+			if ((e as any).errno === 1062) throw entityError.duplicateEntry(e);
+			else throw e;
 		}
 	}
 
@@ -203,7 +203,7 @@ export class EntityRepository<
 	 * @returns A promise that resolves once the update operation is completed.
 	 */
 	public async update(item: ITEM | undefined) {
-		if (item) return this.exec.update(item)
+		if (item) return this.exec.update(item);
 	}
 
 	/**
@@ -212,7 +212,7 @@ export class EntityRepository<
 	 * @returns A promise that resolves once the insert operation is completed.
 	 */
 	public async insert(item: ITEM | undefined) {
-		if (item) return this.exec.insert(item)
+		if (item) return this.exec.insert(item);
 	}
 
 	/**
@@ -223,7 +223,7 @@ export class EntityRepository<
 	 * @returns A promise that resolves once the overwrite operation is completed.
 	 */
 	public async overwrite(item: ITEM | undefined, values: Record<string, any>, reload: boolean = true) {
-		if (item) return this.exec.overwrite(item, values, reload)
+		if (item) return this.exec.overwrite(item, values, reload);
 	}
 
 	/**
