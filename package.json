@@ -17,7 +17,7 @@
 	"@affinity-lab/storm-validator": "workspace:packages/storm-validator",
 	"@affinity-lab/comet": "workspace:packages/comet",
 	"@affinity-lab/sapphire-awqrd": "workspace:packages/sapphire",
-	"@affinity-lab/comet-hono-bun": "workspace:packages/comet-hono-bun"
+	"@affinity-lab/comet-hono-bun": "workspace:packages/comet-bun-hono"
   },
   "peerDependencies": {
 	"typescript": "^5.0.0"
@@ -34,6 +34,6 @@
 	"packages/storm-tag",
 	"packages/storm-validator",
 	"packages/sapphire",
-	"packages/comet-hono-bun"
+	"packages/comet-bun-hono"
   ]
 }

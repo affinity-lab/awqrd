@@ -3,6 +3,8 @@ import {eq, Placeholder, sql} from "drizzle-orm";
 import {int, MySqlColumn} from "drizzle-orm/mysql-core";
 import type {MySqlSelectWithout} from "drizzle-orm/mysql-core/query-builders/select.types";
 import {EntityRepositoryInterface} from "./entity/entity-repository-interface";
+import {ViewEntityRepositoryInterface} from "./entity/view-entity-repository-interface";
+import {ViewEntity} from "./entity/view-entity";
 
 
 /**
@@ -61,7 +63,7 @@ export const likeString = {
  * @param fieldName
  * @returns A function that retrieves the previous DTO of an item.
  */
-export function getByFactory<T extends string | number, R>(repo: EntityRepositoryInterface, fieldName: string): (search: T) => Promise<R | undefined> {
+export function getByFactory<T extends string | number, R extends ViewEntity>(repo: ViewEntityRepositoryInterface, fieldName: Extract<keyof R, T>): (search: T) => Promise<R | undefined> {
 	let field = repo.schema[fieldName];
 	let stmt = repo.db.select().from(repo.schema).where(eq(field, sql.placeholder("search"))).limit(1).prepare();
 	let fn = async (search: T) => {
@@ -73,7 +75,7 @@ export function getByFactory<T extends string | number, R>(repo: EntityRepositor
 	return fn;
 }
 
-export function getAllByFactory<T extends string | number, R>(repo: EntityRepositoryInterface, fieldName: string): (search: T) => Promise<Array<R>> {
+export function getAllByFactory<T extends string | number, R extends ViewEntity>(repo: ViewEntityRepositoryInterface, fieldName: Extract<keyof R, T>): (search: T) => Promise<Array<R>> {
 	let field = repo.schema[fieldName];
 	let stmt = repo.db.select().from(repo.schema).where(eq(field, sql.placeholder("search"))).prepare();
 	let fn = async (search: T) => {
@@ -92,7 +94,8 @@ export function getAllByFactory<T extends string | number, R>(repo: EntityReposi
  * @param repository
  */
 export async function prevDto(state: State, repository: EntityRepositoryInterface) {
-	if (state.prevDto) state.prevDto = await repository.getRawDTO(state.item.id);
+	console.log("ASd")
+	if (!state.prevDto) state.prevDto = await repository.getRawDTO(state.item.id);
 	return state.prevDto;
 }
 /**

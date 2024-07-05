@@ -1,7 +1,11 @@
-import {EntityRepositoryInterface, getByFactory, WithId} from "@affinity-lab/storm";
-import type {Cache} from "@affinity-lab/util";
+import {
+	getByFactory,
+	ViewEntity,
+	ViewEntityRepositoryInterface,
+	WithId
+} from "@affinity-lab/storm";
 
-import {type ResultCache, ResultCacheWithMaps} from "./result-cache-factory";
+import {ResultCacheWithMaps} from "./result-cache-factory";
 
 
 /**
@@ -11,9 +15,9 @@ import {type ResultCache, ResultCacheWithMaps} from "./result-cache-factory";
  * @param resultCache
  * @param mapCache
  */
-export function cachedGetByFactory<T extends string | number, R>(
-	repo: EntityRepositoryInterface,
-	fieldName: string,
+export function cachedGetByFactory<T extends string | number, R extends ViewEntity>(
+	repo: ViewEntityRepositoryInterface,
+	fieldName: Extract<keyof R, T>,
 	resultCache: ResultCacheWithMaps
 ): (search: T) => Promise<R | undefined> {
 

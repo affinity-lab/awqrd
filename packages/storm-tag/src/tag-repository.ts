@@ -1,5 +1,15 @@
-import {Dto, Entity, EntityRepository, EntityRepositoryInterface, Export, prevDto, stmt} from "@affinity-lab/storm";
+import {
+	Dto,
+	Entity,
+	EntityRepository,
+	EntityRepositoryInterface,
+	Export,
+	Import,
+	prevDto,
+	stmt
+} from "@affinity-lab/storm";
 import type {MaybeArray, State, T_Class} from "@affinity-lab/util";
+import {MaterializeIt} from "@affinity-lab/util";
 import {and, not, sql} from "drizzle-orm";
 import {MySqlTable} from "drizzle-orm/mysql-core";
 
@@ -10,7 +20,9 @@ export type Usage = {
 	field: string
 }
 
-export class TagEntity extends Entity {@Export declare name: string}
+export class TagEntity extends Entity {
+	@Export @Import declare name: string
+}
 
 export class TagRepository<
 	SCHEMA extends MySqlTable,
@@ -21,7 +33,22 @@ export class TagRepository<
 
 	protected usages: Array<Usage> = []
 
-	protected stmt_getByName = stmt<{ names: Array<string> }, Array<ITEM>>(this.db.select().from(this.schema).where(sql`name IN (${sql.placeholder("names")})`), this.instantiate.all)
+	protected initialize(addPipelines: boolean = true) {
+		super.initialize();
+		if(addPipelines) {
+			this.pipelines.delete.blocks.finalize.append(async (state: State) => await this.deleteInUsages(state.item.name));
+			this.pipelines.update.blocks.prepare.append(async (state: State) => await prevDto(state, this))
+										.finalize.append(async (state: State) => await this.selfRename(state.dto, state.prevDto));
+		}
+	}
+
+	@MaterializeIt
+	protected get stmt_getByName() {
+		return stmt<{ names: Array<string> }, Array<ITEM>>(
+			this.db.select().from(this.schema).where(sql`name IN (${sql.placeholder("names")})`),
+			this.instantiate.all
+		)
+	}
 
 	/**
 	 * Get tags by name
@@ -65,11 +92,12 @@ export class TagRepository<
 	 * @param name
 	 */
 	public async deleteInUsages(name: string): Promise<void> {
-		name = `${name}`
+		name = name.trim();
+		let helper = `,${name},`;
 		for (let usage of this.usages) {
 			let set: Record<string, any> = {}
-			set[usage.field] = sql`trim(both ',' from replace(concat(',', ${usage.repo.schema[usage.field]} , ','), ',${name},', ','))`;
-			usage.repo.db.update(usage.repo.schema).set(set).where(sql`FIND_IN_SET("${name}", ${usage.repo.schema[usage.field]})`);
+			set[usage.field] = sql`trim(both ',' from replace(concat(',', ${usage.repo.schema[usage.field]} , ','), ${helper}, ','))`;
+			await usage.repo.db.update(usage.repo.schema).set(set).where(sql`FIND_IN_SET(${name}, ${usage.repo.schema[usage.field]})`);
 		}
 	}
 
@@ -81,7 +109,9 @@ export class TagRepository<
 	 * Add a usage to the tag
 	 * @param usage
 	 */
-	protected addUsage(usage: MaybeArray<Usage>) { this.usages.push(...(Array.isArray(usage) ? usage : [usage]));}
+	protected addUsage(usage: MaybeArray<Usage>) {
+		this.usages.push(...(Array.isArray(usage) ? usage : [usage]));
+	}
 
 
 	/**
@@ -192,9 +222,9 @@ export class TagRepository<
 
 			repository.pipelines.update.blocks
 				.prepare.append(async (state: State) => {
-					await prevDto(state, repository);
-					this.prepare(repository, state.dto);
-				})
+				await prevDto(state, repository);
+				this.prepare(repository, state.dto);
+			})
 				.finalize.append(async (state: State) => {
 					await this.selfRename(state.dto, state.prevDto);
 					await this.updateTag(repository, state.dto, state.prevDto);

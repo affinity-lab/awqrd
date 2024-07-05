@@ -1,4 +1,4 @@
-import {Dto, EntityRepositoryInterface, prevDto, stmt} from "@affinity-lab/storm";
+import {Dto, EntityRepositoryInterface, Export, Import, stmt, prevDto} from "@affinity-lab/storm";
 import {MaterializeIt, type State, T_Class} from "@affinity-lab/util";
 import {and, eq, not, sql} from "drizzle-orm";
 import {type MySqlTable} from "drizzle-orm/mysql-core";
@@ -14,11 +14,9 @@ export type GroupUsage = {
 }
 
 export class GroupTagEntity extends TagEntity {
-	declare groupId: number | string
+	@Export @Import declare groupId: number | string
 }
 
-
-// TODO test this
 export class GroupTagRepository<
 	SCHEMA extends MySqlTable,
 	ITEM extends GroupTagEntity,
@@ -30,25 +28,36 @@ export class GroupTagRepository<
 
 	constructor(readonly db: MySql2Database<any>, readonly schema: SCHEMA, readonly entity: ENTITY) {super(db, schema, entity)}
 
+	protected initialize() {
+		super.initialize(false);
+		this.pipelines.delete.blocks.finalize.append(async (state: State) => await this.deleteInUsages(state.item.name, state.item.groupId));
+		this.pipelines.update.blocks.prepare.append(async (state: State) => await prevDto(state, this))
+			.finalize.append(async (state: State) => await this.selfRename(state.dto, state.prevDto));
+	}
+
 	@MaterializeIt
 	protected get stmt_groupGetByName() {
 		return stmt<{ names: Array<string>, groupId: number | string }, Array<ITEM>>(
-			this.db.select().from(this.schema).where(sql`name IN (${sql.placeholder("names")}) AND groupId = ${sql.placeholder("groupId")}`), this.instantiate.all
+			this.db.select().from(this.schema).where(sql`name IN (${sql.placeholder("names")}) AND groupId = ${sql.placeholder("groupId")}`),
+			this.instantiate.all
 		)
 	}
 
 	@MaterializeIt
 	protected get stmt_getByGroup() {
 		return stmt<{groupId: number | string }, Array<ITEM>>(
-			this.db.select().from(this.schema).where(sql`groupId = ${sql.placeholder("groupId")}`), this.instantiate.all
+			this.db.select().from(this.schema).where(sql`groupId = ${sql.placeholder("groupId")}`),
+			this.instantiate.all
 		)
 	}
 
-	async getToGroup(groupId: number) {
+	/***
+	 * returns all tags to a group
+	 * @param groupId group's identifier
+	 */
+	public async getToGroup(groupId: number) {
 		return this.stmt_getByGroup({groupId});
 	}
-
-	// protected stmt_groupGetByName = stmt<{ names: Array<string>, groupId: number | string }, Array<ITEM>>(this.db.select().from(this.schema).where(sql`name IN (${sql.placeholder("names")}) AND groupId = ${sql.placeholder("groupId")}`), this.instantiate.all)
 
 	/**
 	 * Get tags by name and groupId
@@ -67,17 +76,24 @@ export class GroupTagRepository<
 	}
 
 	/**
-	 * Delete a tag from all usages
+	 * Delete a tag from all usages, called when a tag is deleted manually
 	 * @param name
 	 * @param groupId
 	 */
 	public async deleteInUsages(name: string, groupId?: number | string): Promise<void> {
 		if (!groupId) throw tagError.groupId();
-		name = `${name}`
+		name = name.trim();
+		let listNameHelper = `,${name},`;
+		let jsonNameHelper = `$.${name}`;
 		for (let usage of this.usages) {
 			let set: Record<string, any> = {}
-			set[usage.field] = sql`trim(both ',' from replace(concat(',', ${usage.repo.schema[usage.field]} , ','), ',${name},', ','))`;
-			usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`FIND_IN_SET("${name}", ${usage.repo.schema[usage.field]})`, eq(usage.repo.schema[usage.groupField], groupId)));
+			if(usage.mode === "LIST") {
+				set[usage.field] = sql`trim(both ',' from replace(concat(',', ${usage.repo.schema[usage.field]} , ','), ${listNameHelper}, ','))`;
+				await usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`FIND_IN_SET(${name}, ${usage.repo.schema[usage.field]})`, eq(usage.repo.schema[usage.groupField], groupId)));
+			} else {
+				set[usage.field] = sql`JSON_REMOVE(${usage.repo.schema[usage.field]}, ${jsonNameHelper})`;
+				await usage.repo.db.update(usage.repo.schema).set(set).where(and(sql`JSON_EXTRACT(${usage.repo.schema[usage.field]}, ${jsonNameHelper}) IS NOT NULL`, eq(usage.repo.schema[usage.groupField], groupId)));
+			}
 		}
 	}
 
@@ -88,24 +104,30 @@ export class GroupTagRepository<
 	 * @param groupId
 	 */
 	public async rename(oldName: string, newName: string, groupId?: number | string): Promise<void> {
-		oldName = oldName.replace(',', "").trim();
+		oldName = oldName.replace(',', "").trim(); // normalize the names
 		newName = newName.replace(',', "").trim();
 		if (oldName === newName) return
-		let o = await this.getByName(oldName, groupId);
-		if (!o) return
-		let n = await this.getByName(newName, groupId);
-		let item = Array.isArray(o) ? o[0] : o;
-		if (!n) {
+		let oldItem = await this.getByName(oldName, groupId); // item with oldName
+		if (!oldItem) return
+		let newItem = await this.getByName(newName, groupId); // item with newName
+		let item = Array.isArray(oldItem) ? oldItem[0] : oldItem;
+		if (!newItem) {
 			item.name = newName
-			await this.update(item)
-		} else await this.delete(item);
-		await this.doRename(oldName, newName, groupId);
+			await this.update(item); // updates the tag
+		} else await this.delete(item); // deletes the tag
+		await this.doRename(oldName, newName, groupId); // updates the tag in all usages
 	}
 
 	// ------------------------------------------ PIPELINE HELPERS
 
-
-	public async updateTag(repository: EntityRepositoryInterface, dto: Record<string, any>, prevDto: Record<string, any>, fieldName?: string) {
+	/***
+	 * Called by the tag's pipeline, checks for changes, adds and deletes the tags according to them.
+	 * @param repository changed entity's repository
+	 * @param dto changed entity
+	 * @param prevDto changed entity's previous state
+	 * @param fieldName name of the tag field
+	 */
+	protected async updateTag(repository: EntityRepositoryInterface, dto: Record<string, any>, prevDto: Record<string, any>, fieldName?: string) {
 		if (!fieldName) throw tagError.selfRename();
 		let groupId = dto[fieldName];
 		let {prev, curr} = this.changes(repository, dto, prevDto);
@@ -113,33 +135,77 @@ export class GroupTagRepository<
 		await this.deleteTag(prev.filter(x => !curr.includes(x)), groupId);
 	}
 
+	/***
+	 * creates 2 arrays of strings, one for the current tags on the changed entity, and one for the tags before the change.
+	 * @param repository changed entity's repository
+	 * @param dto changed entity
+	 * @param prevDto changed entity's previous state
+	 * @protected
+	 */
+	protected changes(repository: EntityRepositoryInterface, dto: Record<string, any>, prevDto: Record<string, any>): { prev: Array<string>; curr: Array<string> } {
+		if (!prevDto) throw tagError.itemNotFound(repository.constructor.name);
+		let curr: Array<string> = [];
+		let prev: Array<string> = [];
+		for (let usage of this.usages) {
+			if (usage.repo === repository) {
+				if(usage.mode === "JSON") {
+					prev.push(...Object.keys(prevDto[usage.field]));
+					curr.push(...Object.keys(dto[usage.field]));
+				}
+				else {
+					prev.push(...(prevDto[usage.field] ? prevDto[usage.field].split(',') : []));
+					curr.push(...(dto[usage.field] ? (dto[usage.field] as string).split(',') : []));
+				}
 
-	public async selfRename(dto: Record<string, any>, prevDto: Record<string, any>, fieldName?: string) {
-		if (!fieldName) throw tagError.selfRename();
-		let groupId: number | string | undefined | null = dto[fieldName];
-		if (!groupId) throw tagError.groupId();
-		if (dto.name && dto.name !== prevDto.name) await this.doRename(prevDto.name, dto.name, groupId);
+			}
+		}
+		prev = [...new Set(prev)];
+		curr = [...new Set(curr)];
+		return {prev, curr};
+	}
+
+
+	/***
+	 * update pipeline calls this (manual name update)
+	 * @param dto tag's dto
+	 * @param prevDto tag's prevDto
+	 */
+	public async selfRename(dto: Record<string, any>, prevDto: Record<string, any>) {
+		if (dto.name && dto.name !== prevDto.name) await this.doRename(prevDto.name, dto.name, dto.groupId);
 	}
 
 	// ------------------------------------------ INTERNAL HELPERS
 
-
+	/***
+	 * Called by updateTag, checks if any item needs to be added.
+	 * @param names all tag names that was added to the entity
+	 * @param groupId
+	 */
 	protected async addTag(names: Array<string>, groupId?: number | string): Promise<void> {
 		let items = await this.getByName(names, groupId).then(r => (r).map(i => i.name))
 		let toAdd = names.filter(x => !items.includes(x));
 		for (let tag of toAdd) {
 			let item = await this.create()
-			item.name = tag as InstanceType<ENTITY>["name"]
+			item.name = tag
 			await this.insert(item);
 		}
 	}
 
+	/***
+	 * Called by updateTag, checks if any item needs to be deleted.
+	 * @param names all tag names that was removed from the entity
+	 * @param groupId
+	 */
 	protected async deleteTag(names: Array<string>, groupId?: number | string): Promise<void> {
 		let items = await this.getByName(names, groupId)
 		if (items.length === 0) return;
 		await this.deleteItems(items, groupId);
 	}
 
+
+	/***
+	 * Runs when a tag is removed from an entity's usage. It checks if the tag is associated with any other entities within the usages, and if not, the tag is deleted.
+	 */
 	protected async deleteItems(items: Array<ITEM>, groupId?: number | string) {
 		if (!groupId) throw tagError.groupId();
 		for (let item of items) {
@@ -153,20 +219,23 @@ export class GroupTagRepository<
 			}
 			if (doDelete) {
 				await this.delete(item);
-				await this.deleteInUsages(item.name as string, groupId);
 			}
 		}
 	}
 
 
+	/***
+	 * Updates the renamed tag in all of its usages.
+	 */
 	protected async doRename(oldName: string, newName: string, groupId?: number | string) {
 		if (!groupId) throw tagError.groupId();
-		let nN = `$.${newName}`;
-		let oN = `$.${oldName}`;
-		let eN = `"${newName}"`;
-		let eO = `"${oldName}"`;
-		let oldN = `,${oldName},`
-		let newN = `,${newName},`
+		let nN = `$.${newName}`; // helper for newName in JSOM mode (where)
+		let oN = `$.${oldName}`; // helper for oldName in JSOM mode (where + set)
+		let eN = `"${newName}"`; // helper for newName in JSOM mode (set)
+		let eO = `"${oldName}"`; // helper for oldName in JSOM mode (set)
+		let oldN = `,${oldName},`; // helper for newName in LIST mode (set)
+		let newN = `,${newName},`; // helper for oldName in LIST mode (set)
+		// NOTE: LIST mode uses oldName and newName in it's "where" section
 		for (let usage of this.usages) {
 			let set: Record<string, any> = {};
 			if (usage.mode && usage.mode === "JSON") {
@@ -187,6 +256,15 @@ export class GroupTagRepository<
 	}
 
 
+	protected prepare(repository: EntityRepositoryInterface, dto: Record<string, any>) {
+		for (let usage of this.usages) {
+			if (usage.repo === repository && usage.mode === "LIST") {
+				dto[usage.field] = [...new Set((dto[usage.field] as string || "").trim().split(',').map(x => x.trim()).filter(x => !!x))].join(',');
+			}
+		}
+	}
+
+
 	// ------------------------------------------ PIPELINE PLUGIN
 
 	plugin(field: string, groupField?: string, mode: "JSON" | "LIST" = "LIST") {
@@ -194,14 +272,12 @@ export class GroupTagRepository<
 		return (repository: EntityRepositoryInterface) => {
 
 			let usage: GroupUsage = {repo: repository, field, groupField, mode}
-			//TODO: CHECK IF THIS WORKS AND IF YES TRY TO TYPEHINT IT
 			this.addUsage(usage)
 
 			repository.pipelines.update.blocks
 				.prepare.append(async (state: State) => await prevDto(state, repository))
 				.prepare.append(async (state: State) => this.prepare(repository, state.dto))
 				.finalize.append(async (state: State) => {
-					await this.selfRename(state.dto, state.prevDto, groupField);
 					await this.updateTag(repository, state.dto, state.prevDto, groupField);
 				}
 			)
@@ -219,7 +295,6 @@ export class GroupTagRepository<
 			repository.pipelines.overwrite.blocks
 				.prepare.append(async (state: State) => await prevDto(state, repository))
 				.finalize.append(async (state: State) => {
-					await this.selfRename(state.dto, await prevDto(state, repository), groupField);
 					await this.updateTag(repository, state.dto, await prevDto(state, repository), groupField);
 				}
 			)

@@ -254,7 +254,7 @@ export class Storage {
 	plugin() {
 		return (repository: EntityRepositoryInterface) => {
 			repository.pipelines.delete.blocks
-				.finalize.append(async (state: State<{ item: { id: number } }>) => this.destroy(repository, state.item.id)
+				.finalize.prepend(async (state: State<{ item: { id: number } }>) => this.destroy(repository, state.item.id)
 			)
 		}
 	}
