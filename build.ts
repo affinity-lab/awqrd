@@ -21,6 +21,7 @@ export let packages = {
 	util: new Package("util"),
 	storm: new Package("storm", "util"),
 	stormCache: new Package("storm-cache", "storm", "util"),
+	stormSequence: new Package("storm-sequence", "storm", "util"),
 	stormStorage: new Package("storm-storage", "storm", "util"),
 	stormStorageServerBunHono: new Package("storm-storage-server-bun-hono", "storm", "util"),
 	stormTag: new Package("storm-tag", "storm", "util"),
@@ -44,6 +45,7 @@ function build() {
 	buildPackage("util")
 	buildPackage("comet")
 	buildPackage("storm")
+	buildPackage("stormSequence")
 	buildPackage("stormCache")
 	buildPackage("stormStorage")
 	buildPackage("stormStorageServerBunHono")
@@ -58,6 +60,7 @@ function publish(code:string) {
 	publishPackage("util", code)
 	publishPackage("comet", code)
 	publishPackage("storm", code)
+	publishPackage("stormSequence", code)
 	publishPackage("stormCache", code)
 	publishPackage("stormStorage", code)
 	publishPackage("stormTag", code)
