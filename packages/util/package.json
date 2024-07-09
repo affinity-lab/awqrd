@@ -27,6 +27,7 @@
     "mime-types": "^2.1.35",
     "node-cache": "^5.1.2",
     "nodemailer": "^6.9.13",
+    "memcached": "^2.2.2",
     "sharp": "^0.33.3",
     "sql-highlight": "^4.4.2",
     "uni-flatten": "^1.6.2"
@@ -34,7 +35,8 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^20.12.8",
-    "@types/jsonwebtoken": "^9.0.4"
+    "@types/jsonwebtoken": "^9.0.4",
+    "@types/memcached": "^2.2.2"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
