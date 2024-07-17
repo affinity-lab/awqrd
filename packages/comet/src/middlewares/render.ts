@@ -1,8 +1,7 @@
-import {cometError} from "@affinity-lab/comet/src/error";
 import type {Middleware} from "@affinity-lab/util";
 import {ExtendedError} from "@affinity-lab/util";
-
 import {CometState} from "../client/comet-state";
+import {cometError} from "../error";
 
 
 export type Result = { result: any, status: number }

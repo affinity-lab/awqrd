@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/util",
-  "version": "2.0.159",
+  "version": "2.0.165",
   "description": "Utils for Comet and Storm",
   "author": "Affinity Works",
   "license": "MIT",
@@ -15,7 +15,8 @@
   ],
   "scripts": {
     "prebuild": "bunx rimraf dist && bunx rimraf types",
-    "build": "bunx tsc"
+    "build": "bunx tsc",
+    "postbuild": "bunx ts-add-js-extension --dir=dist"
   },
   "dependencies": {
     "@types/mime-types": "^2.1.4",
@@ -27,6 +28,7 @@
     "mime-types": "^2.1.35",
     "node-cache": "^5.1.2",
     "nodemailer": "^6.9.13",
+    "memcached": "^2.2.2",
     "sharp": "^0.33.3",
     "sql-highlight": "^4.4.2",
     "uni-flatten": "^1.6.2"
@@ -34,7 +36,8 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^20.12.8",
-    "@types/jsonwebtoken": "^9.0.4"
+    "@types/jsonwebtoken": "^9.0.4",
+    "@types/memcached": "^2.2.2"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

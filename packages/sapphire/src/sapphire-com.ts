@@ -1,9 +1,9 @@
+import {Comet, type CometState} from "@affinity-lab/comet";
+import {Dto} from "@affinity-lab/storm";
+import {MaybePromise, MaybeUnset, TmpFile} from "@affinity-lab/util";
+import {sapphireError} from "./error";
 import {IForm} from "./form";
 import {IList} from "./list";
-import {MaybeArray, MaybeUnset, TmpFile} from "@affinity-lab/util";
-import {Comet, type CometState} from "@affinity-lab/comet";
-import {sapphireError} from "./error";
-import {Dto} from "@affinity-lab/storm";
 
 
 export abstract class SapphireCom {
@@ -15,7 +15,7 @@ export abstract class SapphireCom {
 		if(formAdapter === undefined && tmpFile !== undefined) throw Error(`form adapter is a requirement to handle files ${this.constructor.name}`);
 	}
 
-	protected preprocesses(state: CometState): MaybeArray<(state: CometState) => void> | never {return [];}
+	protected preprocesses(state: CometState): MaybePromise<void> {}
 
 	@Comet.Command({preprocess: (state:CometState)=>state.cmd.instance.preprocesses(state)})
 	async list(@Comet.Args args: {reqPageIndex: number, pageSize: number, search?: string, order?: string, filter?: Record<string, any>}, @Comet.Env env: any): Promise<{ count: number; page: number; items: any[] }> | never {

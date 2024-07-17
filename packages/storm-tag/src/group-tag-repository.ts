@@ -1,4 +1,4 @@
-import {Dto, EntityRepositoryInterface, Export, Import, stmt, prevDto} from "@affinity-lab/storm";
+import {Dto, EntityRepositoryInterface, Export, Import, prevDto, stmt} from "@affinity-lab/storm";
 import {MaterializeIt, type State, T_Class} from "@affinity-lab/util";
 import {and, eq, not, sql} from "drizzle-orm";
 import {type MySqlTable} from "drizzle-orm/mysql-core";
@@ -67,7 +67,7 @@ export class GroupTagRepository<
 	public async getByName(names: Array<string>, groupId?: number | string): Promise<Array<ITEM>>;
 	public async getByName(name: string, groupId?: number | string): Promise<ITEM | undefined>;
 	public async getByName(names: Array<string> | string, groupId?: number | string): Promise<ITEM | undefined | Array<ITEM>> {
-		if (!groupId) throw tagError.groupId();
+		if (!groupId) throw tagError.groupId({where: "GETBYNAME", groupId: groupId});
 		let isArray = Array.isArray(names);
 		if (typeof names === "string") names = [names];
 		if (names.length === 0) return isArray ? [] : undefined;
@@ -81,7 +81,7 @@ export class GroupTagRepository<
 	 * @param groupId
 	 */
 	public async deleteInUsages(name: string, groupId?: number | string): Promise<void> {
-		if (!groupId) throw tagError.groupId();
+		if (!groupId) throw tagError.groupId({where: "DELETE IN USAGES", groupId: groupId});
 		name = name.trim();
 		let listNameHelper = `,${name},`;
 		let jsonNameHelper = `$.${name}`;
@@ -123,14 +123,14 @@ export class GroupTagRepository<
 	/***
 	 * Called by the tag's pipeline, checks for changes, adds and deletes the tags according to them.
 	 * @param repository changed entity's repository
-	 * @param dto changed entity
+	 * @param item changed entity
 	 * @param prevDto changed entity's previous state
 	 * @param fieldName name of the tag field
 	 */
-	protected async updateTag(repository: EntityRepositoryInterface, dto: Record<string, any>, prevDto: Record<string, any>, fieldName?: string) {
+	protected async updateTag(repository: EntityRepositoryInterface, item: Record<string, any>, prevDto: Record<string, any>, fieldName?: string) {
 		if (!fieldName) throw tagError.selfRename();
-		let groupId = dto[fieldName];
-		let {prev, curr} = this.changes(repository, dto, prevDto);
+		let groupId = item[fieldName];
+		let {prev, curr} = this.changes(repository, item, prevDto);
 		await this.addTag(curr.filter(x => !prev.includes(x)), groupId);
 		await this.deleteTag(prev.filter(x => !curr.includes(x)), groupId);
 	}
@@ -138,11 +138,11 @@ export class GroupTagRepository<
 	/***
 	 * creates 2 arrays of strings, one for the current tags on the changed entity, and one for the tags before the change.
 	 * @param repository changed entity's repository
-	 * @param dto changed entity
+	 * @param item changed entity
 	 * @param prevDto changed entity's previous state
 	 * @protected
 	 */
-	protected changes(repository: EntityRepositoryInterface, dto: Record<string, any>, prevDto: Record<string, any>): { prev: Array<string>; curr: Array<string> } {
+	protected changes(repository: EntityRepositoryInterface, item: Record<string, any>, prevDto: Record<string, any>): { prev: Array<string>; curr: Array<string> } {
 		if (!prevDto) throw tagError.itemNotFound(repository.constructor.name);
 		let curr: Array<string> = [];
 		let prev: Array<string> = [];
@@ -150,11 +150,11 @@ export class GroupTagRepository<
 			if (usage.repo === repository) {
 				if(usage.mode === "JSON") {
 					prev.push(...Object.keys(prevDto[usage.field]));
-					curr.push(...Object.keys(dto[usage.field]));
+					curr.push(...Object.keys(item[usage.field]));
 				}
 				else {
 					prev.push(...(prevDto[usage.field] ? prevDto[usage.field].split(',') : []));
-					curr.push(...(dto[usage.field] ? (dto[usage.field] as string).split(',') : []));
+					curr.push(...(item[usage.field] ? (item[usage.field] as string).split(',') : []));
 				}
 
 			}
@@ -207,7 +207,7 @@ export class GroupTagRepository<
 	 * Runs when a tag is removed from an entity's usage. It checks if the tag is associated with any other entities within the usages, and if not, the tag is deleted.
 	 */
 	protected async deleteItems(items: Array<ITEM>, groupId?: number | string) {
-		if (!groupId) throw tagError.groupId();
+		if (!groupId) throw tagError.groupId({where: "DELETE ITEMS", groupId: groupId})
 		for (let item of items) {
 			let doDelete = true;
 			for (let usage of this.usages) {
@@ -228,7 +228,7 @@ export class GroupTagRepository<
 	 * Updates the renamed tag in all of its usages.
 	 */
 	protected async doRename(oldName: string, newName: string, groupId?: number | string) {
-		if (!groupId) throw tagError.groupId();
+		if (!groupId) throw tagError.groupId({where: "DO RENAME", groupId: groupId});
 		let nN = `$.${newName}`; // helper for newName in JSOM mode (where)
 		let oN = `$.${oldName}`; // helper for oldName in JSOM mode (where + set)
 		let eN = `"${newName}"`; // helper for newName in JSOM mode (set)
@@ -278,14 +278,14 @@ export class GroupTagRepository<
 				.prepare.append(async (state: State) => await prevDto(state, repository))
 				.prepare.append(async (state: State) => this.prepare(repository, state.dto))
 				.finalize.append(async (state: State) => {
-					await this.updateTag(repository, state.dto, state.prevDto, groupField);
+				await this.updateTag(repository, state.item, state.prevDto, groupField);
 				}
 			)
 
 			repository.pipelines.delete.blocks
 				.prepare.append(async (state: State) => await prevDto(state, repository))
 				.finalize.append(async (state: State) => {
-					await this.deleteTag(state.prevDto[usage.field].split(','), groupField)
+				await this.deleteTag(state.prevDto[usage.field].split(','), state.prevDto[groupField])
 				}
 			)
 
@@ -295,7 +295,7 @@ export class GroupTagRepository<
 			repository.pipelines.overwrite.blocks
 				.prepare.append(async (state: State) => await prevDto(state, repository))
 				.finalize.append(async (state: State) => {
-					await this.updateTag(repository, state.dto, await prevDto(state, repository), groupField);
+				await this.updateTag(repository, state.item, await prevDto(state, repository), groupField);
 				}
 			)
 		}

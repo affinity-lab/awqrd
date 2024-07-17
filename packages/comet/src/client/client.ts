@@ -9,7 +9,7 @@ export abstract class Client<CTX=any> {
 	private pipeline: Pipeline<any, any>;
 
 	constructor(
-		public readonly version: number,
+		public readonly version: number = 1,
 		middlewares: Array<MiddlewareFn | Middleware> = [],
 		public readonly unsupported: boolean = false,
 	) {

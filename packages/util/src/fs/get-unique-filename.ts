@@ -1,5 +1,5 @@
-import {fileExists} from "./file-exists";
 import Path from "path";
+import {fileExists} from "./file-exists";
 
 /**
  * Generates a unique filename by appending a numerical suffix to the filename if it already exists in the specified directory.

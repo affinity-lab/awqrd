@@ -8,7 +8,7 @@ import path from "path";
  * @param {string} dir - The directory containing the modules.
  * @returns {Array<T>} An array of default exports from the loaded modules.
  */
-export function loadModuleDefaultExports<T = any>(dir: string): Array<T> {
+export async function loadModuleDefaultExports<T = any>(dir: string): Promise<Array<T>> {
 	// Initialize an empty array to store the loaded modules
 	const modules: Array<T> = [];
 
@@ -16,11 +16,18 @@ export function loadModuleDefaultExports<T = any>(dir: string): Array<T> {
 	const records = fg.globSync(path.join(dir + "/*.{ts,js}").replaceAll("\\", "/"));
 
 	// Load each module asynchronously and push the default export into the 'modules' array
-	records.map(async (filename: string) => {
-		let module: T = require(filename).default;
-		modules.push(module);
-	});
+	await Promise.all(records.map(async (filename: string) => {
+		if (typeof require !== "undefined") {
+			let module: T = require(filename).default;
+			modules.push(module);
+		} else {
+			let module: T = (await import(filename)).default;
+			modules.push(module);
+		}
+	}));
 
 	// Return the array of default exports
 	return modules;
 }
+
+

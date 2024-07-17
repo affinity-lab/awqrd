@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/comet",
-  "version": "1.0.171",
+  "version": "1.0.177",
   "description": "Comet Command API for bun / hono",
   "author": "Affinity Works",
   "license": "MIT",
@@ -15,13 +15,14 @@
   ],
   "scripts": {
     "prebuild": "bunx rimraf dist && bunx rimraf types",
-    "build": "bunx tsc"
+    "build": "bunx tsc",
+    "postbuild": "bunx ts-add-js-extension --dir=dist"
   },
   "dependencies": {
     "hono": "^4.1.7",
     "reformdata": "^0.2.2",
     "zod": "^3.22.4",
-    "@affinity-lab/util": "2.0.159"
+    "@affinity-lab/util": "2.0.165"
   },
   "devDependencies": {
     "@types/bun": "latest",

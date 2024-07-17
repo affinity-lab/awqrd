@@ -1,7 +1,7 @@
-import {Client} from "./client";
-import {Middleware, MiddlewareFn, Jwt} from "@affinity-lab/util";
-import {CometState} from "./comet-state";
+import {Jwt, Middleware, MiddlewareFn} from "@affinity-lab/util";
 import {cometError} from "../error";
+import {Client} from "./client";
+import {CometState} from "./comet-state";
 
 
 export class ClientWithJwt<T = any> extends Client {

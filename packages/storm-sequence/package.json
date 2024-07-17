@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/storm-sequence",
-  "version": "1.0.2",
+  "version": "1.0.8",
   "description": "Storm sequence plugin",
   "author": "Affinity Works",
   "license": "MIT",
@@ -15,11 +15,12 @@
   ],
   "scripts": {
     "prebuild": "bunx rimraf dist && bunx rimraf types",
-    "build": "bunx tsc"
+    "build": "bunx tsc",
+    "postbuild": "bunx ts-add-js-extension --dir=dist"
   },
   "dependencies": {
-    "@affinity-lab/util": "2.0.159",
-    "@affinity-lab/storm": "1.0.166",
+    "@affinity-lab/util": "2.0.165",
+    "@affinity-lab/storm": "1.0.172",
     "drizzle-orm": "^0.30.6"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 import NodeCache, {type ValueSetItem} from "node-cache";
-import {type KeyValue, Cache} from "./cache";
+import {Cache, type KeyValue} from "./cache";
 
 
 /**

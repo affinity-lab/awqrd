@@ -1,5 +1,5 @@
-import { createClient, RedisClientType } from 'redis';
-import { type KeyValue, Cache } from './cache';
+import {createClient, RedisClientType} from 'redis';
+import {Cache, type KeyValue} from './cache';
 
 
 //NOTE: untested
