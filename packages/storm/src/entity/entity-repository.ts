@@ -3,11 +3,11 @@ import {omitFieldsIP, pickFieldsIP, ProcessPipeline, type State} from "@affinity
 import {sql} from "drizzle-orm";
 import {MySqlTableWithColumns} from "drizzle-orm/mysql-core";
 import type {MySql2Database, MySqlRawQueryResult} from "drizzle-orm/mysql2";
+import {entityError} from "../error";
 import type {Dto, ViewDto} from "../types";
 import {Entity} from "./entity";
 import type {EntityRepositoryInterface} from "./entity-repository-interface";
 import {ViewEntityRepository} from "./view-entity-repository";
-import {entityError} from "../error";
 
 
 /**

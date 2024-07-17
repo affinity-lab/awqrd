@@ -1,9 +1,4 @@
-import {
-	getByFactory,
-	ViewEntity,
-	ViewEntityRepositoryInterface,
-	WithId
-} from "@affinity-lab/storm";
+import {getByFactory, ViewEntity, ViewEntityRepositoryInterface, WithId} from "@affinity-lab/storm";
 
 import {ResultCacheWithMaps} from "./result-cache-factory";
 

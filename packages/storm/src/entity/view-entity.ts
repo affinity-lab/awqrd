@@ -1,7 +1,7 @@
 import {MaterializeIt, MaybeNull, omitFieldsIP, pickFieldsIP} from "@affinity-lab/util";
+import {entityError} from "../error";
 import {Export} from "../helper";
 import {ViewEntityRepositoryInterface} from "./view-entity-repository-interface";
-import {entityError} from "../error";
 
 
 /**

@@ -1,8 +1,8 @@
 import fs from "fs";
+import path from "path";
 import {type Collection} from "./collection";
 import {mimeTypeMap} from "./helper/mimetype-map";
 import type {AttachmentObject} from "./helper/types";
-import path from "path";
 
 export class Attachment<METADATA extends Record<string, any>> implements AttachmentObject {
 

@@ -3,8 +3,8 @@ import {eq, Placeholder, sql} from "drizzle-orm";
 import {int, MySqlColumn} from "drizzle-orm/mysql-core";
 import type {MySqlSelectWithout} from "drizzle-orm/mysql-core/query-builders/select.types";
 import {EntityRepositoryInterface} from "./entity/entity-repository-interface";
-import {ViewEntityRepositoryInterface} from "./entity/view-entity-repository-interface";
 import {ViewEntity} from "./entity/view-entity";
+import {ViewEntityRepositoryInterface} from "./entity/view-entity-repository-interface";
 
 
 /**

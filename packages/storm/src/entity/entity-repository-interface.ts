@@ -1,6 +1,5 @@
 import {MaybeUndefined, ProcessPipeline, T_Class} from "@affinity-lab/util";
-import {MySqlTableWithColumns} from "drizzle-orm/mysql-core";
-import {MySqlTable} from "drizzle-orm/mysql-core";
+import {MySqlTable, MySqlTableWithColumns} from "drizzle-orm/mysql-core";
 import type {Dto} from "../types";
 import {Entity} from "./entity";
 import {ViewEntityRepositoryInterface} from "./view-entity-repository-interface";

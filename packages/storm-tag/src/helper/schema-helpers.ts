@@ -1,6 +1,5 @@
-import {mysqlTable, varchar} from "drizzle-orm/mysql-core";
+import {int, MySqlColumn, mysqlTable, varchar} from "drizzle-orm/mysql-core";
 import {type MySqlIntBuilderInitial} from "drizzle-orm/mysql-core/columns/int";
-import {MySqlColumn, int} from "drizzle-orm/mysql-core";
 
 export let stormTagSchemaHelpers = {
 	tagTableFactory: function (name: string, id: () => MySqlIntBuilderInitial<any>) {

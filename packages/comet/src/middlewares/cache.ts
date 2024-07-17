@@ -1,6 +1,5 @@
+import type {Cache, Middleware} from "@affinity-lab/util";
 import crypto from "crypto";
-import type {Cache} from "@affinity-lab/util";
-import type {Middleware} from "@affinity-lab/util";
 
 import {CometState} from "../client/comet-state";
 
