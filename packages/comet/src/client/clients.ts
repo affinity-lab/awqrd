@@ -48,9 +48,9 @@ export abstract class Clients<GROUPS extends string = string> {
 		return client;
 	}
 
-	readCommands(commandsPath: string) {
+	async readCommands(commandsPath: string) {
 
-		loadModuleDefaultExports(commandsPath);
+		await loadModuleDefaultExports(commandsPath);
 
 		let allClients: Array<Client> = [];
 		for (const key in this.clients) allClients.push(...this.clients[key].all());
