@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/storm-validator",
-  "version": "1.0.173",
+  "version": "1.0.175",
   "description": "Storm validator plugin",
   "author": "Affinity Works",
   "license": "MIT",
@@ -21,8 +21,8 @@
   "dependencies": {
     "hono": "^4.1.7",
     "sharp": "^0.33.3",
-    "@affinity-lab/util": "2.0.166",
-    "@affinity-lab/storm": "1.0.173"
+	"@affinity-lab/util": "2.0.168",
+	"@affinity-lab/storm": "1.0.175"
   },
   "devDependencies": {
     "@types/bun": "latest",

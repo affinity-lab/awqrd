@@ -1,10 +1,8 @@
-import {loadModuleDefaultExports, type MetaDataStore, omitFields} from "@affinity-lab/util";
+import {MaterializeIt, type MetaDataStore, Middleware, MiddlewareFn, omitFields} from "@affinity-lab/util";
 import {Comet} from "../comet";
 import {cometError} from "../error";
 import {Client} from "./client";
 import {ClientGroup} from "./client-group";
-
-type ClientInfo = { name: string | undefined, version: number | string | undefined, apiKey: string | undefined }
 
 export abstract class Clients<GROUPS extends string = string> {
 	constructor(readonly clients: Record<GROUPS, ClientGroup>) {}
@@ -48,9 +46,7 @@ export abstract class Clients<GROUPS extends string = string> {
 		return client;
 	}
 
-	async readCommands(commandsPath: string) {
-
-		await loadModuleDefaultExports(commandsPath);
+	readCommands() {
 
 		let allClients: Array<Client> = [];
 		for (const key in this.clients) allClients.push(...this.clients[key].all());
@@ -84,4 +80,15 @@ export abstract class Clients<GROUPS extends string = string> {
 	}
 
 	abstract get(ctx: any): Promise<Client<any>>;
+}
+
+export class SingleClient extends Clients {
+	constructor(middlewares: Array<MiddlewareFn | Middleware> | undefined = undefined, protected name: string = "default") {
+		let clients: Record<string, any> = {};
+		clients[name] = new ClientGroup(new (class extends Client {})(1, middlewares))
+		super(clients);
+	}
+	get(): Promise<Client> { return Promise.resolve(this.clients[this.name].get(1)!);}
+
+	@MaterializeIt get instance() { return this.clients[this.name].get(1)!;}
 }

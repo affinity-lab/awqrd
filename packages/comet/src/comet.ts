@@ -39,9 +39,9 @@ export class Comet {
 		return (target: any, propertyKey: string) => {
 			if (config === undefined) config = {};
 			if (config.name === undefined) config.name = propertyKey;
-			this.classMetaData.get(target.constructor, true)
+			Comet.classMetaData.get(target.constructor, true)
 			for (const key in config) {
-				this.classMetaData.get(target.constructor, true).set(["command", propertyKey, key], config[key]);
+				Comet.classMetaData.get(target.constructor, true).set(["command", propertyKey, key], config[key]);
 			}
 		}
 	}
@@ -49,9 +49,9 @@ export class Comet {
 		return (target: any) => {
 			if (config === undefined) config = {};
 			if (config.name === undefined) config.name = target.name;
-			this.classMetaData.get(target, true)
+			Comet.classMetaData.get(target, true)
 			for (const key in config) {
-				this.classMetaData.get(target, true).set(["group", key], config[key]);
+				Comet.classMetaData.get(target, true).set(["group", key], config[key]);
 			}
 		}
 	}

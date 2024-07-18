@@ -8,9 +8,9 @@ export type Result = { result: any, status: number }
 
 export class RenderMiddleware implements Middleware {
 
-	private readonly errorHandlers: Array<(error: any) => ExtendedError | undefined>;
+	private readonly errorHandlers: Array<(error: any) => ExtendedError | undefined | void>;
 
-	constructor(...errorHandlers: Array<(error: any) => ExtendedError | undefined>) {
+	constructor(...errorHandlers: Array<(error: any) => ExtendedError | undefined | void>) {
 		this.errorHandlers = errorHandlers;
 	}
 
