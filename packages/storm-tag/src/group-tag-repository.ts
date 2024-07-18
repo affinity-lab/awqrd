@@ -1,4 +1,4 @@
-import {Dto, EntityRepositoryInterface, Export, Import, prevDto, stmt} from "@affinity-lab/storm";
+import {Dto, EntityRepositoryInterface, Export, Import, stmt, prevDto, Entity} from "@affinity-lab/storm";
 import {MaterializeIt, type State, T_Class} from "@affinity-lab/util";
 import {and, eq, not, sql} from "drizzle-orm";
 import {type MySqlTable} from "drizzle-orm/mysql-core";
@@ -119,7 +119,6 @@ export class GroupTagRepository<
 	}
 
 	// ------------------------------------------ PIPELINE HELPERS
-
 	/***
 	 * Called by the tag's pipeline, checks for changes, adds and deletes the tags according to them.
 	 * @param repository changed entity's repository
@@ -127,9 +126,10 @@ export class GroupTagRepository<
 	 * @param prevDto changed entity's previous state
 	 * @param fieldName name of the tag field
 	 */
-	protected async updateTag(repository: EntityRepositoryInterface, item: Record<string, any>, prevDto: Record<string, any>, fieldName?: string) {
+	protected async updateTag<ITEM extends Entity, FIELD_NAME extends keyof ITEM & string>(repository: EntityRepositoryInterface, item: ITEM, prevDto: Record<string, any>, fieldName?: FIELD_NAME) {
 		if (!fieldName) throw tagError.selfRename();
-		let groupId = item[fieldName];
+		let groupId = item[fieldName] as string | number;
+		if (!groupId) throw tagError.groupId({where: "UPDATE TAG", groupId: groupId})
 		let {prev, curr} = this.changes(repository, item, prevDto);
 		await this.addTag(curr.filter(x => !prev.includes(x)), groupId);
 		await this.deleteTag(prev.filter(x => !curr.includes(x)), groupId);
@@ -182,11 +182,11 @@ export class GroupTagRepository<
 	 * @param groupId
 	 */
 	protected async addTag(names: Array<string>, groupId?: number | string): Promise<void> {
+		if (!groupId) throw tagError.groupId({where: "ADD TAG", groupId: groupId})
 		let items = await this.getByName(names, groupId).then(r => (r).map(i => i.name))
 		let toAdd = names.filter(x => !items.includes(x));
 		for (let tag of toAdd) {
-			let item = await this.create()
-			item.name = tag
+			let item = await this.create({groupId: groupId, name: tag});
 			await this.insert(item);
 		}
 	}
@@ -197,6 +197,7 @@ export class GroupTagRepository<
 	 * @param groupId
 	 */
 	protected async deleteTag(names: Array<string>, groupId?: number | string): Promise<void> {
+		if (!groupId) throw tagError.groupId({where: "DELETE TAG", groupId: groupId})
 		let items = await this.getByName(names, groupId)
 		if (items.length === 0) return;
 		await this.deleteItems(items, groupId);
@@ -207,7 +208,6 @@ export class GroupTagRepository<
 	 * Runs when a tag is removed from an entity's usage. It checks if the tag is associated with any other entities within the usages, and if not, the tag is deleted.
 	 */
 	protected async deleteItems(items: Array<ITEM>, groupId?: number | string) {
-		if (!groupId) throw tagError.groupId({where: "DELETE ITEMS", groupId: groupId})
 		for (let item of items) {
 			let doDelete = true;
 			for (let usage of this.usages) {
@@ -278,14 +278,14 @@ export class GroupTagRepository<
 				.prepare.append(async (state: State) => await prevDto(state, repository))
 				.prepare.append(async (state: State) => this.prepare(repository, state.dto))
 				.finalize.append(async (state: State) => {
-				await this.updateTag(repository, state.item, state.prevDto, groupField);
+					await this.updateTag(repository, state.item, state.prevDto, groupField);
 				}
 			)
 
 			repository.pipelines.delete.blocks
 				.prepare.append(async (state: State) => await prevDto(state, repository))
 				.finalize.append(async (state: State) => {
-				await this.deleteTag(state.prevDto[usage.field].split(','), state.prevDto[groupField])
+					await this.deleteTag(state.prevDto[usage.field].split(','), state.prevDto[groupField])
 				}
 			)
 
@@ -295,7 +295,7 @@ export class GroupTagRepository<
 			repository.pipelines.overwrite.blocks
 				.prepare.append(async (state: State) => await prevDto(state, repository))
 				.finalize.append(async (state: State) => {
-				await this.updateTag(repository, state.item, await prevDto(state, repository), groupField);
+					await this.updateTag(repository, state.item, await prevDto(state, repository), groupField);
 				}
 			)
 		}

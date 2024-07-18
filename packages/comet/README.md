@@ -13,7 +13,9 @@ Comet is a simple and fast api framework for Node.js.
 `Example`
 
 ```ts
-const files = fg.globSync(path.join(process.cwd(), "src/commands/*.ts"));
+import FastGlob from "fast-glob";
+
+const files = FastGlob.globSync(path.resolve(process.cwd(), 'src', 'commands', '**', '*.ts').replaceAll('\\', "/"));
 await Promise.all(files.map(async (filename: string) => await import(filename)));
 clients.readCommands();
 clients.describe();

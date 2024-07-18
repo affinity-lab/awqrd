@@ -23,7 +23,7 @@ export function cachePlugin(resultCache: ResultCache) {
 		repository.pipelines.update.blocks
 			.finalize.append(async (state: State<{ item: { id: number } }>) => await resultCache.del(state.item.id))
 		repository.pipelines.delete.blocks
-			.finalize.append(async (state: State<{ item: { id: number } }>) => await resultCache.del(state.item.id))
+			.finalize.prepend(async (state: State<{ item: { id: number } }>) => await resultCache.del(state.item.id))
 		repository.pipelines.overwrite.blocks
 			.finalize.append(async (state: State<{ item: { id: number } }>) => await resultCache.del(state.item.id))
 

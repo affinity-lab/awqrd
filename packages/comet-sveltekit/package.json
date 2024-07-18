@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/comet-sveltekit",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Comet SvelteKit adapters",
   "author": "Affinity Works",
   "license": "MIT",
@@ -8,25 +8,25 @@
   "type": "module",
   "main": "dist/index.js",
   "files": [
-	"dist",
-	"src",
-	"types",
-	"tsconfig.json"
+    "dist",
+    "src",
+    "types",
+    "tsconfig.json"
   ],
   "scripts": {
-	"prebuild": "bunx rimraf dist && bunx rimraf types",
-	"build": "bunx tsc",
-	"postbuild": "bunx ts-add-js-extension --dir=dist"
+    "prebuild": "bunx rimraf dist && bunx rimraf types",
+    "build": "bunx tsc",
+    "postbuild": "bunx ts-add-js-extension --dir=dist"
   },
   "dependencies": {
-	"reformdata": "^0.2.2",
-	"@affinity-lab/comet": "1.0.180",
-	"@sveltejs/kit": "^2.0.0"
+    "reformdata": "^0.2.2",
+    "@affinity-lab/comet": "1.0.181",
+    "@sveltejs/kit": "^2.0.0"
   },
   "devDependencies": {
-	"@types/node": "^20.12.8"
+    "@types/node": "^20.12.8"
   },
   "peerDependencies": {
-	"typescript": "^5.0.0"
+    "typescript": "^5.0.0"
   }
 }
