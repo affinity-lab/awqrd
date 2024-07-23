@@ -1,4 +1,4 @@
-import {glob} from "fast-glob";
+import FastGlob from "fast-glob";
 import fs from "fs";
 import Path from "path";
 
@@ -12,7 +12,7 @@ import Path from "path";
  */
 export function imgCleanupFactory(imgPath: string) {
 	return async (name: string, id: number, file: string) => {
-		let files = await glob(Path.join(imgPath, `${name}.${id.toString(36).padStart(6, "0")}.*.${file}.*`))
+		let files = await FastGlob.glob(Path.join(imgPath, `${name}.${id.toString(36).padStart(6, "0")}.*.${file}.*`))
 		files.map(file => fs.promises.unlink(file));
 	}
 }
