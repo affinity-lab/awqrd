@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/comet-sveltekit",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Comet SvelteKit adapters",
   "author": "Affinity Works",
   "license": "MIT",
@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "reformdata": "^0.2.2",
-    "@affinity-lab/comet": "1.0.181",
+    "@affinity-lab/comet": "1.0.182",
     "@sveltejs/kit": "^2.0.0"
   },
   "devDependencies": {

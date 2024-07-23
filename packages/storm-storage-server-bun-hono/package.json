@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/storm-storage-server-bun-hono",
-  "version": "1.0.179",
+  "version": "1.0.180",
   "description": "Storm Storage file server for bun and hono",
   "author": "Affinity Works",
   "license": "MIT",
@@ -21,8 +21,8 @@
   "dependencies": {
     "hono": "^4.1.7",
     "sharp": "^0.33.3",
-    "@affinity-lab/util": "2.0.169",
-    "@affinity-lab/storm": "1.0.176"
+    "@affinity-lab/util": "2.0.170",
+    "@affinity-lab/storm": "1.0.177"
   },
   "devDependencies": {
     "@types/bun": "latest",
