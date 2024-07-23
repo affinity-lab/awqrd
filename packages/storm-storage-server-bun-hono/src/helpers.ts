@@ -56,7 +56,7 @@ export async function createThumbnail(source: string, output: string, imgParams:
 		}
 
 		await sharp(source, {animated: true})
-			.resize(width, height, {
+			.resize(width * imgParams.density, height  * imgParams.density, {
 				kernel: sharp.kernel.lanczos3,
 				fit: "contain",
 				withoutEnlargement: true
@@ -73,7 +73,7 @@ export async function createThumbnail(source: string, output: string, imgParams:
 		}
 
 		await sharp(source, {animated: true})
-			.resize(width, height, {
+			.resize(width  * imgParams.density, height  * imgParams.density, {
 				kernel: sharp.kernel.lanczos3,
 				fit: "cover",
 				position: focus,
