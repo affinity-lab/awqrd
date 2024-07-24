@@ -48,7 +48,7 @@ export abstract class IForm<
 		if (!id) item = await this.repository.create();
 		else item = await this.repository.get(id);
 		if (!item) throw sapphireError.notFound({location: "saveItem", id});
-		item.$import(values);
+		item.$import(values as Record<keyof ITEM, any>);
 		await item.$save();
 		return item.id;
 	}
@@ -92,7 +92,6 @@ export abstract class IForm<
 	async changeFileData(id: number, collectionName: string, fileName: string, newMetaData?: Record<string, any>, newName?: string) {
 		let collection: Collection<any> | undefined = this.storage.collections[collectionName];
 		if (!collection) throw sapphireError.collectionNotExist(collectionName);
-		let item = await this.repository.get(id);
 		let file = await this.findFile(id, collectionName, fileName);
 		if(newMetaData) {
 			Object.keys(collection.writableMetaFields).forEach(key => {if(newMetaData[key]) file.metadata[key] = newMetaData[key]})

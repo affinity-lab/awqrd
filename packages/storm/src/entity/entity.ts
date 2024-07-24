@@ -1,4 +1,4 @@
-import {MaterializeIt} from "@affinity-lab/util";
+import {MaterializeIt, type ExcludeFunctions} from "@affinity-lab/util";
 import {Import} from "../helper";
 import {EntityRepositoryInterface} from "./entity-repository-interface";
 import {ViewEntity} from "./view-entity";
@@ -17,18 +17,22 @@ export abstract class Entity extends ViewEntity {
 
 	/**
 	 * Imports data into the entity.
-	 * @param importData
+	 * @param importData record of the properties to copy onto the entity.
+	 * @param onlyDecoratedProperties the properties doesn't have to be decorated if this is false (default true)
 	 */
-	$import(importData: Record<string, any>) {
+	$import<DATA extends {[P in keyof ExcludeFunctions<this>]: ExcludeFunctions<this>[P] }>(importData: DATA, onlyDecoratedProperties = true) {
 		let importFields = (this.constructor as typeof Entity).importFields;
-		if (importFields) for (const key of importFields) if (importData.hasOwnProperty(key)) this[key as keyof this] = importData[key];
+		// @ts-ignore this[key] is actually a key, type just forgot how to type if you can fix it pls do :)
+		for (const key in importData) if(importFields?.includes(key) || (!onlyDecoratedProperties && this.hasOwnProperty(key))) this[key] = importData[key];
 		return this;
 	}
 
 	/**
 	 * Saves the entity to the database.
+	 * @param saveData: properties of Entity
+	 * @param onlyDecoratedProperties sets if @Import decorator is required or not for the properties you save this way, false by default
 	 */
-	$save() {return this.$repository.save(this);}
+	$save<DATA extends {[P in keyof ExcludeFunctions<this>]: ExcludeFunctions<this>[P] }>(saveData?: DATA, onlyDecoratedProperties = false) {return (saveData ? this.$import(saveData, onlyDecoratedProperties) : this).$repository.save(this);}
 
 	/**
 	 * Deletes the entity from the database.
@@ -39,5 +43,5 @@ export abstract class Entity extends ViewEntity {
 	 * Overwrites the entity with the provided data, without validation.
 	 * @param data
 	 */
-	$overwrite(data: Record<string, any>) { return this.$repository.overwrite(this, data);}
+	$overwrite<KEY extends keyof this>(data: Record<KEY, typeof this[KEY]>) { return this.$repository.overwrite(this, data);}
 }

@@ -21,3 +21,17 @@ export type T_Constructor<OBJECT_TYPE> = (new (...args: any[]) => OBJECT_TYPE);
  * @template CLASS - The type of the class.
  */
 export type T_Class<OBJECT_TYPE, CLASS> = T_Constructor<OBJECT_TYPE> & CLASS;
+
+export type OmittedObject<Values extends Record<string, any>, Fields extends Array<keyof Values>> = {
+	[P in keyof Values as Exclude<P, Fields[number]>]: Values[P];
+};
+
+export type PickedObject<Values extends Record<string, any>, Fields extends Array<keyof Values>> = {
+	[P in Fields[number]]: Values[P];
+};
+
+type NonFunctionKeys<VALUES extends Record<string, any>> = {
+	[P in keyof VALUES]: VALUES[P] extends (...args: any[]) => any ? never : P
+}[keyof VALUES];
+
+export type ExcludeFunctions<VALUES extends Record<string, any>> = Partial<Pick<VALUES, NonFunctionKeys<VALUES>>>;
