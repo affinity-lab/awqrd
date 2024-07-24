@@ -2,13 +2,14 @@ import {Buffer} from "buffer";
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
+import {fileExists} from "./file-exists";
 
 export class TmpFile {
 
 	get filename() {return path.basename(this.file);}
 	constructor(public file: string) {}
 	async release(): Promise<void> {
-		if(await fs.promises.exists(this.file))	await fs.promises.unlink(this.file).then(() => fs.promises.rmdir(path.dirname(this.file)));
+		if (await fileExists(this.file)) await fs.promises.unlink(this.file).then(() => fs.promises.rmdir(path.dirname(this.file)));
 	}
 }
 

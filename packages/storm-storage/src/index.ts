@@ -11,3 +11,4 @@ export * from "./image/types";
 export * from "./image/image-collection";
 export * from "./image/img-cleanup";
 export * from "./image/types";
+export * from "./image/helpers"

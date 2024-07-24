@@ -6,7 +6,6 @@ export async function fileExists(path: string): Promise<boolean> {
 		await fs.promises.access(path);
 		return true;
 	} catch (error) {
-		// If access throws an error, the file or directory does not exist
 		return false;
 	}
 }
