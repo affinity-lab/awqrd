@@ -31,7 +31,16 @@ export abstract class ViewEntity {
 	$export() {
 		const e: Record<string, any> = {}
 		let a = (this.constructor as typeof ViewEntity).exportFields;
-		if (a) for (const key of a) e[key] = this[key as keyof this];
+
+
+		if (a) for (const key of a) {
+			e[key] = (
+				typeof this[key as keyof this] === 'object' &&
+				typeof (this[key as keyof this] as { toJSON?: () => any })["toJSON"] === "function"
+			)
+				? (this[key as keyof this] as { toJSON: () => any }).toJSON()
+				: this[key as keyof this];
+		}
 		return e
 	}
 

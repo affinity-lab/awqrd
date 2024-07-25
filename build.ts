@@ -23,7 +23,8 @@ export let packages = {
 	stormCache: new Package("storm-cache", "storm", "util"),
 	stormSequence: new Package("storm-sequence", "storm", "util"),
 	stormStorage: new Package("storm-storage", "storm", "util"),
-	stormStorageServerBunHono: new Package("storm-storage-server-bun-hono", "storm", "util"),
+	stormStorageServerBunHono: new Package("storm-storage-server-bun-hono", "storm", "util", "stormStorage"),
+	stormStorageServerSvelteKit: new Package("storm-storage-server-sveltekit", "storm", "util", "stormStorage"),
 	stormTag: new Package("storm-tag", "storm", "util"),
 	stormValidator: new Package("storm-validator", "storm", "util"),
 	comet: new Package("comet", "util"),
@@ -55,6 +56,7 @@ function build() {
 	buildPackage("sapphire")
 	buildPackage("cometBunHono")
 	buildPackage("cometSvelteKit")
+	buildPackage("stormStorageServerSvelteKit")
 }
 
 
@@ -71,6 +73,7 @@ function publish(code:string) {
 	publishPackage("sapphire", code)
 	publishPackage("cometBunHono", code)
 	publishPackage("cometSvelteKit", code)
+	publishPackage("stormStorageServerSvelteKit", code)
 }
 
 function publishPackage(name: keyof typeof packages, code:string) {

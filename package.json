@@ -19,7 +19,8 @@
     "@affinity-lab/sapphire-awqrd": "workspace:packages/sapphire",
     "@affinity-lab/comet-hono-bun": "workspace:packages/comet-bun-hono",
     "@affinity-lab/comet-sveltekit": "workspace:packages/comet-sveltekit",
-    "@affinity-lab/storm-sequence": "workspace:packages/storm-sequence"
+    "@affinity-lab/storm-sequence": "workspace:packages/storm-sequence",
+    "@affinity-lab/storm-storage-server-sveltekit": "workspace:packages/storm-storage-server-sveltekit"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -39,6 +40,7 @@
     "packages/storm-tag",
     "packages/storm-validator",
     "packages/sapphire",
-    "packages/storm-sequence"
+    "packages/storm-sequence",
+    "packages/storm-storage-server-sveltekit"
   ]
 }
