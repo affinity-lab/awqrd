@@ -1,4 +1,27 @@
-import {ImageAttachmentMetadata, Rules} from "@affinity-lab/storm-storage";
+export type ImgFocus = "centre" | "top" | "left" | "bottom" | "right" | "entropy" | "attention"
+
+export type Rules = {
+	limit: {
+		size: number
+		count: number
+	},
+	mime: undefined | Array<string>
+	ext: undefined | Array<string>
+}
+
+export type ImgRGB = {
+	r: number
+	g: number
+	b: number
+}
+export type ImageAttachmentMetadata = {
+	title?: string
+	focus: ImgFocus
+	readonly width?: number
+	readonly height?: number
+	readonly color?: ImgRGB
+	readonly animated: boolean
+}
 
 export type Collection<METADATA extends Record<string, any> = Record<string, any>> = {
 	collection: string;
@@ -18,11 +41,12 @@ export type FileCollection<METADATA extends Record<string, any> = Record<string,
 
 export type ImgCollection<METADATA extends Record<string, any> = Record<string, any>> = Omit<FileCollection<METADATA>, 'files'> & {
 	files: Array<FileCollection<METADATA>['files'][number] & {
-		img: ((width: number, height: number) => ImgUrl & string)
-		imgWidth: ((width: number) => ImgUrl & string)
-		imgHeight: ((height: number) => ImgUrl & string)
-		imgNamed: ((name: string) => ImgUrl & string)
-
+		img: {
+			size: ((width: number, height: number) => ImgUrl & string)
+			width: ((width: number) => ImgUrl & string)
+			height: ((height: number) => ImgUrl & string)
+			named: ((name: string) => ImgUrl & string)
+		}
 	}>;
 };
 
@@ -63,20 +87,13 @@ export class ImageHandler<METADATA extends ImageAttachmentMetadata = ImageAttach
 		super(collection);
 		this.collection.files.forEach(file => {
 			let ext = /(?:\.([^.]+))?$/.exec(file.name)?.[1];
-
 			let id = collection.id.toString(36).padStart(6, "0");
 
-			file.img = (width: number, height: number): ImgUrl & string => {
-				return new ImgUrl("/img/" + this.collection.collection + "." + id + "-" + width + "x" + height + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ImgUrl & string;
-			}
-			file.imgWidth = (width: number): ImgUrl & string => {
-				return new ImgUrl("/img/" + this.collection.collection + "." + id + "-" + width + "x@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ImgUrl & string;
-			}
-			file.imgHeight = (height: number): ImgUrl & string => {
-				return new ImgUrl("/img/" + this.collection.collection + "." + id + "-x" + height + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ImgUrl & string;
-			}
-			file.imgNamed = (name: string): ImgUrl & string => {
-				return new ImgUrl("/img/" + this.collection.collection + "." + id + "-:" + name + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ImgUrl & string;
+			file.img = {
+				size: (width: number, height: number): ImgUrl & string => new ImgUrl("/img/" + this.collection.collection + "." + id + "-" + width + "x" + height + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ImgUrl & string,
+				width: (width: number): ImgUrl & string => new ImgUrl("/img/" + this.collection.collection + "." + id + "-" + width + "x@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ImgUrl & string,
+				height: (height: number): ImgUrl & string => new ImgUrl("/img/" + this.collection.collection + "." + id + "-x" + height + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ImgUrl & string,
+				named: (name: string): ImgUrl & string => new ImgUrl("/img/" + this.collection.collection + "." + id + "-:" + name + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ImgUrl & string,
 			}
 		});
 	}

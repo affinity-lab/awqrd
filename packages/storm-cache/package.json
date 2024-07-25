@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/storm-cache",
-	"version": "1.0.187",
+	"version": "1.0.195",
   "description": "Storm Cache plugin",
   "author": "Affinity Works",
   "license": "MIT",
@@ -21,8 +21,8 @@
   "dependencies": {
     "hono": "^4.1.7",
     "sharp": "^0.33.3",
-	  "@affinity-lab/util": "2.0.178",
-	  "@affinity-lab/storm": "1.0.184"
+	  "@affinity-lab/util": "2.0.186",
+	  "@affinity-lab/storm": "1.0.192"
   },
   "devDependencies": {
     "@types/bun": "latest",

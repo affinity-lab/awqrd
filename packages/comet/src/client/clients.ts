@@ -7,6 +7,14 @@ import {ClientGroup} from "./client-group";
 export abstract class Clients<GROUPS extends string = string> {
 	constructor(readonly clients: Record<GROUPS, ClientGroup>) {}
 
+	reset() {
+		for (let group in this.clients) {
+			for (let client of this.clients[group].all()) {
+				client.reset();
+			}
+		}
+	}
+
 	public describe() {
 		for (let group in this.clients) {
 			for (let client of this.clients[group].all()) {
@@ -47,6 +55,8 @@ export abstract class Clients<GROUPS extends string = string> {
 	}
 
 	readCommands() {
+
+		this.reset();
 
 		let allClients: Array<Client> = [];
 		for (const key in this.clients) allClients.push(...this.clients[key].all());

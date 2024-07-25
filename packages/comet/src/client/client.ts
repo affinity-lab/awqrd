@@ -8,6 +8,10 @@ export abstract class Client<CTX=any> {
 	readonly id: string = crypto.randomUUID();
 	private pipeline: Pipeline<any, any>;
 
+	reset() {
+		this.#commands = {};
+	}
+
 	constructor(
 		public readonly version: number = 1,
 		middlewares: Array<MiddlewareFn | Middleware> = [],
