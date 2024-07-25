@@ -173,12 +173,13 @@ export class EntityRepository<
 	/**
 	 * Creates a new item.
 	 * @param importData - initial data to import into the new item.
+	 * @param onlyDecoratedProperties the properties doesn't have to be decorated if this is false (default true)
 	 * @returns A promise that resolves to the new item.
 	 */
-	public async create(importData?: Record<string, any>): Promise<ITEM> {
+	public async create(importData?: Record<string, any>, onlyDecoratedProperties = true): Promise<ITEM> {
 		// @ts-ignore
 		let item = new this.entity(this);
-		if (importData) item.$import(importData);
+		if (importData) item.$import(importData, onlyDecoratedProperties);
 		return item;
 
 	}

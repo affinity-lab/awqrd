@@ -23,7 +23,7 @@ export abstract class Entity extends ViewEntity {
 	$import<DATA extends {[P in keyof ExcludeFunctions<this>]: ExcludeFunctions<this>[P] }>(importData: DATA, onlyDecoratedProperties = true) {
 		let importFields = (this.constructor as typeof Entity).importFields;
 		// @ts-ignore this[key] is actually a key, type just forgot how to type if you can fix it pls do :)
-		for (const key in importData) if(importFields?.includes(key) || (!onlyDecoratedProperties && this.hasOwnProperty(key))) this[key] = importData[key];
+		for (const key in importData) if(importFields?.includes(key) || (!onlyDecoratedProperties)) this[key] = importData[key];
 		return this;
 	}
 

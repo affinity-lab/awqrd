@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/sapphire-awqrd",
-	"version": "1.0.103",
+  "version": "1.0.104",
   "description": "Backend for sapphire",
   "author": "Affinity Works",
   "license": "MIT",
@@ -26,10 +26,10 @@
     "mysql2": "^3.9.3",
     "sharp": "^0.33.3",
     "zod": "^3.22.4",
-	  "@affinity-lab/util": "2.0.186",
-	  "@affinity-lab/storm": "1.0.192",
-	  "@affinity-lab/storm-storage": "1.0.192",
-	  "@affinity-lab/comet": "1.0.198"
+    "@affinity-lab/util": "2.0.187",
+    "@affinity-lab/storm": "1.0.193",
+    "@affinity-lab/storm-storage": "1.0.193",
+    "@affinity-lab/comet": "1.0.199"
   },
   "devDependencies": {
     "@types/bun": "latest",
