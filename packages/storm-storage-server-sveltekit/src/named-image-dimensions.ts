@@ -6,7 +6,7 @@ export type NamedImageDimensions = Record<string,
 	>
 >
 
-type KeysOfNamedImg<T> = {
+export type KeysOfNamedImg<T> = {
 	[K in keyof T]: {
 		[P in keyof T[K]]: {
 			[Q in keyof T[K][P]]: string;

@@ -1,6 +1,6 @@
 import {ImageAttachmentMetadata, Rules} from "@affinity-lab/storm-storage";
 
-type Collection<METADATA extends Record<string, any> = Record<string, any>> = {
+export type Collection<METADATA extends Record<string, any> = Record<string, any>> = {
 	collection: string;
 	files: Array<{
 		id: string
@@ -12,11 +12,11 @@ type Collection<METADATA extends Record<string, any> = Record<string, any>> = {
 	rules: Rules
 }
 
-type FileCollection<METADATA extends Record<string, any> = Record<string, any>> = Omit<Collection<METADATA>, 'files'> & {
+export type FileCollection<METADATA extends Record<string, any> = Record<string, any>> = Omit<Collection<METADATA>, 'files'> & {
 	files: Array<Collection<METADATA>['files'][number] & { url: string }>;
 };
 
-type ImgCollection<METADATA extends Record<string, any> = Record<string, any>> = Omit<FileCollection<METADATA>, 'files'> & {
+export type ImgCollection<METADATA extends Record<string, any> = Record<string, any>> = Omit<FileCollection<METADATA>, 'files'> & {
 	files: Array<FileCollection<METADATA>['files'][number] & {
 		img: ((width: number, height: number) => ImgUrl & string)
 		imgWidth: ((width: number) => ImgUrl & string)
@@ -26,7 +26,7 @@ type ImgCollection<METADATA extends Record<string, any> = Record<string, any>> =
 	}>;
 };
 
-class FileHandler<METADATA extends Record<string, any> = Record<string, any>> {
+export class FileHandler<METADATA extends Record<string, any> = Record<string, any>> {
 
 	static create<MD extends Record<string, any> = Record<string, any>, T extends typeof FileHandler<MD> = typeof FileHandler<MD>>(this: T, collection: Collection<MD>): InstanceType<T>
 	static create<MD extends Record<string, any> = Record<string, any>, T extends typeof FileHandler<MD> = typeof FileHandler<MD>>(this: T, collection: undefined): undefined
@@ -56,7 +56,7 @@ class FileHandler<METADATA extends Record<string, any> = Record<string, any>> {
 	get collectionName() { return this.collection.collection }
 }
 
-class ImageHandler<METADATA extends ImageAttachmentMetadata = ImageAttachmentMetadata> extends FileHandler<METADATA> {
+export class ImageHandler<METADATA extends ImageAttachmentMetadata = ImageAttachmentMetadata> extends FileHandler<METADATA> {
 	declare collection: ImgCollection<METADATA>;
 
 	constructor(collection: Collection<METADATA>) {
@@ -83,7 +83,7 @@ class ImageHandler<METADATA extends ImageAttachmentMetadata = ImageAttachmentMet
 	get files(): Array<ImgCollection<METADATA>['files'][number]> { return this.collection.files }
 }
 
-class ImgUrl {
+export class ImgUrl {
 	private ext = "webp";
 	constructor(private url: string, private originalExtension?: string) {
 	}

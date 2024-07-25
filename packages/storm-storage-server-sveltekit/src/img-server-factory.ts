@@ -3,7 +3,7 @@ import {fileExists, joinPath} from "@affinity-lab/util";
 import {redirect, type RequestEvent} from "@sveltejs/kit";
 import {NamedImageDimensions} from "./named-image-dimensions";
 
-function imgServerFactory(
+export function imgServerFactory(
 	imgPath: string,
 	filePath: string,
 	namedImageDimensions?: NamedImageDimensions,
