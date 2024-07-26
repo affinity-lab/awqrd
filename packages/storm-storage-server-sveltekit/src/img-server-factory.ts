@@ -3,18 +3,28 @@ import {fileExists, joinPath} from "@affinity-lab/util";
 import {redirect, type RequestEvent} from "@sveltejs/kit";
 import {NamedImageDimensions} from "./named-image-dimensions";
 
+type ImgServerFactoryOptions = {
+	namedImageDimensions?: NamedImageDimensions,
+	allowFree?: boolean,
+	fileNameParam?: string
+}
+
 export function imgServerFactory(
 	imgPath: string,
 	filePath: string,
-	namedImageDimensions?: NamedImageDimensions,
-	allowFree: boolean = false
+	options: ImgServerFactoryOptions
 ): (event: RequestEvent) => Promise<Response> {
 	return async function (event: RequestEvent) {
+
+		let namedImageDimensions = options.namedImageDimensions;
+		let allowFree = options.allowFree ?? false;
+		let fileNameParam = options.fileNameParam ?? "param"
+
 		const regex = /^([^.]+)\.([^.]+)\.(.{6})-([^-]+)-(.+)\.([^.]+)$/;
 
-		let img = event.params["param"]!;
+		let img = event.params[fileNameParam]!;
 
-		const matches = event.params["param"]!.match(regex);
+		const matches = img!.match(regex);
 		if (matches) {
 			let [entity, collection, id, dimensions, filename, extension]: Array<string> = matches.slice(1);
 

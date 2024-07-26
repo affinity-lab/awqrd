@@ -62,15 +62,20 @@ export class FileHandler<METADATA extends Record<string, any> = Record<string, a
 		return new this(collection!) as InstanceType<T>;
 	}
 
-
 	public collection: FileCollection<METADATA>;
 
+	static fileUrlPrefix = "/file";
+	protected fileUrlPrefix: string;
+
+
 	constructor(collection: Collection<METADATA>) {
+		this.fileUrlPrefix = (this.constructor as typeof FileHandler).fileUrlPrefix;
+
 		this.collection = structuredClone(collection) as FileCollection<METADATA>;
 
 		this.collection.files.forEach(file => {
 			let id = collection.id.toString(36).padStart(6, "0");
-			file.url = "/file/" + collection.collection + "/" + `${id.slice(0, 2)}/${id.slice(2, 4)}/${id.slice(4, 6)}` + "/" + file.name;
+			file.url = this.fileUrlPrefix + "/" + collection.collection + "/" + `${id.slice(0, 2)}/${id.slice(2, 4)}/${id.slice(4, 6)}` + "/" + file.name;
 		});
 	}
 
@@ -83,22 +88,29 @@ export class FileHandler<METADATA extends Record<string, any> = Record<string, a
 export class ImageHandler<METADATA extends ImageAttachmentMetadata = ImageAttachmentMetadata> extends FileHandler<METADATA> {
 	declare collection: ImgCollection<METADATA>;
 
+	protected static imgUrlPrefix = "/img";
+	protected imgUrlPrefix: string;
+
 	constructor(collection: Collection<METADATA>) {
 		super(collection);
+		this.imgUrlPrefix = (this.constructor as typeof ImageHandler).imgUrlPrefix;
+
 		this.collection.files.forEach(file => {
 			let ext = /(?:\.([^.]+))?$/.exec(file.name)?.[1];
 			let id = collection.id.toString(36).padStart(6, "0");
 
 			file.img = {
-				size: (width: number, height: number): ImgUrl & string => new ImgUrl("/img/" + this.collection.collection + "." + id + "-" + width + "x" + height + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ImgUrl & string,
-				width: (width: number): ImgUrl & string => new ImgUrl("/img/" + this.collection.collection + "." + id + "-" + width + "x@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ImgUrl & string,
-				height: (height: number): ImgUrl & string => new ImgUrl("/img/" + this.collection.collection + "." + id + "-x" + height + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ImgUrl & string,
-				named: (name: string): ImgUrl & string => new ImgUrl("/img/" + this.collection.collection + "." + id + "-:" + name + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ImgUrl & string,
+				size: (width: number, height: number): ImgUrl & string => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-" + width + "x" + height + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ImgUrl & string,
+				width: (width: number): ImgUrl & string => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-" + width + "x@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ImgUrl & string,
+				height: (height: number): ImgUrl & string => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-x" + height + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ImgUrl & string,
+				named: (name: string): ImgUrl & string => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-:" + name + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ImgUrl & string,
 			}
 		});
 	}
 	get files(): Array<ImgCollection<METADATA>['files'][number]> { return this.collection.files }
 }
+
+type ResolutionOptions = 1 | 2 | 3 | 4;
 
 export class ImgUrl {
 	private ext = "webp";
@@ -110,10 +122,22 @@ export class ImgUrl {
 		} else this.ext = ext;
 		return this;
 	}
-	get x1() { return this.url.replace("{{d}}", "1").replace("{{ext}}", this.ext) }
-	get x2() { return this.url.replace("{{d}}", "2").replace("{{ext}}", this.ext) }
-	get x3() { return this.url.replace("{{d}}", "3").replace("{{ext}}", this.ext) }
-	get x4() { return this.url.replace("{{d}}", "4").replace("{{ext}}", this.ext) }
+
+	srcset(resolution: ResolutionOptions = 3): string {
+		let output: Array<string> = []
+		for (let i = 1; i < resolution + 1; i++) output.push(this.x(i as ResolutionOptions) + ` ${i}x`)
+		return output.join(" ");
+	}
+
+	protected x(resolution: ResolutionOptions): string {
+		return this.url.replace("{{d}}", resolution.toString()).replace("{{ext}}", this.ext)
+	}
+
+	get x1() { return this.x(1) }
+	get x2() { return this.x(2) }
+	get x3() { return this.x(3) }
+	get x4() { return this.x(4) }
+
 	toString() { return this.x1 }
 }
 
