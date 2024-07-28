@@ -163,7 +163,7 @@ class Package {
 		await write(`Loading package ${this.name}`);
 
 		let prev_hash = fs.existsSync(path.join(this.path, ".hash")) ? fs.readFileSync(path.join(this.path, ".hash")).toString() : "0";
-		let curr_hash = await hashElement(path.join(this.path), {files: {exclude: [".hash"]}});
+		let curr_hash = await hashElement(path.join(this.path), {files: {exclude: [".hash", "package.json"]}});
 		this.action.build = prev_hash !== curr_hash.hash;
 
 		await clearLn()
@@ -213,7 +213,7 @@ class Package {
 	}
 
 	async generateHash() {
-		let hash = await hashElement(path.join(this.path), {files: {exclude: [".hash"]}});
+		let hash = await hashElement(path.join(this.path), {files: {exclude: [".hash", "package.json"]}});
 		await fs.promises.writeFile(path.join(this.path, ".hash"), hash.hash);
 	}
 
