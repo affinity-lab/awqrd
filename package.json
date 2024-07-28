@@ -1,10 +1,11 @@
 {
   "name": "@affinity-lab/awqrd",
-  "description": "AWQRD package (contains: Storm and Comet)",
+  "description": "AWQRD framework",
   "type": "module",
   "scripts": {
-    "build": "bun build.ts build",
-    "publish": "bun build.ts publish"
+    "check": "bun etc/build.ts",
+    "build": "bun etc/build.ts build",
+    "pub": "bun etc/build.ts build pub"
   },
   "devDependencies": {
     "@types/bun": "^1.1.1",
@@ -26,6 +27,9 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@types/folder-hash": "^4.0.4",
+    "chalk": "^5.3.0",
+    "folder-hash": "^4.0.4",
     "redis": "^4.6.15"
   },
   "workspaces": [

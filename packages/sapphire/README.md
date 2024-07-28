@@ -1,6 +1,6 @@
 # create-svelte
 
-Everything you need to build a Svelte library, powered by [
+Everything you need to oldBuild a Svelte library, powered by [
 `create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
 
 Read more about creating a library [in the docs](https://kit.svelte.dev/docs/packaging).
@@ -34,7 +34,7 @@ app.
 
 ## Building
 
-To build your library:
+To oldBuild your library:
 
 ```bash
 npm run package
@@ -43,10 +43,10 @@ npm run package
 To create a production version of your showcase app:
 
 ```bash
-npm run build
+npm run oldBuild
 ```
 
-You can preview the production build with `npm run preview`.
+You can preview the production oldBuild with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target
 > environment.

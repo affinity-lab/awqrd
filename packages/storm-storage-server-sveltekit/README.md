@@ -63,11 +63,11 @@ export const namedImg = keysOfNamedImageDimensions(namedImgDimensions); // this 
 `src/routes/+layout.svelte`
 
 ```ts
-import {ImageHandler} from "@affinity-lab/storm-storage-server-sveltekit";
-import {FileHandler} from "@affinity-lab/storm-storage-server-sveltekit";
+import {ImageCollectionHandler} from "@affinity-lab/storm-storage-server-sveltekit";
+import {FileCollectionHandler} from "@affinity-lab/storm-storage-server-sveltekit";
 
-FileHandler.url = "/file";
-ImageHandler.url = "/img";
+FileCollectionHandler.url = "/file";
+ImageCollectionHandler.url = "/img";
 ```
 
 > `/file` and `/img` are the default settings, if you stick to the default settings, you can skip this step.
@@ -80,12 +80,12 @@ ImageHandler.url = "/img";
 
 <script lang="ts">
 	import {namedImg} from "$lib/named-img";
-	import {ImageHandler} from "@affinity-lab/storm-storage-server-sveltekit";
+	import {ImageCollectionHandler} from "@affinity-lab/storm-storage-server-sveltekit";
 
 	let {data} = $props();
 </script>
 
-{#each ImageHandler.create(data.user?.avatar).files as file, i}
+{#each ImageCollectionHandler.create(data.user?.avatar).files as file, i}
 
 	You can use the file URL directly:
 	<a href={file.url} target="_blank">{file.name}</a>

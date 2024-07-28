@@ -1,13 +1,9 @@
 import {createThumbnail, parseImgParams} from "@affinity-lab/storm-storage";
 import {fileExists, joinPath} from "@affinity-lab/util";
 import {redirect, type RequestEvent} from "@sveltejs/kit";
-import {NamedImageDimensions} from "./named-image-dimensions";
 
-type ImgServerFactoryOptions = {
-	namedImageDimensions?: NamedImageDimensions,
-	allowFree?: boolean,
-	fileNameParam?: string
-}
+
+import {ImgServerFactoryOptions} from "./types";
 
 export function imgServerFactory(
 	imgPath: string,

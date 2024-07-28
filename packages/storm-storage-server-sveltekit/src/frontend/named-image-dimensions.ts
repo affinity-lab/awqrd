@@ -1,18 +1,4 @@
-export type NamedImageDimensions = Record<string,
-	Record<string,
-		Record<string,
-			{ width: number, height: number } | { width: number, height?: number } | { width?: number, height: number }
-		>
-	>
->
-
-export type KeysOfNamedImg<T> = {
-	[K in keyof T]: {
-		[P in keyof T[K]]: {
-			[Q in keyof T[K][P]]: string;
-		};
-	};
-};
+import {KeysOfNamedImg, NamedImageDimensions} from "./types";
 
 export function keysOfNamedImageDimensions<T extends NamedImageDimensions>(obj: T): KeysOfNamedImg<T> {
 	let result: Partial<KeysOfNamedImg<T>> = {};
