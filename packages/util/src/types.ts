@@ -8,6 +8,7 @@ export type NonEmptyArray<T = any> = [T, ...T[]];
 export type EmptyArray = [];
 export type NumericString = `${number}`;
 export type Numeric = NumericString|number;
+export type ToString<TYPE> = TYPE & string;
 
 /**
  * A constructor type.

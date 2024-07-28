@@ -3,7 +3,8 @@
 	"target": "ESNext",
 	"module": "ESNext",
 	"lib": [
-	  "ESNext"
+		"ESNext",
+		"dom"
 	],
 	"moduleResolution": "Bundler",
 	"declaration": true,

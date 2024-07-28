@@ -4,6 +4,6 @@
 .idea
 node_modules
 bun.lockb
-**/build/
+**/oldBuild/
 **/dist/
 **/types/

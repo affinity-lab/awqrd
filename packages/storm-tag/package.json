@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/storm-tag",
-	"version": "1.0.190",
+	"version": "1.0.193",
   "description": "Storm tag plugin",
   "author": "Affinity Works",
   "license": "MIT",
@@ -21,8 +21,8 @@
   "dependencies": {
     "hono": "^4.1.7",
     "sharp": "^0.33.3",
-	  "@affinity-lab/util": "2.0.188",
-	  "@affinity-lab/storm": "1.0.194"
+	  "@affinity-lab/util": "2.0.193",
+	  "@affinity-lab/storm": "1.0.198"
   },
   "devDependencies": {
     "@types/bun": "latest",

@@ -35,7 +35,7 @@ export let packages = {
 
 readPackages();
 
-if (process.argv.includes("build")) build();
+if (process.argv.includes("build")) oldBuild();
 
 if (process.argv.includes("publish")){
 	let pi = process.argv.findIndex(i=>i==="publish")
@@ -43,7 +43,7 @@ if (process.argv.includes("publish")){
 }
 
 
-function build() {
+function oldBuild() {
 	buildPackage("util")
 	buildPackage("comet")
 	buildPackage("storm")
