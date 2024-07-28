@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/comet",
-  "version": "1.0.206",
+  "version": "1.0.207",
   "description": "Comet Command API for bun / hono",
   "author": "Affinity Works",
   "license": "MIT",

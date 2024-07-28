@@ -134,6 +134,12 @@ class PackageHandler {
 			await pkg.publish()
 		}
 	}
+	async rehash() {
+		for (const name in this.packages) {
+			let pkg = this.packages[name];
+			await pkg.generateHash();
+		}
+	}
 }
 
 class Package {
@@ -163,7 +169,7 @@ class Package {
 		await write(`Loading package ${this.name}`);
 
 		let prev_hash = fs.existsSync(path.join(this.path, ".hash")) ? fs.readFileSync(path.join(this.path, ".hash")).toString() : "0";
-		let curr_hash = await hashElement(path.join(this.path), {files: {exclude: [".hash", "package.json"]}});
+		let curr_hash = await hashElement(path.join(this.path), {files: {exclude: [".hash"]}});
 		this.action.build = prev_hash !== curr_hash.hash;
 
 		await clearLn()
@@ -213,7 +219,7 @@ class Package {
 	}
 
 	async generateHash() {
-		let hash = await hashElement(path.join(this.path), {files: {exclude: [".hash", "package.json"]}});
+		let hash = await hashElement(path.join(this.path), {files: {exclude: [".hash"]}});
 		await fs.promises.writeFile(path.join(this.path, ".hash"), hash.hash);
 	}
 
@@ -227,6 +233,7 @@ class Package {
 			try {
 				let res = await cmd(`npm publish --access public`)
 				console.log(res)
+				await this.generateHash();
 			} catch (e) {
 				console.error("ERROR", e)
 				process.exit(-1)
@@ -241,6 +248,7 @@ class Package {
 
 let pkgHandler = new PackageHandler();
 await pkgHandler.load();
+if (process.argv.includes("rehash")) await pkgHandler.rehash();
 if (process.argv.includes("build")) await pkgHandler.build();
 if (process.argv.includes("pub")) await pkgHandler.publish();
 

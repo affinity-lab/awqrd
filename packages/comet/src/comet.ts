@@ -11,6 +11,7 @@ export type CometCommandConfig = {
 	clients?: Client[]
 } & Record<string, any>
 
+
 export class Comet {
 	static classMetaData = new ClassMetaData();
 
