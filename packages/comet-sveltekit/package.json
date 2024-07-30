@@ -1,24 +1,24 @@
 {
   "name": "@affinity-lab/comet-sveltekit",
-  "version": "1.0.30",
+  "version": "1.0.32",
   "description": "Comet SvelteKit adapters",
   "author": "Affinity Works",
   "license": "MIT",
-  "types": "types/index.d.ts",
   "type": "module",
   "main": "dist/frontend.js",
+  "types": "types/frontend.d.ts",
   "exports": {
     ".": {
-      "types": "./types/frontend.d.ts",
-      "import": "./dist/frontend.js"
+      "import": "./dist/frontend.js",
+      "types": "./types/frontend.d.ts"
     },
     "./frontend": {
-      "types": "./types/frontend.d.ts",
-      "import": "./dist/frontend.js"
+      "import": "./dist/frontend.js",
+      "types": "./types/frontend.d.ts"
     },
     "./backend": {
-      "types": "./types/backend.d.ts",
-      "import": "./dist/backend.js"
+      "import": "./dist/backend.js",
+      "types": "./types/backend.d.ts"
     }
   },
   "files": [
@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "reformdata": "^0.2.2",
-    "@affinity-lab/comet": "1.0.208",
+    "@affinity-lab/comet": "1.0.209",
     "@sveltejs/kit": "^2.0.0"
   },
   "devDependencies": {

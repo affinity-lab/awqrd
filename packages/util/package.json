@@ -1,12 +1,22 @@
 {
   "name": "@affinity-lab/util",
-  "version": "2.0.195",
+  "version": "2.0.196",
   "description": "Utils for Comet and Storm",
   "author": "Affinity Works",
   "license": "MIT",
-  "types": "types/index.d.ts",
   "type": "module",
   "main": "dist/index.js",
+  "types": "types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./types/index.d.ts"
+    },
+    "./frontend": {
+      "import": "./dist/index-frontend.js",
+      "types": "./types/index-frontend.d.ts"
+    }
+  },
   "files": [
     "dist",
     "src",
