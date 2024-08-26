@@ -18,7 +18,6 @@ export class Comet {
 	static reset() {
 		Comet.classMetaData = new ClassMetaData()
 	}
-
 	static Args(target: any, propertyKey: string, index: number) {
 		Comet.classMetaData.get(target.constructor, true).set(["params", propertyKey, index.toString()], "args");
 	}

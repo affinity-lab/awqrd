@@ -1,4 +1,5 @@
 export * from "./bytes";
+export * from "./interval";
 export * from "./class-meta-data";
 export * from "./dbg";
 export * from "./extended-error";

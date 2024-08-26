@@ -1,9 +1,15 @@
 import {type Middleware, type MiddlewareFn, Pipeline} from "@affinity-lab/util";
+import {CometResult} from "../comet-result";
 import {cometError} from "../error";
 import {CometState} from "./comet-state";
 import {Command} from "./command";
 
-export abstract class Client<CTX=any> {
+async function cometResultFactoryMiddleware(state: CometState, next: Function): Promise<CometResult> {
+	const result = await next()
+	return (result instanceof CometResult) ? result : new CometResult(result ?? null);
+}
+
+export abstract class Client<CTX = any> {
 	#commands: Record<string, Command<any, any>> = {};
 	readonly id: string = crypto.randomUUID();
 	private pipeline: Pipeline<any, any>;
@@ -17,7 +23,11 @@ export abstract class Client<CTX=any> {
 		middlewares: Array<MiddlewareFn | Middleware> = [],
 		public readonly unsupported: boolean = false,
 	) {
-		this.pipeline = new Pipeline(...middlewares, this.execute.bind(this));
+		this.pipeline = new Pipeline(
+			...middlewares,
+			cometResultFactoryMiddleware,
+			this.execute.bind(this)
+		);
 	}
 
 	get commands() {return this.#commands;}
@@ -37,10 +47,10 @@ export abstract class Client<CTX=any> {
 		return state.cmd.instance[state.cmd.key](...args);
 	}
 
-	async resolve(command: string, ctx: CTX) {
+	async resolve(command: string, ctx: CTX): Promise<CometResult> {
 		command = command.toLowerCase();
 		let cmd = this.#commands[command];
-		return await this.pipeline.run({ctx, args: {}, params:{}, files: {}, cmd, client: this, env: {}, id: this.id + "." + command});
+		return await this.pipeline.run({ctx, args: {}, params: {}, files: {}, cmd, client: this, env: {}, id: this.id + "." + command});
 	}
 
 	add(name: string, instance: any, key: string, config: Record<string, any>, params: string[]) {

@@ -27,8 +27,8 @@ export function imgServerFactory(
 			let file = joinPath(filePath, entity + "." + collection, `${id.slice(0, 2)}/${id.slice(2, 4)}/${id.slice(4, 6)}`, filename);
 			if (!await fileExists(file)) return new Response('', {status: 404});
 
-			if (dimensions.startsWith(":")) {
-				let name = dimensions.match(/:(.*?)@.+/)?.[1];
+			if (dimensions.startsWith("~")) {
+				let name = dimensions.match(/~(.*?)@.+/)?.[1];
 				if (
 					typeof name === "undefined" ||
 					typeof namedImageDimensions === "undefined" ||
@@ -38,7 +38,7 @@ export function imgServerFactory(
 				) return new Response('', {status: 404});
 
 				let dim = namedImageDimensions[entity][collection][name];
-				dimensions = dimensions.replace(":" + name, (dim.width ?? "") + "x" + (dim.height ?? ""));
+				dimensions = dimensions.replace("~" + name, (dim.width ?? "") + "x" + (dim.height ?? ""));
 			} else if (!allowFree) {
 				return new Response('', {status: 404});
 			}

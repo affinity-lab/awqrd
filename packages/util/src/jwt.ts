@@ -18,7 +18,7 @@ export class Jwt<T> {
 		return payload.content;
 	};
 
-	encode(payload: T, expires?: string): string {
+	encode(payload: T, expires?: string | number): string {
 		return jwt.sign({content: payload}, this.secret, {algorithm: this.algorithm, expiresIn: expires ?? this.expires});
 	};
 

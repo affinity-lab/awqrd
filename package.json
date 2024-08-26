@@ -29,8 +29,7 @@
   "dependencies": {
     "@types/folder-hash": "^4.0.4",
     "chalk": "^5.3.0",
-    "folder-hash": "^4.0.4",
-    "redis": "^4.6.15"
+    "folder-hash": "^4.0.4"
   },
   "workspaces": [
     "packages/comet",

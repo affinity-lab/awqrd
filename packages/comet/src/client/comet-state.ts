@@ -4,7 +4,7 @@ import {Command} from "./command";
 export type CometState<CTX = any> = {
 	args: Record<string, any>
 	params: Record<string, string>
-	env: Record<string, any>
+	env: { [key: symbol | string]: any }
 	files: Record<string, Array<File>>
 	id: string
 	ctx: CTX

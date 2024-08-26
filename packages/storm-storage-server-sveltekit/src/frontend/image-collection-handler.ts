@@ -23,7 +23,7 @@ export class ImageCollectionHandler<METADATA extends ImageAttachmentMetadata = I
 				size: (width: number, height: number): ToString<ImgUrl> => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-" + width + "x" + height + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ToString<ImgUrl>,
 				width: (width: number): ToString<ImgUrl> => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-" + width + "x@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ToString<ImgUrl>,
 				height: (height: number): ToString<ImgUrl> => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-x" + height + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ToString<ImgUrl>,
-				named: (name: string): ToString<ImgUrl> => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-:" + name + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ToString<ImgUrl>,
+				named: (name: string): ToString<ImgUrl> => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-~" + name + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ToString<ImgUrl>,
 			}
 		});
 	}
