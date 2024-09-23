@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/util",
-  "version": "2.0.200",
+  "version": "2.0.201",
   "description": "Utils for Comet and Storm",
   "author": "Affinity Works",
   "license": "MIT",
@@ -41,7 +41,8 @@
     "memcached": "^2.2.2",
     "sharp": "^0.33.3",
     "sql-highlight": "^4.4.2",
-    "uni-flatten": "^1.6.2"
+    "uni-flatten": "^1.6.2",
+    "redis": "^4.7.0"
   },
   "devDependencies": {
     "@types/bun": "latest",

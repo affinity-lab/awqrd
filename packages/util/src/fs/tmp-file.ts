@@ -30,7 +30,7 @@ export class TmpFileFactory {
 	}
 	async createFromBuffer(filename: string, buffer: Buffer) {
 		let target = path.join(await this.targetDir, path.basename(filename))
-		await fs.promises.writeFile(target, buffer);
+		await fs.promises.writeFile(target, buffer as unknown as Uint8Array); // TODO this is a "bit" forced
 		return new TmpFile(target);
 	}
 	async createFromFilePath(file: string, removeOriginal: boolean = true) {

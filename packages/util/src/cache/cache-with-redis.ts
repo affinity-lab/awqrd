@@ -18,7 +18,7 @@ export class CacheWithRedis<T = any> extends Cache<T> {
 		if (Array.isArray(key)) {
 			const keys = key.map(k => this.key(k));
 			const values = await this.redisClient.mGet(keys);
-			return values.map(val => (val !== null ? JSON.parse(val) : undefined)) as Array<T>;
+			return values.map((val: any) => (val !== null ? JSON.parse(val) : undefined)) as Array<T>;
 		} else {
 			const value = await this.redisClient.get(this.key(key));
 			return value !== null ? JSON.parse(value) as T : undefined;
