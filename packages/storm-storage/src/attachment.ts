@@ -76,7 +76,7 @@ export class Attachment<METADATA extends Record<string, any>> implements Attachm
 
 	toJSON() {
 		return {
-			metadata: this.#metadata,
+			metadata: this.metadata,
 			name: this.name,
 			id: this.id,
 			size: this.#size,

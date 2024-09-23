@@ -36,7 +36,8 @@ export abstract class ViewEntity {
 		if (a) for (const key of a) {
 			e[key] = (
 				typeof this[key as keyof this] === 'object' &&
-				typeof (this[key as keyof this] as { toJSON?: () => any })["toJSON"] === "function"
+				this[key as keyof this] !== null &&
+				typeof (this[key as keyof this] as { toJSON: () => any }).toJSON === "function"
 			)
 				? (this[key as keyof this] as { toJSON: () => any }).toJSON()
 				: this[key as keyof this];

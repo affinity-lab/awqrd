@@ -94,7 +94,6 @@ export function getAllByFactory<T extends string | number, R extends ViewEntity>
  * @param repository
  */
 export async function prevDto(state: State, repository: EntityRepositoryInterface) {
-	console.log("ASd")
 	if (!state.prevDto) state.prevDto = await repository.getRawDTO(state.item.id);
 	return state.prevDto;
 }
