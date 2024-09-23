@@ -17,10 +17,10 @@ export class CacheMiddleware implements Middleware {
 		let key = (state.cmd.config.cache.key === undefined) ? this.defaultKeyFn(state) : state.cmd.config.cache.key(state);
 		if (typeof key !== "string") key = crypto.createHash("md5").update(JSON.stringify(key)).digest("hex");
 
-		let cached = await this.cache.get(key)
+		let cached = await this.cache.get(key);
 		if (cached) {return cached}
-		let value = await next()
-		await this.cache.set({key, value}, state.cmd.config.cache.ttl??this.defaultTtl)
+		let value = await next();
+		await this.cache.set({key, value}, state.cmd.config.cache.ttl??this.defaultTtl);
 		return value;
 	}
 }
