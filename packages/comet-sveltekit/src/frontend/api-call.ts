@@ -15,7 +15,7 @@ type ApiCallFactoryOptions = {
 export function apiCallFactory(
 	prefix: string = '/api',
 	options: ApiCallFactoryOptions = {}
-): (cmd: string, body: any | FormData, headers?: Record<string, string>) => Promise<any> {
+): (cmd: string, body?: any | FormData, headers?: Record<string, string>) => Promise<any> {
 
 	let errorHandler = options.errorHandler ?? ((response: Response) => {throw new ApiError(response.status, response)});
 	let createHeaders = options.createHeaders ?? (() => ({}));
@@ -25,8 +25,9 @@ export function apiCallFactory(
 		mode: options.mode ?? "cors"
 	};
 
-	return async function (cmd: string, body: any | FormData, headers: Record<string, string> = {}) {
+	return async function (cmd: string, body?: any | FormData, headers: Record<string, string> = {}) {
 		let url = `${prefix}/${cmd}`;
+		if (body === undefined) body = null;
 
 		let response = body instanceof FormData
 			? await fetch(url, {

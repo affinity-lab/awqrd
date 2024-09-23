@@ -82,10 +82,11 @@ export class IList<SCHEMA extends MySqlTableWithColumns<any> = any> {
 		if (typeof key === "undefined" || key.trim().length === 0) return or()!;
 		let likes: Array<SQL> = [];
 		for (let col of Array.isArray(this.quickSearchFields) ? this.quickSearchFields : [this.quickSearchFields]) {
-			if (col instanceof MySqlColumn) likes.push(sql`LOWER(${col}) like LOWER(${likeString.contains(key)})`);
-			else {
-				if(Array.isArray(col!.field)) for (let f of col!.field) likes.push( sql`LOWER(${col!.table[f as string]}) like LOWER(${likeString.contains(key)})`);
-				else likes.push( sql`LOWER(${col!.table[col!.field as string]}) like LOWER(${likeString.contains(key)})`);
+			if (col instanceof MySqlColumn) {
+				likes.push(sql`LOWER(${col}) like LOWER(${likeString.contains(key)})`);
+			} else {
+				if (Array.isArray(col!.field)) for (let f of col!.field) likes.push(sql`LOWER(${col!.table[f as string]}) like LOWER(${likeString.contains(key)})`);
+				else likes.push(sql`LOWER(${col!.table[col!.field as string]}) like LOWER(${likeString.contains(key)})`);
 			}
 		}
 		return or(...likes)!;

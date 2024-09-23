@@ -61,7 +61,7 @@ export class CometResult {
 	}
 	setCookie(name: string, value: string, options: {
 		expires?: Date,
-		maxAge?: number,
+		maxAge?: number | string,
 		domain?: string,
 		path?: string,
 		secure?: boolean,

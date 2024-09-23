@@ -1,4 +1,5 @@
-import {type Transporter} from 'nodemailer';
+import nodemailer, {Transporter} from 'nodemailer';
+import SMTPTransport from "nodemailer/lib/smtp-transport";
 
 export type CourierEmail = {
 	fromName: string,
@@ -11,8 +12,9 @@ export type CourierEmail = {
 }
 
 export class CourierService {
-
-	constructor(private transporter: Transporter, private errorFn: (error: Error) => void = (e) => console.log(e)) {
+	private transporter: Transporter;
+	constructor(transporterOptions: SMTPTransport.Options, private errorFn: (error: Error) => void = (e) => console.log(e)) {
+		this.transporter = nodemailer.createTransport(transporterOptions);
 	}
 
 	public async sendEmail(email: CourierEmail) {
