@@ -8,7 +8,7 @@ export * from "./middlewares/validate"
 export * from "./client/client"
 export * from "./client/clients"
 export * from "./client/client-group"
-export {CometState} from "./client/comet-state";
-export {Command} from "./client/command";
+export * from "./client/comet-state";
+export * from "./client/command";
 export * from "./client/client-with-jwt";
-export {CometResult} from "./comet-result";
+export * from "./comet-result";

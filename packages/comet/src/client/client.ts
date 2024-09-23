@@ -54,7 +54,7 @@ export abstract class Client<CTX = any> {
 	}
 
 	add(name: string, instance: any, key: string, config: Record<string, any>, params: string[]) {
-		if (this.#commands[name] !== undefined) throw Error(`Parse error: DUPLICATE COMMAND ${name}`);
+		if (this.#commands[name] !== undefined) console.log(`Warning: DUPLICATE COMMAND ${name}`);
 		this.#commands[name] = {instance, key, config, name, params};
 	}
 }
