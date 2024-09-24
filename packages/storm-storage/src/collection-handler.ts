@@ -80,7 +80,7 @@ export class CollectionHandler<METADATA extends Record<string, any>> extends Arr
 			collection: this.collection.name,
 			rules: this.collection.rules,
 			id: this.id,
-			files: this.loaded ? this.map(item => item.toJSON()) : null
+			files: this.loaded ? [...this] : null
 		}
 	}
 
