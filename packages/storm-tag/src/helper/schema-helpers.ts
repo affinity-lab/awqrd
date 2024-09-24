@@ -14,6 +14,6 @@ export let stormTagSchemaHelpers = {
 		return {id: id(), name: varchar("name", {length: 255}).notNull().unique()};
 	},
 	groupTagCols: function (id: () => MySqlIntBuilderInitial<any>, groupColReference: () => MySqlColumn) {
-		return {id: id(), name: varchar("name", {length: 255}).notNull().unique(), groupId: int("groupId").references(groupColReference)};
+		return {id: id(), name: varchar("name", {length: 255}).notNull(), groupId: int("groupId").references(groupColReference)};
 	}
 }
