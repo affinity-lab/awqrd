@@ -1,26 +1,20 @@
-import type {Cache, Middleware} from "@affinity-lab/util";
 import crypto from "crypto";
-
 import {CometState} from "../client/comet-state";
+import {CometResult} from "../comet-result";
+import {CacheMiddlewareOptions} from "../types";
 
-export class CacheMiddleware implements Middleware {
-
-	constructor(
-		private cache: Cache,
-		private defaultTtl: number = 60,
-		private defaultKeyFn: (state: CometState) => string | Record<string, any> = (state: CometState) => { return {id: state.id, args: state.args, env: state.env}}
-	) {}
-
-	async handle(state: CometState, next: Function) {
+export function cacheMiddleware(options: CacheMiddlewareOptions) {
+	return async function (state: CometState, next: () => Promise<CometResult>) {
 		if (!state.cmd.config.cache) return await next();
+		let key = (state.cmd.config.cache.key === undefined) ? (options.defaultKeyFn || {id: state.id, args: state.args, env: state.env}) : state.cmd.config.cache.key(state);
+		if (typeof key !== "string") key = crypto.createHash(options.keyHashAlgorithm || "md5").update(JSON.stringify(key) + options.keySalt || "").digest("hex");
 
-		let key = (state.cmd.config.cache.key === undefined) ? this.defaultKeyFn(state) : state.cmd.config.cache.key(state);
-		if (typeof key !== "string") key = crypto.createHash("md5").update(JSON.stringify(key)).digest("hex");
-
-		let cached = await this.cache.get(key);
-		if (cached) {return cached}
+		let cached = await options.cache.get(key);
+		if (cached) {
+			return cached
+		}
 		let value = await next();
-		await this.cache.set({key, value}, state.cmd.config.cache.ttl??this.defaultTtl);
+		await options.cache.set({key, value}, state.cmd.config.cache.ttl ?? (options.defaultTtl || 60));
 		return value;
 	}
 }

@@ -37,9 +37,8 @@ export abstract class IForm<
 
 	public async getItem(id: number | null, values?: Record<string, any>) {
 		let u = await this.repository.get(id);
-		let item = id ? await this.export(u, values) : await this.newItem(values);
-		if (!item) throw sapphireError.notFound({location: "getItem", id});
-		return item;
+		if (!u) throw sapphireError.notFound({location: "getItem", id});
+		return id ? await this.export(u, values) : await this.newItem(values);
 	}
 
 	public async save(id: number | null, values: Record<string, any> = {}): Promise<MaybeUnset<number>> {
