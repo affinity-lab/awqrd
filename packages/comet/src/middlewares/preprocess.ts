@@ -1,5 +1,5 @@
 import {CometState} from "../client/comet-state";
-import {CometResult} from "../../types";
+import {CometResult} from "../comet-result";
 
 export function preprocessMiddleware<REQ = any>() {
 	return async function (state: CometState<REQ>, next: () => Promise<CometResult>) {

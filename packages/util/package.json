@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/util",
-  "version": "2.0.203",
+  "version": "2.0.204",
   "description": "Utils for Comet and Storm",
   "author": "Affinity Works",
   "license": "MIT",
@@ -54,5 +54,8 @@
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "repository": {
+    "url": "git://github.com/affinity-lab/awqrd.git"
   }
 }

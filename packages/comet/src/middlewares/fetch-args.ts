@@ -1,7 +1,7 @@
 import {CometState} from "../client/comet-state";
-import {CometResult} from "../../types";
 import {reform} from "reformdata";
 import {cometError} from "../error";
+import {CometResult} from "../comet-result";
 import {ParseRequestOptions} from "../types";
 
 
