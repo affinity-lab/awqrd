@@ -9,7 +9,7 @@ export type CometState<CTX = any> = {
 	id: string
 	ctx: CTX
 	cmd: Command<any, any>
-	client: Client,
-	headers: Record<string, string>;
-	cookies: Record<string, string>;
+	client: Client
+	headers: Record<string, string>
+	cookies: Record<string, string>
 }

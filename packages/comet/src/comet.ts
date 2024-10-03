@@ -24,6 +24,12 @@ export class Comet {
 	static Files(target: any, propertyKey: string, index: number) {
 		Comet.classMetaData.get(target.constructor, true).set(["params", propertyKey, index.toString()], "files");
 	}
+	static Cookies(target: any, propertyKey: string, index: number) {
+		Comet.classMetaData.get(target.constructor, true).set(["params", propertyKey, index.toString()], "cookies");
+	}
+	static Headers(target: any, propertyKey: string, index: number) {
+		Comet.classMetaData.get(target.constructor, true).set(["params", propertyKey, index.toString()], "headers");
+	}
 	static Env(target: any, propertyKey: string, index: number) {
 		Comet.classMetaData.get(target.constructor, true).set(["params", propertyKey, index.toString()], "env");
 	}
