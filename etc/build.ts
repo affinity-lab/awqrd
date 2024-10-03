@@ -235,14 +235,14 @@ class Package {
 	async changeNPMRC(branch: string) {
 		process.chdir(this.path);
 		if(branch === 'prod') {
-			if(fs.existsSync('._npmrc')) {
-				fs.renameSync('._npmrc', '.npmrc');
-				await writeLn(`${this.name} ${chalk.red("._npmrc")} ➜ ${chalk.green(".npmrc")}`);
-			}
-		} else {
 			if(fs.existsSync('.npmrc')) {
 				fs.renameSync('.npmrc', '._npmrc');
 				await writeLn(`${this.name} ${chalk.red(".npmrc")} ➜ ${chalk.green("._npmrc")}`);
+			}
+		} else {
+			if(fs.existsSync('._npmrc')) {
+				fs.renameSync('._npmrc', '.npmrc');
+				await writeLn(`${this.name} ${chalk.red("._npmrc")} ➜ ${chalk.green(".npmrc")}`);
 			}
 		}
 	}
