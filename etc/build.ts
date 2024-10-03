@@ -129,16 +129,15 @@ class PackageHandler {
 	}
 	async publish() {
 		await this.checkGitRepository();
-
 		await header("Publishing packages");
 		for (const name in this.packages) {
 			let pkg = this.packages[name];
-			// await pkg.publish()
+			await pkg.publish()
 		}
 	}
 
 	async checkGitRepository() {
-		await header("Checking current branch... ");
+		await header("Checking current branch");
 		let res = await cmd("git branch --show-current");
 		for (const name in this.packages) await this.packages[name].changeNPMRC(res)
 	}
@@ -273,8 +272,8 @@ class Package {
 
 let pkgHandler = new PackageHandler();
 await pkgHandler.load();
-// if (process.argv.includes("rehash")) await pkgHandler.rehash();
-// if (process.argv.includes("build")) await pkgHandler.build();
+if (process.argv.includes("rehash")) await pkgHandler.rehash();
+if (process.argv.includes("build")) await pkgHandler.build();
 if (process.argv.includes("pub")) await pkgHandler.publish();
 
 process.exit(0);
