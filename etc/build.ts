@@ -148,11 +148,13 @@ class PackageHandler {
 			if(fs.existsSync('.npmrc')) {
 				fs.renameSync('.npmrc', '._npmrc');
 				await writeLn(`${chalk.red(".npmrc")} ➜ ${chalk.green("._npmrc")}`);
+				await cmd("git add ._npmrc");
 			}
 		} else {
 			if(fs.existsSync('._npmrc')) {
 				fs.renameSync('._npmrc', '.npmrc');
 				await writeLn(`${chalk.red("._npmrc")} ➜ ${chalk.green(".npmrc")}`);
+				await cmd("git add .npmrc");
 			}
 		}
 	}
