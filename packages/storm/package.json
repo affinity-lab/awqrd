@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/storm",
-  "version": "1.0.210",
+  "version": "1.0.211",
   "description": "Storm ORM for drizzle",
   "author": "Affinity Works",
   "license": "MIT",

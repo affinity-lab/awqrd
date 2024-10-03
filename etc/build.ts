@@ -128,18 +128,33 @@ class PackageHandler {
 		}
 	}
 	async publish() {
-		await this.checkGitRepository();
+		let branch = await this.checkGitRepository();
 		await header("Publishing packages");
 		for (const name in this.packages) {
 			let pkg = this.packages[name];
-			await pkg.publish()
+			await pkg.publish(branch)
 		}
 	}
 
 	async checkGitRepository() {
 		await header("Checking current branch");
 		let res = await cmd("git branch --show-current");
-		for (const name in this.packages) await this.packages[name].changeNPMRC(res)
+		await this.changeNPMRC(res);
+		return res;
+	}
+
+	async changeNPMRC(branch: string) {
+		if(branch === 'prod') {
+			if(fs.existsSync('.npmrc')) {
+				fs.renameSync('.npmrc', '._npmrc');
+				await writeLn(`${chalk.red(".npmrc")} ➜ ${chalk.green("._npmrc")}`);
+			}
+		} else {
+			if(fs.existsSync('._npmrc')) {
+				fs.renameSync('._npmrc', '.npmrc');
+				await writeLn(`${chalk.red("._npmrc")} ➜ ${chalk.green(".npmrc")}`);
+			}
+		}
 	}
 
 	async rehash() {
@@ -231,40 +246,35 @@ class Package {
 		await fs.promises.writeFile(path.join(this.path, ".hash"), hash.hash);
 	}
 
-	async changeNPMRC(branch: string) {
-		process.chdir(this.path);
-		if(branch === 'prod') {
-			if(fs.existsSync('.npmrc')) {
-				fs.renameSync('.npmrc', '._npmrc');
-				await writeLn(`${this.name} ${chalk.red(".npmrc")} ➜ ${chalk.green("._npmrc")}`);
-			}
-		} else {
-			if(fs.existsSync('._npmrc')) {
-				fs.renameSync('._npmrc', '.npmrc');
-				await writeLn(`${this.name} ${chalk.red("._npmrc")} ➜ ${chalk.green(".npmrc")}`);
-			}
-		}
-	}
-
-	async publish() {
+	async publish(branch: string) {
 		process.chdir(this.path);
 		if (this.npmVersion === "") this.npmVersion = await cmd(`npm view ${this.name} version`).catch(() => "0.0.1");
-
-		if (this.version > this.npmVersion) {
+		if(branch !== 'prod') {
 			await write(chalk.whiteBright(this.title) + " ");
-			await writeLn(chalk.green("PUBLISH"));
-			try {
-				let res = await cmd(`npm publish --access public`)
-				console.log(res)
-				await this.generateHash();
-			} catch (e) {
-				console.error("ERROR", e)
-				process.exit(-1)
+			if (this.version > this.npmVersion) {
+				await cmd(`npm publish`);
+				await writeLn(chalk.green("GIT PUBLISH"));
+			} else {
+				await writeLn(chalk.yellow("SKIP"));
 			}
 		} else {
-			await write(chalk.white(this.title) + " ");
-			await writeLn(chalk.yellow("SKIP"));
+			if (this.version > this.npmVersion) {
+				await write(chalk.whiteBright(this.title) + " ");
+				await writeLn(chalk.green("PUBLISH"));
+				try {
+					let res = await cmd(`npm publish --access public`)
+					console.log(res)
+					await this.generateHash();
+				} catch (e) {
+					console.error("ERROR", e)
+					process.exit(-1)
+				}
+			} else {
+				await write(chalk.white(this.title) + " ");
+				await writeLn(chalk.yellow("SKIP"));
+			}
 		}
+
 	}
 }
 
