@@ -15,3 +15,4 @@ export * from "./comet-result";
 export * from "./types";
 export * from "./auth-state";
 export * from "./middlewares/command-guard";
+export * from "./middlewares/measure";

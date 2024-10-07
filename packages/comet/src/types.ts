@@ -105,5 +105,5 @@ export type ParseRequestOptions = {
 export type CometLogger<REQ> = {
 	requestLog?: (state: CometState<REQ>) => void,
 	resultLog?: (state: CometState<REQ>, response: CometResult) => void,
-	errorLog?: (state: CometState<REQ>, error: any) => void,
+	errorLog?: (state: CometState<REQ>, error: any) => void
 }
