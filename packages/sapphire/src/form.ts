@@ -77,8 +77,8 @@ export abstract class IForm<
 					let collection = group.collections[key];
 					let files = await collection.get(id);
 					collections.push({
-						name: collection.name,
-						items: files,
+						collection: collection.name,
+						files,
 						publicMetaFields: Object.entries(collection.writableMetaFields).map((obj) => {return {name: obj[0], ...obj[1]}}),
 						rules: {...collection.rules, limit: collection.rules.limit.count}
 					});

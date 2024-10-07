@@ -1,8 +1,6 @@
-//import {ToString} from "@affinity-lab/util";
 import {FileCollectionHandler} from "./file-collection-handler";
 import {Collection, ImageAttachmentMetadata, ImgCollection, ImgUrlInterface, ResolutionOptions} from "./types";
-
-export type ToString<TYPE> = TYPE & string;
+import {ToString} from "@affinity-lab/util";
 
 
 export class ImageCollectionHandler<METADATA extends ImageAttachmentMetadata = ImageAttachmentMetadata> extends FileCollectionHandler<METADATA> {
