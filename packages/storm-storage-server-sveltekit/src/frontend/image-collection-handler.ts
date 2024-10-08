@@ -6,7 +6,7 @@ import {Collection, ImageAttachmentMetadata, ImgCollection, ImgUrlInterface, Res
 export class ImageCollectionHandler<METADATA extends ImageAttachmentMetadata = ImageAttachmentMetadata> extends FileCollectionHandler<METADATA> {
 	declare collection: ImgCollection<METADATA>;
 
-	protected static imgUrlPrefix = "/img";
+	static imgUrlPrefix = "/img";
 	protected imgUrlPrefix: string;
 
 	constructor(collection: Collection<METADATA>) {
@@ -16,12 +16,14 @@ export class ImageCollectionHandler<METADATA extends ImageAttachmentMetadata = I
 		this.collection.files.forEach(file => {
 			let ext = /(?:\.([^.]+))?$/.exec(file.name)?.[1];
 			let id = collection.id.toString(36).padStart(6, "0");
-			if (ext && ["png", "webp", "gif", "jpg", "jpeg", "tiff"].includes(ext))
-			file.img = {
-				size: (width: number, height: number): ToString<ImgUrl> => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-" + width + "x" + height + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ToString<ImgUrl>,
-				width: (width: number): ToString<ImgUrl> => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-" + width + "x@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ToString<ImgUrl>,
-				height: (height: number): ToString<ImgUrl> => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-x" + height + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ToString<ImgUrl>,
-				named: (name: string): ToString<ImgUrl> => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-~" + name + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ToString<ImgUrl>,
+			if (ext && ["png", "webp", "gif", "jpg", "jpeg", "tiff"].includes(ext)) {
+				let focus = file.metadata.focus || "entropy"
+				file.img = {
+					size: (width: number, height: number): ToString<ImgUrl> => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-" + width + "x" + height + "@{{d}}." + focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ToString<ImgUrl>,
+					width: (width: number): ToString<ImgUrl> => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-" + width + "x@{{d}}." + focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ToString<ImgUrl>,
+					height: (height: number): ToString<ImgUrl> => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-x" + height + "@{{d}}." + focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ToString<ImgUrl>,
+					named: (name: string): ToString<ImgUrl> => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-~" + name + "@{{d}}." + focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ToString<ImgUrl>,
+				}
 			}
 		});
 	}

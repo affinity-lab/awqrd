@@ -29,15 +29,17 @@ export function imgServerFactory(
 
 			if (dimensions.startsWith("~")) {
 				let name = dimensions.match(/~(.*?)@.+/)?.[1];
-				if (
-					typeof name === "undefined" ||
+				if (typeof name === "undefined" ||
 					typeof namedImageDimensions === "undefined" ||
-					typeof namedImageDimensions[entity] === "undefined" ||
-					typeof namedImageDimensions[entity][collection] === "undefined" ||
-					typeof namedImageDimensions[entity][collection][name] === "undefined"
+					(
+						(
+							typeof namedImageDimensions[entity] === "undefined" ||
+							typeof namedImageDimensions[entity][collection] === "undefined" ||
+							typeof namedImageDimensions[entity][collection][name] === "undefined"
+						) && typeof namedImageDimensions["_"]["_"][name] === "undefined"
+					)
 				) return new Response('', {status: 404});
-
-				let dim = namedImageDimensions[entity][collection][name];
+				let dim = namedImageDimensions[entity][collection][name] || namedImageDimensions["_"]["_"][name];
 				dimensions = dimensions.replace("~" + name, (dim.width ?? "") + "x" + (dim.height ?? ""));
 			} else if (!allowFree) {
 				return new Response('', {status: 404});
