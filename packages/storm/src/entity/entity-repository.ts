@@ -75,16 +75,19 @@ export class EntityRepository<
 		return {
 			...super.pipelineExecFactory(),
 			delete: async (item: ITEM) => {
-				return await this.pipelines.delete.run(this, {item})
+				return await this.pipelines.delete.run(this, {item});
 			},
 			insert: async (item: ITEM) => {
-				return await this.pipelines.insert.run(this, {item}).then(res => res.insertId as number)
+				await this.pipelines.insert.run(this, {item}).then(res => res.insertId as number);
+				return item;
 			},
 			update: async (item: ITEM) => {
-				return await this.pipelines.update.run(this, {item})
+				await this.pipelines.update.run(this, {item});
+				return item;
 			},
 			overwrite: async (item: ITEM, values: Record<string, any>, reload: boolean = true) => {
-				return await this.pipelines.overwrite.run(this, {item, values, reload})
+				await this.pipelines.overwrite.run(this, {item, values, reload});
+				return item;
 			}
 		}
 	}

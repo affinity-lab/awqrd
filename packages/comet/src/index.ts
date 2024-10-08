@@ -16,3 +16,4 @@ export * from "./types";
 export * from "./auth-state";
 export * from "./middlewares/command-guard";
 export * from "./middlewares/measure";
+export * from "./middlewares/error-handler";

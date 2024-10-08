@@ -107,3 +107,5 @@ export type CometLogger<REQ> = {
 	resultLog?: (state: CometState<REQ>, response: CometResult) => void,
 	errorLog?: (state: CometState<REQ>, error: any) => void
 }
+
+export type ErrorHandler = (error: any) => Promise<CometResult | null>;
