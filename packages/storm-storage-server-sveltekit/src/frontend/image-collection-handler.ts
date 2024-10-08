@@ -1,6 +1,6 @@
+import {ToString} from "@affinity-lab/util";
 import {FileCollectionHandler} from "./file-collection-handler";
 import {Collection, ImageAttachmentMetadata, ImgCollection, ImgUrlInterface, ResolutionOptions} from "./types";
-import {ToString} from "@affinity-lab/util";
 
 
 export class ImageCollectionHandler<METADATA extends ImageAttachmentMetadata = ImageAttachmentMetadata> extends FileCollectionHandler<METADATA> {
@@ -16,7 +16,7 @@ export class ImageCollectionHandler<METADATA extends ImageAttachmentMetadata = I
 		this.collection.files.forEach(file => {
 			let ext = /(?:\.([^.]+))?$/.exec(file.name)?.[1];
 			let id = collection.id.toString(36).padStart(6, "0");
-
+			if (ext && ["png", "webp", "gif", "jpg", "jpeg", "tiff"].includes(ext))
 			file.img = {
 				size: (width: number, height: number): ToString<ImgUrl> => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-" + width + "x" + height + "@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ToString<ImgUrl>,
 				width: (width: number): ToString<ImgUrl> => new ImgUrl(this.imgUrlPrefix + "/" + this.collection.collection + "." + id + "-" + width + "x@{{d}}." + file.metadata.focus + "-" + file.name + ".{{ext}}?" + file.id, ext) as ToString<ImgUrl>,

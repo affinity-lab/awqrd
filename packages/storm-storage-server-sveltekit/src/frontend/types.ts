@@ -37,7 +37,7 @@ export type FileCollection<METADATA extends Record<string, any> = Record<string,
 };
 export type ImgCollection<METADATA extends Record<string, any> = Record<string, any>> = Omit<FileCollection<METADATA>, 'files'> & {
 	files: Array<FileCollection<METADATA>['files'][number] & {
-		img: {
+		img?: {
 			size: ((width: number, height: number) => ImgUrlInterface & string)
 			width: ((width: number) => ImgUrlInterface & string)
 			height: ((height: number) => ImgUrlInterface & string)

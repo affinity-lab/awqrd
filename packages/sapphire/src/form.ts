@@ -81,7 +81,7 @@ export abstract class IForm<
 						collection: collection.name,
 						files,
 						publicMetaFields: Object.entries(collection.writableMetaFields).map((obj) => {return {name: obj[0], ...obj[1]}}),
-						rules: {...collection.rules, limit: collection.rules.limit.count}
+						rules: {...collection.rules, limit: collection.rules.limit.count},
 					});
 				}
 			}
