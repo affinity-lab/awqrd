@@ -30,7 +30,7 @@ export class ImageCollection extends Collection<ImageAttachmentMetadata> {
 			entityRepository: EntityRepositoryInterface,
 		},
 		rules: CollectionOptions,
-		private defaultFocus: "attention"
+		private defaultFocus: ImgFocus = "attention"
 	) {
 		super(name, groupDefinition, rules);
 		if (this.rules.ext === undefined) this.rules.ext = [".png", ".webp", ".gif", ".jpg", ".jpeg", ".tiff"];
