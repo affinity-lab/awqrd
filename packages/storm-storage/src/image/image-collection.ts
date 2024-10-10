@@ -22,15 +22,18 @@ export class ImageCollection extends Collection<ImageAttachmentMetadata> {
 		title: {type: "string"},
 		focus: {type: "enum", options: imgFocusOptions}
 	}
-	constructor(name: string,
+	constructor(
+		name: string,
 		groupDefinition: {
 			storage: Storage,
 			group: string,
-			entityRepository: EntityRepositoryInterface
+			entityRepository: EntityRepositoryInterface,
 		},
-		rules: CollectionOptions) {
+		rules: CollectionOptions,
+		private defaultFocus: ImgFocus = "attention"
+	) {
 		super(name, groupDefinition, rules);
-		if(this.rules.ext === undefined) this.rules.ext = [".png", ".webp", ".gif", ".jpg", ".jpeg", ".tiff"];
+		if (this.rules.ext === undefined) this.rules.ext = [".png", ".webp", ".gif", ".jpg", ".jpeg", ".tiff"];
 	}
 
 	protected async prepareFile(file: ITmpFile): Promise<{ file: ITmpFile; metadata: ImageAttachmentMetadata }> {
@@ -43,7 +46,7 @@ export class ImageCollection extends Collection<ImageAttachmentMetadata> {
 				height: img?.meta.height,
 				color: img?.stats.dominant,
 				animated: (img?.meta.pages) ? img.meta.pages > 1 : false,
-				focus: "entropy"
+				focus: this.defaultFocus
 			}
 		};
 	}

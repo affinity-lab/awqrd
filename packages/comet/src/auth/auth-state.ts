@@ -1,4 +1,4 @@
-import {AuthData, AuthToken} from "./types";
+import type {AuthData, AuthToken} from "./types";
 
 const AUTH_STATE = Symbol("AUTH_STATE");
 export function getAuthState(env: { [key: string | symbol]: any }) { return env[AUTH_STATE] as AuthState; }
@@ -22,3 +22,4 @@ export class AuthState {
 	needCleanup() { return this.hasSignOutEvent() || (this.tokenExists && !this.hasSignInEvent()); }
 	hasToken() { this.tokenExists = true; }
 }
+

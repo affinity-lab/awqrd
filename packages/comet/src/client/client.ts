@@ -50,7 +50,7 @@ export abstract class Client<CTX = any> {
 	async resolve(command: string, ctx: CTX): Promise<CometResult> {
 		command = command.toLowerCase();
 		let cmd = this.#commands[command];
-		if(!cmd) throw cometError.notFound(`There is no command named: ${command}`);
+		if(cmd === undefined) throw cometError.notFound(`There is no command named: ${command}`);
 		return await this.pipeline.run({ctx, args: {}, params: {}, files: {}, cmd, client: this, env: {}, id: this.id + "." + command});
 	}
 
