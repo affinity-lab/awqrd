@@ -22,3 +22,4 @@ export * from "./auth/token-handler/token-handler-cookie";
 export * from "./auth/auth-state";
 export * from "./auth/types";
 export * from "./middlewares/token-auth";
+export * from "./auth/token-encoder/jwt-token-encoder";

@@ -9,7 +9,7 @@ export function renderMiddleware<REQ extends Context = any>(logger?: CometLogger
 			if (logger?.requestLog) logger.requestLog(state);
 			let result = await next();
 			let response = state.ctx.json(result.result, {status: result.status})
-			result.headers.forEach((h) => state.ctx.header(h[0], h[1]));
+			result.headers.forEach((h) => state.ctx.header(h[0], h[1], {append: true}));
 			if (logger?.resultLog) logger.resultLog(state, result);
 			return response;
 		} catch (error) {

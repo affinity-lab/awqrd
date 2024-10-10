@@ -15,7 +15,7 @@ export type ImgParams = {
  * @return {ImgParams | undefined} the parsed ImgParams object, or undefined if the string does not match the expected format
  */
 export function parseImgParams(img: string): ImgParams | undefined {
-	const regex = /^(?:(\d+)x(\d+)|(\d+)x|x(\d+))@?(\d)?x?\.?(centre|center|top|left|bottom|right|entropy|attention|box)?$/;
+	const regex = /^(?:(\d+)x(\d+)|(\d+)x|x(\d+))~?(\d)?x?\.?(centre|center|top|left|bottom|right|entropy|attention|box)?$/;
 	const match = regex.exec(img);
 	if (match) {
 		const width: number = parseInt(match[1] || match[3] || "0");

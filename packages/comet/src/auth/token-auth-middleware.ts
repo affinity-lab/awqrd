@@ -1,7 +1,6 @@
 import {AuthState, setAuthState} from "./auth-state";
 import type {AuthData, TokenHandler} from "./types";
 import {type Middleware} from "@affinity-lab/util";
-import type {RequestEvent} from "@sveltejs/kit";
 import {CometState} from "../client/comet-state";
 import {CometResult} from "../comet-result";
 
@@ -12,7 +11,7 @@ export class TokenAuthMiddleware implements Middleware {
 		protected authResolver: (uid: number | string) => Promise<AuthData | undefined>,
 	) {}
 
-	async handle(state: CometState<RequestEvent>, next: Function): Promise<CometResult> {
+	async handle(state: CometState, next: Function): Promise<CometResult> {
 		let authState = await this.createAuthState(state);
 		setAuthState(state.env, authState);
 		let result: CometResult = await next();
