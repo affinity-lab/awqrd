@@ -1,6 +1,6 @@
 {
   "name": "@affinity-lab/storm-sequence",
-  "version": "1.0.58",
+	"version": "1.0.59",
   "description": "Storm sequence plugin",
   "author": "Affinity Works",
   "license": "MIT",
@@ -19,8 +19,8 @@
     "postbuild": "bunx ts-add-js-extension --dir=dist"
   },
   "dependencies": {
-    "@affinity-lab/util": "2.0.210",
-    "@affinity-lab/storm": "1.0.223",
+	  "@affinity-lab/util": "2.0.211",
+	  "@affinity-lab/storm": "1.0.224",
     "drizzle-orm": "^0.30.6"
   },
   "devDependencies": {
