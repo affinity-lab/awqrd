@@ -226,7 +226,7 @@ class Package {
 			.catch(async (error) => {
 				await writeLn(chalk.red("failed"))
 				console.error(`Error building ${this.name}`)
-				console.log(error);
+				console.log("ERROR:", error);
 				process.exit(-1)
 			});
 		await writeLn(chalk.green("done"));

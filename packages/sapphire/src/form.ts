@@ -37,7 +37,6 @@ export abstract class IForm<
 
 	public async getItem(id: number | null, values?: Record<string, any>) {
 		let u = await this.repository.get(id);
-		if (!u) throw sapphireError.notFound({location: "getItem", id});
 		return id ? await this.export(u, values) : await this.newItem(values);
 	}
 

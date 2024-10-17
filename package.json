@@ -5,7 +5,8 @@
   "scripts": {
     "check": "bun etc/build.ts",
     "build": "bun etc/build.ts build",
-    "pub": "bun etc/build.ts build pub"
+    "pub": "bun etc/build.ts pub",
+    "build-pub": "bun etc/build.ts build pub"
   },
   "devDependencies": {
     "@types/bun": "^1.1.1",
